@@ -1,0 +1,70 @@
+[
+  {
+    "role": "gate",
+    "response": { "signals": [{ "type": "smalltalk", "note": "hälsningsfras" }], "company_update": null, "facts_upsert": [], "facts_remove": [], "threads_upsert": [], "product_interest_upsert": [], "action_items_upsert": [], "questions_addressed": [], "summary_append": null, "advice": { "needed": false, "reason": "", "topics": [] }, "language_flag": null }
+  },
+  {
+    "role": "gate",
+    "response": { "signals": [{ "type": "smalltalk", "note": "bekräftar att tid finns" }], "company_update": null, "facts_upsert": [], "facts_remove": [], "threads_upsert": [], "product_interest_upsert": [], "action_items_upsert": [], "questions_addressed": [], "summary_append": null, "advice": { "needed": false, "reason": "", "topics": [] }, "language_flag": null }
+  },
+  {
+    "role": "gate",
+    "response": { "signals": [{ "type": "topic_shift", "note": "säljaren öppnar ämnet handskannrar" }], "company_update": null, "facts_upsert": [], "facts_remove": [], "threads_upsert": [{ "id": null, "topic": "Nuläge handskannrar", "kind": "discovery", "status": "open", "salience": "medium", "note": "säljaren öppnade ämnet, kundens läge okänt" }], "product_interest_upsert": [], "action_items_upsert": [], "questions_addressed": [], "summary_append": null, "advice": { "needed": false, "reason": "ingen kundinformation ännu", "topics": [] }, "language_flag": null }
+  },
+  {
+    "role": "gate",
+    "response": { "signals": [], "company_update": null, "facts_upsert": [{ "id": null, "category": "pain", "text": "X40-batterierna dör snabbt i frysen", "source": "call", "confidence": "high" }], "facts_remove": [], "threads_upsert": [{ "id": "t1", "topic": "Batteriproblem i frysmiljö", "kind": "discovery", "status": "open", "salience": "high", "note": "pain bekräftad, omfattning okänd" }], "product_interest_upsert": [{ "id": null, "product_ref": null, "name_as_said": "X40", "stance": "owns", "reason": "använder X40 idag, batteriproblem i frys", "source": "call" }], "action_items_upsert": [], "questions_addressed": [], "summary_append": "Kunden har batteriproblem med X40 i frysmiljö.", "advice": { "needed": true, "reason": "ny smärtpunkt öppnar behovsdialog", "topics": ["t1"] }, "language_flag": null }
+  },
+  {
+    "role": "advisor",
+    "response": { "questions": [{ "id": null, "text": "Hur många skannrar kör ni i frysdelen idag?", "thread": "t1" }, { "id": null, "text": "Vilka tider på dygnet är plocktrycket störst?", "thread": "t1" }], "products": [{ "id": null, "product_ref": "prod:x60", "display_name": "X60 handskanner", "why": "Frysklassad ersättare som löser X40:s batteriproblem i kallmiljö.", "thread": "t1", "price_note": null }], "thread_updates": [], "answer": null }
+  },
+  {
+    "role": "gate",
+    "response": { "signals": [], "company_update": null, "facts_upsert": [], "facts_remove": [], "threads_upsert": [], "product_interest_upsert": [], "action_items_upsert": [], "questions_addressed": ["q1"], "summary_append": null, "advice": { "needed": false, "reason": "säljaren ställer föreslagen fråga", "topics": [] }, "language_flag": null }
+  },
+  {
+    "role": "gate",
+    "response": { "signals": [], "company_update": null, "facts_upsert": [{ "id": null, "category": "situation", "text": "Tolv skannrar i frysdelen, två utbytta i år", "source": "call", "confidence": "high" }], "facts_remove": [], "threads_upsert": [], "product_interest_upsert": [], "action_items_upsert": [], "questions_addressed": [], "summary_append": null, "advice": { "needed": false, "reason": "detalj som inte ändrar rådgivningen ännu", "topics": [] }, "language_flag": null }
+  },
+  {
+    "role": "gate",
+    "response": { "signals": [], "company_update": null, "facts_upsert": [], "facts_remove": [], "threads_upsert": [], "product_interest_upsert": [], "action_items_upsert": [], "questions_addressed": ["q2"], "summary_append": null, "advice": { "needed": false, "reason": "säljaren ställer föreslagen fråga", "topics": [] }, "language_flag": null }
+  },
+  {
+    "role": "gate",
+    "response": { "signals": [], "company_update": null, "facts_upsert": [{ "id": null, "category": "situation", "text": "Störst plocktryck tidiga mornar, 05–09", "source": "call", "confidence": "medium" }], "facts_remove": [], "threads_upsert": [], "product_interest_upsert": [], "action_items_upsert": [], "questions_addressed": [], "summary_append": null, "advice": { "needed": false, "reason": "kompletterande detalj", "topics": [] }, "language_flag": null }
+  },
+  {
+    "role": "gate",
+    "response": { "signals": [{ "type": "question_from_customer", "note": "frågar om skanner för −30 °C" }], "company_update": null, "facts_upsert": [], "facts_remove": [], "threads_upsert": [{ "id": null, "topic": "Skanner som klarar −30 °C", "kind": "customer_question", "status": "open", "salience": "high", "note": "kunden frågar aktivt om frysklassning" }], "product_interest_upsert": [], "action_items_upsert": [], "questions_addressed": [], "summary_append": "Kunden frågar aktivt efter frysklassad skanner.", "advice": { "needed": true, "reason": "direkt produktfråga från kunden", "topics": ["t2"] }, "language_flag": null }
+  },
+  {
+    "role": "advisor",
+    "response": { "questions": [{ "id": null, "text": "Vill ni byta alla tolv på en gång eller i etapper?", "thread": "t1" }], "products": [{ "id": "pr1", "product_ref": "", "display_name": "", "why": "", "thread": null, "price_note": null }, { "id": null, "product_ref": "prod:serviceavtal-frys", "display_name": "Serviceavtal frys", "why": "Täcker batteribyten i kallmiljö och sänker risken efter bytet.", "thread": "t2", "price_note": null }], "thread_updates": [], "answer": null }
+  },
+  {
+    "role": "gate",
+    "response": { "signals": [], "company_update": null, "facts_upsert": [], "facts_remove": [], "threads_upsert": [{ "id": "t2", "topic": "Skanner som klarar −30 °C", "kind": "customer_question", "status": "addressed", "salience": "medium", "note": "besvarad: X60 frysklassad, laddas i samma dockor" }], "product_interest_upsert": [{ "id": null, "product_ref": null, "name_as_said": "X60", "stance": "neutral", "reason": "presenterad av säljaren, kunden har inte reagerat än", "source": "call" }], "action_items_upsert": [], "questions_addressed": [], "summary_append": null, "advice": { "needed": false, "reason": "säljaren besvarar, invänta kundens reaktion", "topics": [] }, "language_flag": null }
+  },
+  {
+    "role": "gate",
+    "response": { "signals": [{ "type": "buying_signal", "note": "tidsram angiven: före högsäsongen i november" }, { "type": "objection_raised", "note": "vill inte byta laddstationer igen" }], "company_update": null, "facts_upsert": [{ "id": null, "category": "timeline", "text": "Vill lösa frysproblemet före högsäsongen i november", "source": "call", "confidence": "high" }], "facts_remove": [], "threads_upsert": [{ "id": null, "topic": "Oro för att behöva byta laddstationer", "kind": "objection", "status": "open", "salience": "medium", "note": "kvarstår trots info om samma dockor" }], "product_interest_upsert": [], "action_items_upsert": [], "questions_addressed": [], "summary_append": "Tidsram före november; oro kring laddstationer kvarstår.", "advice": { "needed": true, "reason": "köpsignal med tidsram plus öppen invändning", "topics": ["t3", "t1"] }, "language_flag": null }
+  },
+  {
+    "role": "advisor",
+    "response": { "questions": [{ "id": null, "text": "Ska jag räkna på tolv X60 i era befintliga dockor, med leverans före november?", "thread": "t1" }], "products": [{ "id": "pr1", "product_ref": "", "display_name": "", "why": "", "thread": null, "price_note": null }, { "id": "pr2", "product_ref": "", "display_name": "", "why": "", "thread": null, "price_note": null }], "thread_updates": [{ "id": "t3", "status": "open", "salience": "high" }], "answer": null }
+  },
+  {
+    "role": "gate",
+    "response": { "signals": [], "company_update": null, "facts_upsert": [], "facts_remove": [], "threads_upsert": [], "product_interest_upsert": [], "action_items_upsert": [{ "id": null, "text": "Skicka X60-datablad till kunden", "owner": "rep", "source": "call" }], "questions_addressed": [], "summary_append": "Säljaren skickar X60-datablad efter samtalet.", "advice": { "needed": false, "reason": "avslutande åtagande, ingen ny rådgivning behövs", "topics": [] }, "language_flag": null }
+  },
+  {
+    "role": "advisor",
+    "response": { "questions": [{ "id": "q4", "text": "", "thread": null }], "products": [{ "id": "pr1", "product_ref": "", "display_name": "", "why": "", "thread": null, "price_note": null }, { "id": "pr2", "product_ref": "", "display_name": "", "why": "", "thread": null, "price_note": null }], "thread_updates": [], "answer": "Ja — X60 laddas i samma dockor som X40, så inga nya laddstationer behövs. LP-dock krävs bara om ni utökar antalet laddplatser." }
+  },
+  {
+    "role": "summarizer",
+    "response": { "summary": "Kunden (grossist inom djupfryst) kör tolv X40-handskannrar i frysdelen och har återkommande batteriproblem i kallmiljö — två enheter är redan utbytta i år. Störst plocktryck är tidiga mornar 05–09. Kunden frågade aktivt efter en skanner som klarar −30 °C; X60 presenterades som frysklassad ersättare som laddas i befintliga X40-dockor. Tydlig köpsignal: lösningen ska vara på plats före högsäsongen i november. Kvarstående invändning: oro för att behöva byta laddstationer — delvis bemött med att dockorna behålls. Serviceavtal frys lyftes som komplement för kallmiljödrift. Säljaren lovade skicka X60-datablad direkt efter samtalet.", "next_steps": [{ "text": "Skicka X60-datablad", "owner": "rep" }, { "text": "Räkna på tolv X60 med leverans före november", "owner": "rep" }, { "text": "Bekräfta att befintliga dockor täcker laddbehovet, annars offerera LP-dock", "owner": "rep" }] }
+  }
+]

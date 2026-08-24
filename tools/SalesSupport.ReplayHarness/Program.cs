@@ -8,13 +8,36 @@ using SalesSupport.ReplayHarness;
 
 Console.OutputEncoding = Encoding.UTF8;
 
-var live = args.Contains("--live");
-var samplePath = args.FirstOrDefault(a => !a.StartsWith("--", StringComparison.Ordinal))
-    ?? Path.Combine(FindRepoRoot(), "samples", "calls", "nordfrys-cold-storage.jsonl");
+var live = false;
+var useFixtures = false;
+string? dumpDir = null;
+string? samplePath = null;
+
+for (var i = 0; i < args.Length; i++)
+{
+    switch (args[i])
+    {
+        case "--live": live = true; break;
+        case "--fixtures": useFixtures = true; break;
+        case "--dump": dumpDir = i + 1 < args.Length ? args[++i] : "prompt-dumps"; break;
+        default: samplePath = args[i]; break;
+    }
+}
+
+samplePath ??= Path.Combine(FindRepoRoot(), "samples", "calls", "nordfrys-cold-storage.jsonl");
 
 if (!File.Exists(samplePath))
 {
     Console.Error.WriteLine($"Sample call not found: {samplePath}");
+    return 1;
+}
+
+var fixturesPath = Path.Combine(FindRepoRoot(), "samples", "fixtures",
+    Path.GetFileNameWithoutExtension(samplePath) + ".fixtures.json");
+
+if (useFixtures && !File.Exists(fixturesPath))
+{
+    Console.Error.WriteLine($"Fixture file not found: {fixturesPath}");
     return 1;
 }
 
@@ -24,11 +47,16 @@ if (live && string.IsNullOrEmpty(Environment.GetEnvironmentVariable("ANTHROPIC_A
     return 1;
 }
 
-ILlmProvider llm = live ? new ClaudeLlmProvider() : new FakeLlmProvider();
-var options = new OrchestratorOptions { CompanyName = "Nordfrys AB (demo)", CallLanguage = "sv" };
+ILlmProvider llm = useFixtures ? new FixtureLlmProvider(fixturesPath)
+    : live ? new ClaudeLlmProvider()
+    : new FakeLlmProvider();
+if (dumpDir is not null) llm = new DumpingLlmProvider(llm, dumpDir);
+
+var mode = useFixtures ? "fixtures (Claude-authored goldens)" : live ? "LIVE Claude API" : "fake models";
+var options = new OrchestratorOptions { CompanyName = "Duab (demo)", CallLanguage = "sv" };
 var orchestrator = new CallOrchestrator(llm, new InMemoryKnowledge(), options);
 
-Console.WriteLine($"Replay: {Path.GetFileName(samplePath)}  [{(live ? "LIVE Claude API" : "fake models")}]");
+Console.WriteLine($"Replay: {Path.GetFileName(samplePath)}  [{mode}]");
 Console.WriteLine(new string('-', 72));
 
 var index = 0;

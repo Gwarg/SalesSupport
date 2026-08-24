@@ -15,5 +15,15 @@ dotnet run --project tools/SalesSupport.ReplayHarness   # replay a scripted call
 ```
 
 The replay harness runs recorded/scripted calls (samples/calls/*.jsonl) through the full
-gate → merge → retrieval → advisor → panel loop using deterministic fake models and an
-in-memory knowledge source — no keys, no audio, no network.
+gate → merge → retrieval → advisor → panel loop — no audio required. Three model modes:
+
+```
+dotnet run --project tools/SalesSupport.ReplayHarness                # fake heuristics (plumbing only)
+dotnet run --project tools/SalesSupport.ReplayHarness -- --fixtures  # Claude-authored golden responses, zero API cost
+dotnet run --project tools/SalesSupport.ReplayHarness -- --live      # real Claude API (needs ANTHROPIC_API_KEY)
+```
+
+Fixtures live in samples/fixtures/*.fixtures.json — authored during Claude Code sessions
+(subscription-funded development, D27) and doubling as the golden corpus that live runs
+are diffed against. Add `--dump <dir>` to any mode to write every prompt and response
+to files.
