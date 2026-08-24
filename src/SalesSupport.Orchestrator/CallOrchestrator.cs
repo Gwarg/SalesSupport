@@ -51,7 +51,7 @@ public sealed class CallOrchestrator(ILlmProvider llm, IKnowledgeSource knowledg
             advisorRan = true;
 
             var cards = await RetrieveForTopicsAsync(diff.Advice.Topics, ct);
-            var advisorConversation = PromptBuilder.Advisor(Picture, cards, Panel, options);
+            var advisorConversation = PromptBuilder.Advisor(Picture, cards, Panel, knowledge.GetCatalogMap(), options);
             var result = await llm.CompleteJsonAsync<AdvisorResult>(LlmRole.Advisor, advisorConversation, ct);
 
             delta = Panel.Reconcile(result);
@@ -65,7 +65,7 @@ public sealed class CallOrchestrator(ILlmProvider llm, IKnowledgeSource knowledg
     public async Task<AskResult> AskAsync(string query, CancellationToken ct = default)
     {
         var cards = await knowledge.SearchAsync(query, options.RetrievalK, ct: ct);
-        var conversation = PromptBuilder.Advisor(Picture, cards, Panel, options, repQuery: query);
+        var conversation = PromptBuilder.Advisor(Picture, cards, Panel, knowledge.GetCatalogMap(), options, repQuery: query);
         var result = await llm.CompleteJsonAsync<AdvisorResult>(LlmRole.Advisor, conversation, ct);
 
         var delta = Panel.Reconcile(result);

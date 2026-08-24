@@ -1,14 +1,16 @@
 using System.Text;
+using SalesSupport.Core.Contracts;
 using SalesSupport.Core.Model;
 using SalesSupport.Core.Serialization;
 using SalesSupport.Orchestrator;
+using SalesSupport.Providers.Claude;
 using SalesSupport.ReplayHarness;
 
 Console.OutputEncoding = Encoding.UTF8;
 
-var samplePath = args.Length > 0
-    ? args[0]
-    : Path.Combine(FindRepoRoot(), "samples", "calls", "nordfrys-cold-storage.jsonl");
+var live = args.Contains("--live");
+var samplePath = args.FirstOrDefault(a => !a.StartsWith("--", StringComparison.Ordinal))
+    ?? Path.Combine(FindRepoRoot(), "samples", "calls", "nordfrys-cold-storage.jsonl");
 
 if (!File.Exists(samplePath))
 {
@@ -16,10 +18,17 @@ if (!File.Exists(samplePath))
     return 1;
 }
 
-var options = new OrchestratorOptions { CompanyName = "Nordfrys AB (demo)", CallLanguage = "sv" };
-var orchestrator = new CallOrchestrator(new FakeLlmProvider(), new InMemoryKnowledge(), options);
+if (live && string.IsNullOrEmpty(Environment.GetEnvironmentVariable("ANTHROPIC_API_KEY")))
+{
+    Console.Error.WriteLine("--live requires ANTHROPIC_API_KEY to be set.");
+    return 1;
+}
 
-Console.WriteLine($"Replay: {Path.GetFileName(samplePath)}");
+ILlmProvider llm = live ? new ClaudeLlmProvider() : new FakeLlmProvider();
+var options = new OrchestratorOptions { CompanyName = "Nordfrys AB (demo)", CallLanguage = "sv" };
+var orchestrator = new CallOrchestrator(llm, new InMemoryKnowledge(), options);
+
+Console.WriteLine($"Replay: {Path.GetFileName(samplePath)}  [{(live ? "LIVE Claude API" : "fake models")}]");
 Console.WriteLine(new string('-', 72));
 
 var index = 0;

@@ -15,5 +15,17 @@ public sealed class OrchestratorOptions
     public int MaxProducts { get; init; } = 3;
 
     public string CallLanguage { get; init; } = "sv";
+
+    /// <summary>Installation locale — the language of post-call summaries and UI chrome (D7).</summary>
+    public string UiLanguage { get; init; } = "sv";
+
     public string CompanyName { get; init; } = "";
+
+    /// <summary>The D27 cost dial: how eagerly the gate requests advice (docs/prompts.md).</summary>
+    public GateStrictness GateStrictness { get; init; } = GateStrictness.Balanced;
+
+    /// <summary>Installation-specific house rules for the advisor's company block (≤ ~300 tokens, docs/prompts.md).</summary>
+    public string SalesGuidance { get; init; } = "";
 }
+
+public enum GateStrictness { Strict, Balanced, Eager }
