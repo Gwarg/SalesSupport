@@ -1,0 +1,58 @@
+[
+  {
+    "role": "gate",
+    "response": { "signals": [{ "type": "smalltalk", "note": "hälsningsfras" }], "company_update": null, "facts_upsert": [], "facts_remove": [], "threads_upsert": [], "product_interest_upsert": [], "action_items_upsert": [], "questions_addressed": [], "summary_append": null, "advice": { "needed": false, "reason": "", "topics": [] }, "language_flag": null }
+  },
+  {
+    "role": "gate",
+    "response": { "signals": [{ "type": "topic_shift", "note": "tre parallella ämnen öppnade i ett svep" }], "company_update": null, "facts_upsert": [{ "id": null, "category": "situation", "text": "Bygger nytt kallager i Västerås nästa höst", "source": "call", "confidence": "high" }], "facts_remove": [], "threads_upsert": [{ "id": null, "topic": "Nytt kallager i Västerås", "kind": "discovery", "status": "open", "salience": "medium", "note": "nybygge nästa höst, omfattning okänd" }, { "id": null, "topic": "Frysskannrar strular", "kind": "discovery", "status": "open", "salience": "high", "note": "återkommande problem, detaljer okända" }, { "id": null, "topic": "Nya märkningskrav för djupfryst", "kind": "discovery", "status": "open", "salience": "medium", "note": "chefen driver frågan" }], "product_interest_upsert": [], "action_items_upsert": [], "questions_addressed": [], "summary_append": "Tre spår öppnade: nytt kallager, skannerproblem, märkningskrav.", "advice": { "needed": true, "reason": "tre nya spår kräver prioritering och frågor", "topics": ["frysskannrar batterier", "märkningskrav djupfryst etikettskrivare", "kallager"] }, "language_flag": null }
+  },
+  {
+    "role": "advisor",
+    "response": { "questions": [{ "id": null, "text": "Vad är det som strular med frysskannrarna — batterier eller något annat?", "thread": "t2" }, { "id": null, "text": "Gäller märkningsfrågan etiketterna i sig eller utrustningen som skriver dem?", "thread": "t3" }], "products": [], "thread_updates": [], "answer": null }
+  },
+  {
+    "role": "gate",
+    "response": { "signals": [], "company_update": null, "facts_upsert": [], "facts_remove": [], "threads_upsert": [], "product_interest_upsert": [], "action_items_upsert": [], "questions_addressed": ["q1"], "summary_append": null, "advice": { "needed": false, "reason": "säljaren ställer föreslagen fråga", "topics": [] }, "language_flag": null }
+  },
+  {
+    "role": "gate",
+    "response": { "signals": [], "company_update": null, "facts_upsert": [{ "id": null, "category": "pain", "text": "Skannerbatterierna dör inne i frysen", "source": "call", "confidence": "high" }, { "id": null, "category": "situation", "text": "Tio X40 i frysdelen", "source": "call", "confidence": "high" }], "facts_remove": [], "threads_upsert": [{ "id": "t2", "topic": "Frysskannrar strular", "kind": "discovery", "status": "open", "salience": "high", "note": "batteriproblem bekräftat, tio X40 berörda" }], "product_interest_upsert": [{ "id": null, "product_ref": null, "name_as_said": "X40", "stance": "owns", "reason": "tio enheter i frysdelen med batteriproblem", "source": "call" }], "action_items_upsert": [], "questions_addressed": [], "summary_append": null, "advice": { "needed": true, "reason": "smärtpunkt preciserad — produktväg kan föreslås", "topics": ["t2"] }, "language_flag": null }
+  },
+  {
+    "role": "advisor",
+    "response": { "questions": [{ "id": "q2", "text": "", "thread": null }, { "id": null, "text": "Ska skannrarna lösas nu, eller i samband med nybygget?", "thread": "t2" }], "products": [{ "id": null, "product_ref": "prod:x60", "display_name": "X60 handskanner", "why": "Frysklassad ersättare för X40-flottan — löser batteriproblemet permanent.", "thread": "t2", "price_note": null }, { "id": null, "product_ref": "prod:batteri-x40", "display_name": "Arktiskt batteripaket X40", "why": "Snabb förbättring av befintliga X40 utan flottbyte.", "thread": "t2", "price_note": "ca 450 kr/st (indikativt)" }], "thread_updates": [], "answer": null }
+  },
+  {
+    "role": "gate",
+    "response": { "signals": [], "company_update": null, "facts_upsert": [], "facts_remove": [], "threads_upsert": [], "product_interest_upsert": [], "action_items_upsert": [], "questions_addressed": ["q3"], "summary_append": null, "advice": { "needed": false, "reason": "säljaren ställer föreslagen fråga", "topics": [] }, "language_flag": null }
+  },
+  {
+    "role": "gate",
+    "response": { "signals": [], "company_update": null, "facts_upsert": [{ "id": null, "category": "constraint", "text": "Skannerbytet görs nu, skiljt från nybygget", "source": "call", "confidence": "high" }], "facts_remove": [], "threads_upsert": [{ "id": "t1", "topic": "Nytt kallager i Västerås", "kind": "discovery", "status": "parked", "salience": "medium", "note": "eget projekt med egen budget och tidplan" }], "product_interest_upsert": [], "action_items_upsert": [], "questions_addressed": [], "summary_append": null, "advice": { "needed": false, "reason": "prioritering klar, nuvarande förslag står sig", "topics": [] }, "language_flag": null }
+  },
+  {
+    "role": "gate",
+    "response": { "signals": [{ "type": "question_from_customer", "note": "frågar om LP-200 uppfyller nya märkningskraven" }], "company_update": null, "facts_upsert": [], "facts_remove": [], "threads_upsert": [{ "id": "t3", "topic": "Nya märkningskrav för djupfryst", "kind": "customer_question", "status": "open", "salience": "high", "note": "frågar om LP-200 uppfyller kraven" }], "product_interest_upsert": [{ "id": null, "product_ref": null, "name_as_said": "LP-200", "stance": "interested", "reason": "frågar aktivt om LP-200 och kraven", "source": "call" }], "action_items_upsert": [], "questions_addressed": [], "summary_append": "Kunden frågar om LP-200 klarar 2026-märkningskraven.", "advice": { "needed": true, "reason": "direkt produktfråga från kunden", "topics": ["t3"] }, "language_flag": null }
+  },
+  {
+    "role": "advisor",
+    "response": { "questions": [], "products": [{ "id": "pr1", "product_ref": "", "display_name": "", "why": "", "thread": null, "price_note": null }, { "id": "pr2", "product_ref": "", "display_name": "", "why": "", "thread": null, "price_note": null }, { "id": null, "product_ref": "prod:lp200", "display_name": "LP-200 etikettskrivare", "why": "Uppfyller 2026-märkningskraven för djupfryst — direkt svar på frågan.", "thread": "t3", "price_note": null }], "thread_updates": [], "answer": null }
+  },
+  {
+    "role": "gate",
+    "response": { "signals": [], "company_update": null, "facts_upsert": [], "facts_remove": [], "threads_upsert": [{ "id": "t3", "topic": "Nya märkningskrav för djupfryst", "kind": "customer_question", "status": "addressed", "salience": "medium", "note": "besvarad: LP-200 uppfyller 2026-kraven" }], "product_interest_upsert": [], "action_items_upsert": [{ "id": null, "text": "Skicka LP-200-dokumentation om 2026-märkningskraven", "owner": "rep", "source": "call" }], "questions_addressed": [], "summary_append": null, "advice": { "needed": false, "reason": "frågan besvarad, dokumentation utlovad", "topics": [] }, "language_flag": null }
+  },
+  {
+    "role": "gate",
+    "response": { "signals": [{ "type": "buying_signal", "note": "vill ha underlag om både skannrar och skrivare" }], "company_update": null, "facts_upsert": [{ "id": null, "category": "timeline", "text": "Underlag önskas nu; lagerprojektet tas upp efter nyår", "source": "call", "confidence": "medium" }], "facts_remove": [], "threads_upsert": [{ "id": "t1", "topic": "Nytt kallager i Västerås", "kind": "discovery", "status": "parked", "salience": "medium", "note": "återupptas efter nyår" }], "product_interest_upsert": [], "action_items_upsert": [], "questions_addressed": [], "summary_append": "Underlag önskas om skannrar och skrivare; lagerfrågan efter nyår.", "advice": { "needed": false, "reason": "säljaren går mot avslut", "topics": [] }, "language_flag": null }
+  },
+  {
+    "role": "gate",
+    "response": { "signals": [], "company_update": null, "facts_upsert": [], "facts_remove": [], "threads_upsert": [], "product_interest_upsert": [], "action_items_upsert": [{ "id": null, "text": "Skicka underlag om X60 och arktiskt batteripaket", "owner": "rep", "source": "call" }, { "id": null, "text": "Boka januarimöte om nya kallagret i Västerås", "owner": "rep", "source": "call" }], "questions_addressed": [], "summary_append": null, "advice": { "needed": false, "reason": "avslutande åtaganden", "topics": [] }, "language_flag": null }
+  },
+  {
+    "role": "summarizer",
+    "response": { "summary": "Kunden driver tre parallella spår: ett nytt kallager i Västerås nästa höst (eget projekt, parkerat till efter nyår), akuta batteriproblem på tio X40-skannrar i frysen, och chefens fråga om de nya märkningskraven för djupfryst. Skannerbytet ska ske nu, separat från nybygget — X60 föreslogs som permanent lösning och arktiskt batteripaket som snabb förbättring. Kunden frågade aktivt om LP-200 uppfyller 2026-märkningskraven, vilket bekräftades; dokumentation utlovades. Kunden vill ha underlag om både skannrar och skrivare, och lagerprojektet återupptas i januari.", "next_steps": [{ "text": "Skicka underlag om X60 och arktiskt batteripaket", "owner": "rep" }, { "text": "Skicka LP-200-dokumentation om 2026-märkningskraven", "owner": "rep" }, { "text": "Boka januarimöte om nya kallagret i Västerås", "owner": "rep" }] }
+  }
+]

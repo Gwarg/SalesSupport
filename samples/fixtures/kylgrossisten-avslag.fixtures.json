@@ -1,0 +1,50 @@
+[
+  {
+    "role": "gate",
+    "response": { "signals": [], "company_update": null, "facts_upsert": [], "facts_remove": [], "threads_upsert": [{ "id": null, "topic": "Serviceärenden på skannrar", "kind": "discovery", "status": "open", "salience": "medium", "note": "säljaren öppnade utifrån servicehistorik" }], "product_interest_upsert": [], "action_items_upsert": [], "questions_addressed": [], "summary_append": null, "advice": { "needed": false, "reason": "kunden har inte svarat än", "topics": [] }, "language_flag": null }
+  },
+  {
+    "role": "gate",
+    "response": { "signals": [{ "type": "objection_raised", "note": "X60 avvisad som för dyr redan i inledningen" }], "company_update": null, "facts_upsert": [{ "id": null, "category": "pain", "text": "Skannerbatterierna dör i frysen", "source": "call", "confidence": "high" }, { "id": null, "category": "budget", "text": "X60 upplevs som alldeles för dyr", "source": "call", "confidence": "high" }], "facts_remove": [], "threads_upsert": [{ "id": "t1", "topic": "Serviceärenden på skannrar", "kind": "discovery", "status": "open", "salience": "high", "note": "batteriproblem bekräftat; X60 avvisad på pris" }], "product_interest_upsert": [{ "id": null, "product_ref": null, "name_as_said": "X60", "stance": "rejected", "reason": "utvärderad i våras, för dyr enligt kunden", "source": "call" }], "action_items_upsert": [], "questions_addressed": [], "summary_append": "X60 avvisad på pris; batteriproblemet kvarstår.", "advice": { "needed": true, "reason": "avvisad produkt kräver alternativ väg", "topics": ["t1", "arktiskt batteripaket X40"] }, "language_flag": null }
+  },
+  {
+    "role": "advisor",
+    "response": { "questions": [{ "id": null, "text": "Är det investeringen som helhet eller priset per enhet som är stoppet?", "thread": "t1" }], "products": [{ "id": null, "product_ref": "prod:batteri-x40", "display_name": "Arktiskt batteripaket X40", "why": "Löser frysproblemet på befintliga X40 till en bråkdel av kostnaden för nya skannrar.", "thread": "t1", "price_note": "ca 450 kr/st (indikativt)" }, { "id": null, "product_ref": "prod:serviceavtal-frys", "display_name": "Serviceavtal frys", "why": "Löpande avtal istället för investering — passar året utan budget.", "thread": "t1", "price_note": null }], "thread_updates": [], "answer": null }
+  },
+  {
+    "role": "gate",
+    "response": { "signals": [], "company_update": null, "facts_upsert": [], "facts_remove": [], "threads_upsert": [], "product_interest_upsert": [], "action_items_upsert": [], "questions_addressed": ["q1"], "summary_append": null, "advice": { "needed": false, "reason": "säljaren ställer föreslagen fråga", "topics": [] }, "language_flag": null }
+  },
+  {
+    "role": "gate",
+    "response": { "signals": [], "company_update": null, "facts_upsert": [{ "id": null, "category": "budget", "text": "Ingen investeringsbudget i år, möjligen nästa år", "source": "call", "confidence": "high" }], "facts_remove": [], "threads_upsert": [], "product_interest_upsert": [], "action_items_upsert": [], "questions_addressed": [], "summary_append": null, "advice": { "needed": false, "reason": "bekräftar vald inriktning — avtal och lågkostnad ligger redan i panelen", "topics": [] }, "language_flag": null }
+  },
+  {
+    "role": "advisor",
+    "response": { "questions": [], "products": [{ "id": "pr1", "product_ref": "", "display_name": "", "why": "", "thread": null, "price_note": null }, { "id": "pr2", "product_ref": "", "display_name": "", "why": "", "thread": null, "price_note": null }], "thread_updates": [], "answer": "Ca 450 kr per styck (indikativt) för det arktiska batteripaketet till X40 — exakt pris sätts i offerten." }
+  },
+  {
+    "role": "gate",
+    "response": { "signals": [{ "type": "question_from_customer", "note": "frågar efter sätt att förbättra befintliga X40" }], "company_update": null, "facts_upsert": [], "facts_remove": [], "threads_upsert": [{ "id": null, "topic": "Förbättra befintliga X40 i frysmiljö", "kind": "customer_question", "status": "open", "salience": "high", "note": "öppen för lösning utan nyinvestering" }], "product_interest_upsert": [], "action_items_upsert": [], "questions_addressed": [], "summary_append": null, "advice": { "needed": true, "reason": "kunden ber själv om det spår panelen föreslår", "topics": ["t2"] }, "language_flag": null }
+  },
+  {
+    "role": "advisor",
+    "response": { "questions": [{ "id": null, "text": "Hur många X40 kör ni i fryszonen idag?", "thread": "t2" }], "products": [{ "id": "pr1", "product_ref": "", "display_name": "", "why": "", "thread": null, "price_note": null }, { "id": "pr2", "product_ref": "", "display_name": "", "why": "", "thread": null, "price_note": null }], "thread_updates": [], "answer": null }
+  },
+  {
+    "role": "gate",
+    "response": { "signals": [], "company_update": null, "facts_upsert": [], "facts_remove": [], "threads_upsert": [{ "id": "t2", "topic": "Förbättra befintliga X40 i frysmiljö", "kind": "customer_question", "status": "addressed", "salience": "medium", "note": "besvarat: arktiskt batteripaket plus serviceavtal" }], "product_interest_upsert": [], "action_items_upsert": [], "questions_addressed": [], "summary_append": null, "advice": { "needed": false, "reason": "säljaren levererar svaret", "topics": [] }, "language_flag": null }
+  },
+  {
+    "role": "gate",
+    "response": { "signals": [{ "type": "buying_signal", "note": "accepterar batterispåret och ber om offert" }], "company_update": null, "facts_upsert": [], "facts_remove": [], "threads_upsert": [], "product_interest_upsert": [{ "id": null, "product_ref": null, "name_as_said": "arktiska batteripaketet", "stance": "interested", "reason": "ber om offert", "source": "call" }], "action_items_upsert": [], "questions_addressed": [], "summary_append": "Kunden accepterade batterispåret och bad om offert.", "advice": { "needed": false, "reason": "affären rör sig framåt av sig själv", "topics": [] }, "language_flag": null }
+  },
+  {
+    "role": "gate",
+    "response": { "signals": [], "company_update": null, "facts_upsert": [], "facts_remove": [], "threads_upsert": [], "product_interest_upsert": [], "action_items_upsert": [{ "id": null, "text": "Skicka offert på arktiskt batteripaket och serviceavtal frys", "owner": "rep", "source": "call" }], "questions_addressed": [], "summary_append": null, "advice": { "needed": false, "reason": "avslutande åtagande", "topics": [] }, "language_flag": null }
+  },
+  {
+    "role": "summarizer",
+    "response": { "summary": "Kunden har återkommande batteriproblem på X40-skannrar i frysen men avvisade X60 direkt på pris — ingen investeringsbudget i år, möjligen nästa år. Samtalet svängde till förbättring av befintlig flotta: arktiskt batteripaket till X40 (ca 450 kr/st indikativt) och serviceavtal frys som avtalskostnad istället för investering. Kunden tyckte det lät rimligt och bad om offert. Antalet X40 i fryszonen är inte bekräftat ännu. X60 kan återbesökas nästa budgetår.", "next_steps": [{ "text": "Skicka offert på arktiskt batteripaket och serviceavtal frys", "owner": "rep" }, { "text": "Bekräfta antal X40 i fryszonen inför offerten", "owner": "rep" }, { "text": "Följ upp X60 inför nästa budgetår", "owner": "rep" }] }
+  }
+]

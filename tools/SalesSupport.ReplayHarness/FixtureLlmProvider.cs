@@ -26,6 +26,9 @@ public sealed class FixtureLlmProvider : ILlmProvider
                 e.GetProperty("response").Clone())));
     }
 
+    /// <summary>Non-zero after a run signals fixture/orchestrator drift — surfaced by the harness.</summary>
+    public int Remaining => _entries.Count;
+
     public Task<T> CompleteJsonAsync<T>(LlmRole role, LlmConversation conversation, CancellationToken ct = default)
         where T : class
     {

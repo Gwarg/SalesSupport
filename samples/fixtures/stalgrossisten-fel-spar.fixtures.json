@@ -1,0 +1,26 @@
+[
+  {
+    "role": "gate",
+    "response": { "signals": [{ "type": "smalltalk", "note": "intro" }], "company_update": null, "facts_upsert": [], "facts_remove": [], "threads_upsert": [], "product_interest_upsert": [], "action_items_upsert": [], "questions_addressed": [], "summary_append": null, "advice": { "needed": false, "reason": "", "topics": [] }, "language_flag": null }
+  },
+  {
+    "role": "gate",
+    "response": { "signals": [], "company_update": null, "facts_upsert": [{ "id": null, "category": "constraint", "text": "Säljer armeringsjärn — inget kallager eller frys", "source": "call", "confidence": "high" }], "facts_remove": [], "threads_upsert": [], "product_interest_upsert": [], "action_items_upsert": [], "questions_addressed": [], "summary_append": null, "advice": { "needed": false, "reason": "ingen produktmatchning — inget att rådge om", "topics": [] }, "language_flag": null }
+  },
+  {
+    "role": "gate",
+    "response": { "signals": [], "company_update": null, "facts_upsert": [], "facts_remove": [], "threads_upsert": [], "product_interest_upsert": [], "action_items_upsert": [], "questions_addressed": [], "summary_append": null, "advice": { "needed": false, "reason": "säljaren kvalificerar på egen hand", "topics": [] }, "language_flag": null }
+  },
+  {
+    "role": "gate",
+    "response": { "signals": [], "company_update": null, "facts_upsert": [{ "id": null, "category": "constraint", "text": "Pappersplock — inga handskannrar i drift", "source": "call", "confidence": "high" }, { "id": null, "category": "situation", "text": "Mitt i ägarbyte, inga nya system i år", "source": "call", "confidence": "high" }], "facts_remove": [], "threads_upsert": [], "product_interest_upsert": [], "action_items_upsert": [], "questions_addressed": [], "summary_append": null, "advice": { "needed": false, "reason": "kunden är diskvalificerad, inget att föreslå", "topics": [] }, "language_flag": null }
+  },
+  {
+    "role": "gate",
+    "response": { "signals": [], "company_update": null, "facts_upsert": [], "facts_remove": [], "threads_upsert": [], "product_interest_upsert": [], "action_items_upsert": [{ "id": null, "text": "Ta bort kunden från ringlistan", "owner": "rep", "source": "call" }], "questions_addressed": [], "summary_append": "Ej målgrupp: pappersplock, inget kallager, ägarbyte pågår.", "advice": { "needed": false, "reason": "artigt avslut", "topics": [] }, "language_flag": null }
+  },
+  {
+    "role": "summarizer",
+    "response": { "summary": "Fel målgrupp: kunden säljer armeringsjärn, har varken kallager eller frys, kör pappersplock utan handskannrar och är dessutom mitt i ett ägarbyte utan utrymme för nya system i år. Inga produktspår öppnades och inga förslag lämnades. Samtalet avslutades artigt med beskedet att kunden stryks från ringlistan.", "next_steps": [{ "text": "Ta bort kunden från ringlistan", "owner": "rep" }] }
+  }
+]

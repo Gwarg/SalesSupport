@@ -26,4 +26,14 @@ dotnet run --project tools/SalesSupport.ReplayHarness -- --live      # real Clau
 Fixtures live in samples/fixtures/*.fixtures.json — authored during Claude Code sessions
 (subscription-funded development, D27) and doubling as the golden corpus that live runs
 are diffed against. Add `--dump <dir>` to any mode to write every prompt and response
-to files.
+to files. Run the whole corpus as a regression suite with:
+
+```
+dotnet run --project tools/SalesSupport.ReplayHarness -- --all
+```
+
+Sample format: JSONL with an optional first meta line `{"language":"en","customer":"…"}`,
+then `{"speaker":"rep|customer","text":"…"}` utterances and `{"ask":"…"}` for typed
+rep queries mid-call. Corpus scenarios: happy-path discovery (nordfrys), multi-thread
+allocation/parking (vaxholm), rejected-product stance + budget pivot (kylgrossisten),
+English call (danfrost), and a no-fit call where correct output is nothing (stålgrossisten).

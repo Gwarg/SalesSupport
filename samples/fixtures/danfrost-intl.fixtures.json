@@ -1,0 +1,46 @@
+[
+  {
+    "role": "gate",
+    "response": { "signals": [{ "type": "smalltalk", "note": "intro and timing check" }], "company_update": null, "facts_upsert": [], "facts_remove": [], "threads_upsert": [], "product_interest_upsert": [], "action_items_upsert": [], "questions_addressed": [], "summary_append": null, "advice": { "needed": false, "reason": "", "topics": [] }, "language_flag": null }
+  },
+  {
+    "role": "gate",
+    "response": { "signals": [], "company_update": null, "facts_upsert": [{ "id": null, "category": "situation", "text": "Recently took over a frozen-goods terminal in Aarhus", "source": "call", "confidence": "high" }, { "id": null, "category": "pain", "text": "Inherited equipment situation described as a mess", "source": "call", "confidence": "medium" }], "facts_remove": [], "threads_upsert": [{ "id": null, "topic": "Equipment status at the Aarhus terminal", "kind": "discovery", "status": "open", "salience": "high", "note": "new takeover, equipment state unknown" }], "product_interest_upsert": [], "action_items_upsert": [], "questions_addressed": [], "summary_append": "New frozen-goods terminal in Aarhus with unclear equipment state.", "advice": { "needed": true, "reason": "fresh situation opens discovery", "topics": ["t1", "freezer handheld scanners"] }, "language_flag": null }
+  },
+  {
+    "role": "advisor",
+    "response": { "questions": [{ "id": null, "text": "What scanning equipment came with the terminal?", "thread": "t1" }, { "id": null, "text": "How many pickers work the freezer section per shift?", "thread": "t1" }], "products": [], "thread_updates": [], "answer": null }
+  },
+  {
+    "role": "gate",
+    "response": { "signals": [], "company_update": null, "facts_upsert": [], "facts_remove": [], "threads_upsert": [], "product_interest_upsert": [], "action_items_upsert": [], "questions_addressed": ["q1"], "summary_append": null, "advice": { "needed": false, "reason": "rep asking suggested question", "topics": [] }, "language_flag": null }
+  },
+  {
+    "role": "gate",
+    "response": { "signals": [], "company_update": null, "facts_upsert": [{ "id": null, "category": "situation", "text": "Mixed fleet of old handhelds at the terminal", "source": "call", "confidence": "medium" }, { "id": null, "category": "pain", "text": "Half the handhelds die within an hour in the freezer", "source": "call", "confidence": "high" }], "facts_remove": [], "threads_upsert": [{ "id": "t1", "topic": "Equipment status at the Aarhus terminal", "kind": "discovery", "status": "open", "salience": "high", "note": "old mixed handhelds failing in freezer" }], "product_interest_upsert": [], "action_items_upsert": [], "questions_addressed": [], "summary_append": null, "advice": { "needed": true, "reason": "confirmed pain points at a freezer-rated replacement", "topics": ["t1"] }, "language_flag": null }
+  },
+  {
+    "role": "advisor",
+    "response": { "questions": [{ "id": "q2", "text": "", "thread": null }], "products": [{ "id": null, "product_ref": "prod:x60", "display_name": "X60 handheld scanner", "why": "Freezer-rated replacement for the failing handhelds — about 14 h battery at −30 °C.", "thread": "t1", "price_note": null }], "thread_updates": [], "answer": null }
+  },
+  {
+    "role": "gate",
+    "response": { "signals": [{ "type": "question_from_customer", "note": "asks for gear rated for −30 °C" }], "company_update": null, "facts_upsert": [], "facts_remove": [], "threads_upsert": [{ "id": null, "topic": "Scanner rated for −30 °C", "kind": "customer_question", "status": "open", "salience": "high", "note": "direct product question" }], "product_interest_upsert": [], "action_items_upsert": [], "questions_addressed": [], "summary_append": null, "advice": { "needed": false, "reason": "current panel suggestion already answers the question", "topics": [] }, "language_flag": null }
+  },
+  {
+    "role": "gate",
+    "response": { "signals": [], "company_update": null, "facts_upsert": [], "facts_remove": [], "threads_upsert": [{ "id": "t2", "topic": "Scanner rated for −30 °C", "kind": "customer_question", "status": "addressed", "salience": "medium", "note": "answered: X60 freezer-rated, IP67, 14 h cold battery" }], "product_interest_upsert": [{ "id": null, "product_ref": null, "name_as_said": "X60", "stance": "neutral", "reason": "presented by the rep, no customer reaction yet", "source": "call" }], "action_items_upsert": [], "questions_addressed": [], "summary_append": null, "advice": { "needed": false, "reason": "rep delivering the answer", "topics": [] }, "language_flag": null }
+  },
+  {
+    "role": "gate",
+    "response": { "signals": [{ "type": "buying_signal", "note": "asked for spec sheet and ballpark price for 20 units" }], "company_update": null, "facts_upsert": [{ "id": null, "category": "situation", "text": "Wants pricing basis for about 20 units", "source": "call", "confidence": "high" }], "facts_remove": [], "threads_upsert": [], "product_interest_upsert": [{ "id": "p1", "product_ref": null, "name_as_said": "X60", "stance": "interested", "reason": "asked for spec sheet and pricing for 20 units", "source": "call" }], "action_items_upsert": [], "questions_addressed": [], "summary_append": "Wants specs and indicative pricing for about 20 X60 units.", "advice": { "needed": false, "reason": "deal moving on its own, rep closing", "topics": [] }, "language_flag": null }
+  },
+  {
+    "role": "gate",
+    "response": { "signals": [], "company_update": null, "facts_upsert": [], "facts_remove": [], "threads_upsert": [], "product_interest_upsert": [], "action_items_upsert": [{ "id": null, "text": "Send X60 spec sheet and indicative pricing for 20 units", "owner": "rep", "source": "call" }], "questions_addressed": [], "summary_append": null, "advice": { "needed": false, "reason": "closing commitment", "topics": [] }, "language_flag": null }
+  },
+  {
+    "role": "summarizer",
+    "response": { "summary": "The customer recently took over a frozen-goods terminal in Aarhus with a mixed fleet of old handheld scanners, half of which die within an hour in the freezer. They asked directly for equipment rated for −30 °C; the X60 was presented as a freezer-rated replacement (IP67, ~14 h battery in cold environments) and the customer moved straight to requesting a spec sheet and indicative pricing for about 20 units. Staffing levels in the freezer section remain unknown. Clear, fast-moving opportunity with a concrete next step.", "next_steps": [{ "text": "Send X60 spec sheet and indicative pricing for 20 units", "owner": "rep" }, { "text": "Ask about picker count per shift to size docks and spare batteries", "owner": "rep" }] }
+  }
+]

@@ -23,6 +23,12 @@ public sealed class InMemoryKnowledge : IKnowledgeSource
             "Serviceavtal för skannrar i kyl- och frysmiljö. Täcker batteribyten och slitage i kallmiljö."),
         new("prod:lp-dock", "product", "LP-dock laddstation",
             "Laddstation kompatibel med X40 och X60. Behövs endast vid utökning av antal laddplatser."),
+        new("prod:batteri-x40", "product", "Arktiskt batteripaket X40",
+            "Utbytesbatterier till X40 optimerade för -30 grader, ca 450 kr/st (indikativt). Förlänger drifttiden i frys utan att byta skannerflottan."),
+        new("fam:etikettskrivare", "family", "Etikettskrivare",
+            "Skrivare för lageretiketter och djupfrysmärkning. LP-serien för industrimiljö."),
+        new("prod:lp200", "product", "LP-200 etikettskrivare",
+            "Industriell etikettskrivare för lager. Uppfyller de nya märkningskraven för djupfryst (2026). Köldbeständiga etiketter som tillval."),
     ];
 
     private static readonly Dictionary<string, string> Aliases = new(StringComparer.OrdinalIgnoreCase)
@@ -32,6 +38,9 @@ public sealed class InMemoryKnowledge : IKnowledgeSource
         ["x60"] = "prod:x60",
         ["x-60"] = "prod:x60",
         ["lp-dock"] = "prod:lp-dock",
+        ["lp200"] = "prod:lp200",
+        ["lp-200"] = "prod:lp200",
+        ["batteripaket"] = "prod:batteri-x40",
     };
 
     public Task<IReadOnlyList<RetrievedCard>> SearchAsync(
@@ -64,5 +73,6 @@ public sealed class InMemoryKnowledge : IKnowledgeSource
     public string? ResolveAlias(string text) => Aliases.GetValueOrDefault(text.Trim());
 
     public string GetCatalogMap() =>
-        "Nordfrys-demokatalog: handskannrar (X40 utgående, X60 frysklassad), laddstationer (LP-dock), serviceavtal (frys).";
+        "Demokatalog: handskannrar (X40 utgående, X60 frysklassad), arktiskt batteripaket till X40, " +
+        "laddstationer (LP-dock), etikettskrivare (LP-200, klarar 2026 års märkningskrav för djupfryst), serviceavtal (frys).";
 }

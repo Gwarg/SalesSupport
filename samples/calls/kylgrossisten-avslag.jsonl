@@ -1,0 +1,10 @@
+{"language":"sv","customer":"Kylgrossisten i Syd AB"}
+{"speaker":"rep","text":"Hej, Andreas från Duab. Jag ringer för att vi sett många serviceärenden på era skannrar senaste halvåret."}
+{"speaker":"customer","text":"Ja, batterierna i frysen, som vanligt. Men jag säger det direkt: vi tittade på X60 i våras och den är alldeles för dyr för oss."}
+{"speaker":"rep","text":"Förstått. Är det investeringen som helhet eller priset per enhet som är problemet?"}
+{"speaker":"customer","text":"Vi har ingen investeringsbudget alls i år. Kanske nästa år."}
+{"ask":"Vad kostar arktiska batteripaketet per styck?"}
+{"speaker":"customer","text":"Finns det något sätt att få våra X40 att funka bättre i frysen så länge?"}
+{"speaker":"rep","text":"Ja — det finns ett arktiskt batteripaket till X40, runt 450 kronor styck, och ett serviceavtal som täcker byten."}
+{"speaker":"customer","text":"Det låter mycket mer rimligt. Skicka en offert på det."}
+{"speaker":"rep","text":"Gör jag. Jag skickar offert på batteripaket och serviceavtal idag."}
