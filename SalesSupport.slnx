@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/SalesSupport.Core/SalesSupport.Core.csproj" />
+    <Project Path="src/SalesSupport.Orchestrator/SalesSupport.Orchestrator.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/SalesSupport.Core.Tests/SalesSupport.Core.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/SalesSupport.ReplayHarness/SalesSupport.ReplayHarness.csproj" />
+  </Folder>
+</Solution>
