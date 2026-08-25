@@ -56,6 +56,27 @@ Speak and play something through the speakers during the run, then listen to
 `captures/mic_16k.wav` and `captures/loopback_16k.wav` (gitignored). Select devices with
 `--mic <index|name>` / `--speaker <index|name>`.
 
+## Transcription spike (L1)
+
+Azure AI Speech behind `ITranscriptionEngine` (D8). Needs a Speech resource — the free F0
+tier works (5 audio-hours/month; create in the Azure portal, e.g. region `swedencentral`) —
+and `AZURE_SPEECH_KEY` + `AZURE_SPEECH_REGION` set. Transcribe a recorded capture:
+
+```
+dotnet run --project tools/SalesSupport.TranscribeSpike -- --wav captures/mic_16k.wav --language sv
+```
+
+Or live dual-channel (mic = rep, loopback = customer), with product-name phrase hints
+from a knowledge pack:
+
+```
+dotnet run --project tools/SalesSupport.TranscribeSpike -- --live --seconds 20 --pack packs/duab-demo_demo-e5.pack.sqlite
+```
+
+Partials render as an overwriting status line, finals as timestamped `[rep]`/`[customer]`
+lines. Note: F0 may reject the second concurrent live session (tier limit, not a bug);
+WAV mode transcribes one channel at a time and always works on F0.
+
 ## Knowledge pack pipeline
 
 Build a knowledge pack (docs/knowledge-pack.md) from a canonical import file (D29):

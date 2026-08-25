@@ -6,6 +6,7 @@
     <Project Path="src/SalesSupport.Orchestrator/SalesSupport.Orchestrator.csproj" />
     <Project Path="src/SalesSupport.Pipeline/SalesSupport.Pipeline.csproj" />
     <Project Path="src/SalesSupport.Providers.Claude/SalesSupport.Providers.Claude.csproj" />
+    <Project Path="src/SalesSupport.Transcription.Azure/SalesSupport.Transcription.Azure.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/SalesSupport.Core.Tests/SalesSupport.Core.Tests.csproj" />
@@ -13,5 +14,6 @@
   <Folder Name="/tools/">
     <Project Path="tools/SalesSupport.CaptureSpike/SalesSupport.CaptureSpike.csproj" />
     <Project Path="tools/SalesSupport.ReplayHarness/SalesSupport.ReplayHarness.csproj" />
+    <Project Path="tools/SalesSupport.TranscribeSpike/SalesSupport.TranscribeSpike.csproj" />
   </Folder>
 </Solution>

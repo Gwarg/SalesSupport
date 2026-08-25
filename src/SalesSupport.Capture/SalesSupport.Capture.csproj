@@ -14,4 +14,8 @@
     <PackageReference Include="NAudio.Wasapi" Version="3.0.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\SalesSupport.Core\SalesSupport.Core.csproj" />
+  </ItemGroup>
+
 </Project>

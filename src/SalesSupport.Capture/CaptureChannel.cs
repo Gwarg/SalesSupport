@@ -1,6 +1,7 @@
 using NAudio.CoreAudioApi;
 using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
+using SalesSupport.Core.Contracts;
 
 namespace SalesSupport.Capture;
 
@@ -12,7 +13,7 @@ namespace SalesSupport.Capture;
 /// zero-fill keeps the stream continuous for STT). Audio exists only in transit: nothing
 /// here persists anything (D17).
 /// </summary>
-public sealed class CaptureChannel : IDisposable
+public sealed class CaptureChannel : IAudioSource, IDisposable
 {
     public static readonly WaveFormat TargetFormat = new(16000, 16, 1);
 

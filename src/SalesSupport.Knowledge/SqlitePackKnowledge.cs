@@ -29,6 +29,9 @@ public sealed class SqlitePackKnowledge : IKnowledgeSource
     public string CompanyId { get; }
     public string PackVersion { get; }
 
+    /// <summary>Phrase hints for the STT session (D8) — product names, SKUs, spoken aliases.</summary>
+    public IReadOnlyList<string> SttVocabulary { get; private init; } = [];
+
     private SqlitePackKnowledge(
         string connectionString, IEmbedder embedder, List<Doc> docs, float[] vectors,
         Dictionary<string, List<string>> aliases, string catalogMap, string companyId, string packVersion)
@@ -99,8 +102,11 @@ public sealed class SqlitePackKnowledge : IKnowledgeSource
         var catalogMap = ReadAll(connection, "SELECT text FROM catalog_map WHERE tier = 'full'", r => r.GetString(0)).FirstOrDefault()
             ?? throw new InvalidOperationException("Pack has no catalog_map('full').");
 
+        var sttVocab = ReadAll(connection, "SELECT term FROM stt_vocab", r => r.GetString(0)).ToList();
+
         return new SqlitePackKnowledge(connectionString, embedder, docs, vectors, aliases, catalogMap,
-            meta["company_id"], meta["pack_version"]);
+            meta["company_id"], meta["pack_version"])
+        { SttVocabulary = sttVocab };
     }
 
     public Task<IReadOnlyList<RetrievedCard>> SearchAsync(
