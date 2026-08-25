@@ -21,6 +21,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\SalesSupport.Core\SalesSupport.Core.csproj" />
     <ProjectReference Include="..\..\src\SalesSupport.Knowledge\SalesSupport.Knowledge.csproj" />
+    <ProjectReference Include="..\..\src\SalesSupport.Pipeline\SalesSupport.Pipeline.csproj" />
   </ItemGroup>
 
 </Project>

@@ -6,5 +6,6 @@ obj/
 TestResults/
 artifacts/
 *.pack.sqlite
+models/
 .env
 appsettings.local.json

@@ -10,6 +10,9 @@ string? input = null;
 string? company = null;
 var outDir = "packs";
 string? version = null;
+var embedderChoice = "hashing";
+var modelDir = Path.Combine("models", "multilingual-e5-small");
+var fp32 = false;
 
 for (var i = 0; i < args.Length; i++)
 {
@@ -19,12 +22,24 @@ for (var i = 0; i < args.Length; i++)
         case "--company": company = args[++i]; break;
         case "--out": outDir = args[++i]; break;
         case "--version": version = args[++i]; break;
+        case "--embedder": embedderChoice = args[++i]; break;
+        case "--model-dir": modelDir = args[++i]; break;
+        case "--fp32": fp32 = true; break;
     }
+}
+
+if (args.Length > 0 && args[0] == "fetch-model")
+{
+    Console.WriteLine($"Fetching multilingual-e5-small ({(fp32 ? "fp32" : "quantized")}) into {modelDir}");
+    await ModelFetcher.FetchAsync(modelDir, quantized: !fp32, Console.WriteLine);
+    Console.WriteLine("Done.");
+    return 0;
 }
 
 if (input is null || company is null)
 {
-    Console.Error.WriteLine("Usage: SalesSupport.Pipeline --input <canonical.jsonl> --company <id> [--out <dir>] [--version <v>]");
+    Console.Error.WriteLine("Usage: SalesSupport.Pipeline --input <canonical.jsonl> --company <id> [--out <dir>] [--version <v>] [--embedder hashing|e5] [--model-dir <dir>] [--fp32]");
+    Console.Error.WriteLine("       SalesSupport.Pipeline fetch-model [--model-dir <dir>] [--fp32]");
     return 1;
 }
 
@@ -53,7 +68,13 @@ if (errors.Count > 0)
 }
 Console.WriteLine("  validation: OK");
 
-var embedder = new HashingEmbedder();
+IEmbedder embedder = embedderChoice switch
+{
+    "hashing" => new HashingEmbedder(),
+    "e5" => OnnxEmbedder.Load(modelDir, quantized: !fp32),
+    _ => throw new ArgumentException($"Unknown embedder '{embedderChoice}' (use hashing or e5)"),
+};
+Console.WriteLine($"  embedder: {embedder.ModelId} ({embedder.Dims} dims)");
 var assembly = PackAssembler.Assemble(rows, embedder);
 Console.WriteLine($"  assembled: {assembly.Families.Count} families, {assembly.Products.Count} cards, " +
                   $"{assembly.Aliases.Count} aliases, {assembly.Relations.Count} relations, " +

@@ -37,7 +37,9 @@ if (live && string.IsNullOrEmpty(Environment.GetEnvironmentVariable("ANTHROPIC_A
 }
 
 IKnowledgeSource knowledge = packPath is not null
-    ? SalesSupport.Knowledge.SqlitePackKnowledge.Load(packPath, new SalesSupport.Knowledge.HashingEmbedder())
+    ? SalesSupport.Knowledge.SqlitePackKnowledge.Load(
+        packPath,
+        SalesSupport.Knowledge.EmbedderFactory.ForPack(packPath, SalesSupport.Knowledge.EmbedderFactory.DefaultModelDir(repoRoot)))
     : new InMemoryKnowledge();
 if (packPath is not null)
     Console.WriteLine($"Knowledge: pack {Path.GetFileName(packPath)}");

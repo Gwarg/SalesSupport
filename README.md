@@ -49,8 +49,18 @@ dotnet run --project src/SalesSupport.Pipeline -- --input samples/catalog/duab-d
 Stages: validation at the waist → family taxonomy from category paths → template product
 cards + question maps (LLM enrichment slots in later) → embeddings → versioned SQLite pack
 with FTS5 + vector indexes, aliases, relations, catalog map, and STT vocabulary. Packs land
-in `packs/` (gitignored). Embeddings currently use a deterministic hashing embedder
-(`hashing-trigram-v1`) — the ONNX multilingual embedder replaces it behind `IEmbedder`.
+in `packs/` (gitignored). Two embedders behind `IEmbedder`: the real one is
+`multilingual-e5-small` via ONNX Runtime (semantic + cross-lingual, `--embedder e5`);
+`hashing-trigram-v1` remains as the zero-download fallback. Fetch the model files once
+(~120 MB, into gitignored `models/`):
+
+```
+dotnet run --project src/SalesSupport.Pipeline -- fetch-model
+```
+
+The harness auto-selects the matching embedder from pack meta. Retrieval quality is
+asserted by RetrievalEvalTests (realistic thread-topic queries + a cross-lingual case);
+those tests soft-skip when the model files are absent.
 
 Run the harness against a real pack instead of the in-memory stub:
 
