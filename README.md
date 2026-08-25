@@ -38,6 +38,24 @@ rep queries mid-call. Corpus scenarios: happy-path discovery (nordfrys), multi-t
 allocation/parking (vaxholm), rejected-product stance + budget pivot (kylgrossisten),
 English call (danfrost), and a no-fit call where correct output is nothing (stålgrossisten).
 
+## Capture spike (L1)
+
+Prove dual-channel audio capture on real hardware — mic + speaker loopback (D1), device
+picker with communications-role defaults (what Teams uses), conversion to the 16 kHz mono
+PCM that STT consumes, zero-fill during loopback silence:
+
+```
+dotnet run --project tools/SalesSupport.CaptureSpike -- --list
+```
+
+```
+dotnet run --project tools/SalesSupport.CaptureSpike -- --seconds 8
+```
+
+Speak and play something through the speakers during the run, then listen to
+`captures/mic_16k.wav` and `captures/loopback_16k.wav` (gitignored). Select devices with
+`--mic <index|name>` / `--speaker <index|name>`.
+
 ## Knowledge pack pipeline
 
 Build a knowledge pack (docs/knowledge-pack.md) from a canonical import file (D29):

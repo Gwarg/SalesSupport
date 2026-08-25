@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/SalesSupport.Capture/SalesSupport.Capture.csproj" />
     <Project Path="src/SalesSupport.Core/SalesSupport.Core.csproj" />
     <Project Path="src/SalesSupport.Knowledge/SalesSupport.Knowledge.csproj" />
     <Project Path="src/SalesSupport.Orchestrator/SalesSupport.Orchestrator.csproj" />
@@ -10,6 +11,7 @@
     <Project Path="tests/SalesSupport.Core.Tests/SalesSupport.Core.Tests.csproj" />
   </Folder>
   <Folder Name="/tools/">
+    <Project Path="tools/SalesSupport.CaptureSpike/SalesSupport.CaptureSpike.csproj" />
     <Project Path="tools/SalesSupport.ReplayHarness/SalesSupport.ReplayHarness.csproj" />
   </Folder>
 </Solution>
