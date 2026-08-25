@@ -7,6 +7,7 @@
     <Project Path="src/SalesSupport.Pipeline/SalesSupport.Pipeline.csproj" />
     <Project Path="src/SalesSupport.Providers.Claude/SalesSupport.Providers.Claude.csproj" />
     <Project Path="src/SalesSupport.Transcription.Azure/SalesSupport.Transcription.Azure.csproj" />
+    <Project Path="src/SalesSupport.Transcription.Speechmatics/SalesSupport.Transcription.Speechmatics.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/SalesSupport.Core.Tests/SalesSupport.Core.Tests.csproj" />

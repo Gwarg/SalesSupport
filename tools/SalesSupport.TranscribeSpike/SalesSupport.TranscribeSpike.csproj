@@ -5,6 +5,7 @@
     <ProjectReference Include="..\..\src\SalesSupport.Capture\SalesSupport.Capture.csproj" />
     <ProjectReference Include="..\..\src\SalesSupport.Transcription.Azure\SalesSupport.Transcription.Azure.csproj" />
     <ProjectReference Include="..\..\src\SalesSupport.Knowledge\SalesSupport.Knowledge.csproj" />
+    <ProjectReference Include="..\..\src\SalesSupport.Transcription.Speechmatics\SalesSupport.Transcription.Speechmatics.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

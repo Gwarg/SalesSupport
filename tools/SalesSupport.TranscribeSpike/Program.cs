@@ -5,6 +5,7 @@ using SalesSupport.Core.Contracts;
 using SalesSupport.Core.Model;
 using SalesSupport.Knowledge;
 using SalesSupport.Transcription.Azure;
+using SalesSupport.Transcription.Speechmatics;
 
 Console.OutputEncoding = Encoding.UTF8;
 
@@ -16,6 +17,7 @@ var seconds = 20;
 string? micSelector = null;
 string? spkSelector = null;
 string? packPath = null;
+var engineName = "azure";
 
 for (var i = 0; i < args.Length; i++)
 {
@@ -29,18 +31,25 @@ for (var i = 0; i < args.Length; i++)
         case "--mic": micSelector = args[++i]; break;
         case "--spk": spkSelector = args[++i]; break;
         case "--pack": packPath = args[++i]; break;
+        case "--engine": engineName = args[++i]; break;
     }
 }
 
 if (wavPath is null && !live)
 {
-    Console.Error.WriteLine("Usage: SalesSupport.TranscribeSpike --wav <file> [--role rep|customer] [--language sv] [--pack <pack>]");
-    Console.Error.WriteLine("       SalesSupport.TranscribeSpike --live [--seconds 20] [--mic sel] [--spk sel] [--language sv] [--pack <pack>]");
-    Console.Error.WriteLine("Requires AZURE_SPEECH_KEY + AZURE_SPEECH_REGION.");
+    Console.Error.WriteLine("Usage: SalesSupport.TranscribeSpike --wav <file> [--role rep|customer] [--language sv] [--pack <pack>] [--engine azure|speechmatics]");
+    Console.Error.WriteLine("       SalesSupport.TranscribeSpike --live [--seconds 20] [--mic sel] [--spk sel] [--language sv] [--pack <pack>] [--engine azure|speechmatics]");
+    Console.Error.WriteLine("azure: AZURE_SPEECH_KEY + AZURE_SPEECH_REGION.  speechmatics: SPEECHMATICS_API_KEY.");
     return 1;
 }
 
-var engine = new AzureSpeechEngine(AzureSpeechEngineOptions.FromEnvironment());
+ITranscriptionEngine engine = engineName switch
+{
+    "azure" => new AzureSpeechEngine(AzureSpeechEngineOptions.FromEnvironment()),
+    "speechmatics" => new SpeechmaticsEngine(SpeechmaticsEngineOptions.FromEnvironment()),
+    _ => throw new ArgumentException($"Unknown engine '{engineName}' (azure | speechmatics)"),
+};
+Console.WriteLine($"Engine: {engineName}");
 
 var hints = new List<string>();
 if (packPath is not null)

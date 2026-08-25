@@ -45,8 +45,6 @@ public sealed class AzureSpeechEngineOptions
 /// </summary>
 public sealed class AzureSpeechEngine(AzureSpeechEngineOptions options) : ITranscriptionEngine
 {
-    private const int BytesPerSecond = 32000;
-
     public async IAsyncEnumerable<TranscriptSegment> TranscribeAsync(
         Speaker speaker, IAudioSource audio, TranscriptionConfig config,
         [EnumeratorCancellation] CancellationToken ct = default)
@@ -87,7 +85,21 @@ public sealed class AzureSpeechEngine(AzureSpeechEngineOptions options) : ITrans
         recognizer.SessionStopped += (_, _) => segments.Writer.TryComplete();
 
         await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
-        var pump = Task.Run(() => PumpAsync(audio, pushStream, ct), CancellationToken.None);
+        var pump = Task.Run(async () =>
+        {
+            try
+            {
+                await Core.Audio.AudioPump.RunAsync(audio, (chunk, _) =>
+                {
+                    pushStream.Write(chunk.ToArray(), chunk.Length);
+                    return Task.CompletedTask;
+                }, ct).ConfigureAwait(false);
+            }
+            finally
+            {
+                pushStream.Close();
+            }
+        }, CancellationToken.None);
 
         try
         {
@@ -103,41 +115,4 @@ public sealed class AzureSpeechEngine(AzureSpeechEngineOptions options) : ITrans
 
     private static TranscriptSegment Segment(Speaker speaker, SpeechRecognitionResult result, bool isFinal) =>
         new(speaker, result.Text, isFinal, TimeSpan.FromTicks(result.OffsetInTicks), result.Duration);
-
-    /// <summary>
-    /// Real-time paced pump: pushes exactly as many bytes as wall clock owes. Live sources
-    /// therefore stream 1:1; silence-padding never runs ahead of real time; file sources
-    /// play out at real-time rate (F0-tier friendly) and close the stream at end of data.
-    /// </summary>
-    private static async Task PumpAsync(IAudioSource audio, PushAudioInputStream pushStream, CancellationToken ct)
-    {
-        var buffer = new byte[BytesPerSecond / 10];
-        var started = Environment.TickCount64;
-        long sent = 0;
-
-        try
-        {
-            while (!ct.IsCancellationRequested)
-            {
-                var owed = (Environment.TickCount64 - started) * BytesPerSecond / 1000 - sent;
-                while (owed >= buffer.Length)
-                {
-                    var read = audio.Read(buffer, 0, buffer.Length);
-                    if (read <= 0) return;
-                    if (read == buffer.Length) pushStream.Write(buffer);
-                    else pushStream.Write(buffer[..read], read);
-                    sent += read;
-                    owed -= read;
-                }
-                await Task.Delay(50, ct).ConfigureAwait(false);
-            }
-        }
-        catch (OperationCanceledException)
-        {
-        }
-        finally
-        {
-            pushStream.Close();
-        }
-    }
 }

@@ -77,6 +77,16 @@ Partials render as an overwriting status line, finals as timestamped `[rep]`/`[c
 lines. Note: F0 may reject the second concurrent live session (tier limit, not a bug);
 WAV mode transcribes one channel at a time and always works on F0.
 
+Two engines behind `ITranscriptionEngine` (D8: the interface decides, not debate):
+`--engine azure` (default; `AZURE_SPEECH_KEY` + `AZURE_SPEECH_REGION`) or
+`--engine speechmatics` (`SPEECHMATICS_API_KEY`, free tier at portal.speechmatics.com;
+optional `SPEECHMATICS_RT_URL` to override the EU endpoint). Benchmark by running the
+same WAV through both:
+
+```
+dotnet run --project tools/SalesSupport.TranscribeSpike -- --wav captures/mic_16k.wav --engine speechmatics
+```
+
 ## Knowledge pack pipeline
 
 Build a knowledge pack (docs/knowledge-pack.md) from a canonical import file (D29):

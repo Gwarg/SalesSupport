@@ -184,6 +184,6 @@ Phased (D30); each phase rides on the previous one's data.
 7. **Prioritized worklist / work orders** (D30) — nightly scoring job + panel idle-state list; team assignment view for managers later.
 
 **Phase E — platform breadth (as needed, any time)**
-8. **Self-hosted STT and local LLM providers** — for data-restricted customers (interfaces exist, D8/D14).
+8. **Self-hosted STT and local LLM providers** — for data-restricted customers (interfaces exist, D8/D14). Named STT candidate for Swedish installations: **KBLab's kb-whisper** (the Swedish National Library's Swedish-fine-tuned Whisper, measurably better than vanilla Whisper on Swedish) in a streaming harness on a GPU box — the fixed-cost economics of D27 applied to STT.
 9. **Auto call detection**, echo cancellation, multi-tenant admin, second company onboarding.
 10. **MCP server for customer assistants** — expose the dossier and knowledge pack via MCP, data-out only, never an inference engine (D27).
