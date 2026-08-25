@@ -4,6 +4,7 @@
     <ProjectReference Include="..\..\src\SalesSupport.Core\SalesSupport.Core.csproj" />
     <ProjectReference Include="..\..\src\SalesSupport.Orchestrator\SalesSupport.Orchestrator.csproj" />
     <ProjectReference Include="..\..\src\SalesSupport.Providers.Claude\SalesSupport.Providers.Claude.csproj" />
+    <ProjectReference Include="..\..\src\SalesSupport.Knowledge\SalesSupport.Knowledge.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

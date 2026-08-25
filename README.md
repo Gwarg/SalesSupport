@@ -37,3 +37,23 @@ then `{"speaker":"rep|customer","text":"…"}` utterances and `{"ask":"…"}` fo
 rep queries mid-call. Corpus scenarios: happy-path discovery (nordfrys), multi-thread
 allocation/parking (vaxholm), rejected-product stance + budget pivot (kylgrossisten),
 English call (danfrost), and a no-fit call where correct output is nothing (stålgrossisten).
+
+## Knowledge pack pipeline
+
+Build a knowledge pack (docs/knowledge-pack.md) from a canonical import file (D29):
+
+```
+dotnet run --project src/SalesSupport.Pipeline -- --input samples/catalog/duab-demo.canonical.jsonl --company duab-demo --version demo
+```
+
+Stages: validation at the waist → family taxonomy from category paths → template product
+cards + question maps (LLM enrichment slots in later) → embeddings → versioned SQLite pack
+with FTS5 + vector indexes, aliases, relations, catalog map, and STT vocabulary. Packs land
+in `packs/` (gitignored). Embeddings currently use a deterministic hashing embedder
+(`hashing-trigram-v1`) — the ONNX multilingual embedder replaces it behind `IEmbedder`.
+
+Run the harness against a real pack instead of the in-memory stub:
+
+```
+dotnet run --project tools/SalesSupport.ReplayHarness -- --all --pack packs/duab-demo_demo.pack.sqlite
+```

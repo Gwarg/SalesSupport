@@ -13,6 +13,7 @@ var useFixtures = false;
 var runAll = false;
 string? dumpDir = null;
 string? samplePath = null;
+string? packPath = null;
 
 for (var i = 0; i < args.Length; i++)
 {
@@ -22,6 +23,7 @@ for (var i = 0; i < args.Length; i++)
         case "--fixtures": useFixtures = true; break;
         case "--all": runAll = true; useFixtures = true; break;
         case "--dump": dumpDir = i + 1 < args.Length && !args[i + 1].StartsWith("--", StringComparison.Ordinal) ? args[++i] : "prompt-dumps"; break;
+        case "--pack": packPath = args[++i]; break;
         default: samplePath = args[i]; break;
     }
 }
@@ -33,6 +35,12 @@ if (live && string.IsNullOrEmpty(Environment.GetEnvironmentVariable("ANTHROPIC_A
     Console.Error.WriteLine("--live requires ANTHROPIC_API_KEY to be set.");
     return 1;
 }
+
+IKnowledgeSource knowledge = packPath is not null
+    ? SalesSupport.Knowledge.SqlitePackKnowledge.Load(packPath, new SalesSupport.Knowledge.HashingEmbedder())
+    : new InMemoryKnowledge();
+if (packPath is not null)
+    Console.WriteLine($"Knowledge: pack {Path.GetFileName(packPath)}");
 
 if (runAll)
 {
@@ -122,7 +130,7 @@ async Task<CallStats> RunCallAsync(string path, bool verbose)
             CallLanguage = language,
             UiLanguage = language,
         };
-        var orchestrator = new CallOrchestrator(llm, new InMemoryKnowledge(), options);
+        var orchestrator = new CallOrchestrator(llm, knowledge, options);
 
         if (verbose)
         {
