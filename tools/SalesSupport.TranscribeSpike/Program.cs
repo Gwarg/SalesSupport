@@ -3,6 +3,7 @@ using SalesSupport.Capture;
 using SalesSupport.Core.Audio;
 using SalesSupport.Core.Contracts;
 using SalesSupport.Core.Model;
+using SalesSupport.Core.Transcription;
 using SalesSupport.Knowledge;
 using SalesSupport.Transcription.Azure;
 using SalesSupport.Transcription.Speechmatics;
@@ -60,16 +61,13 @@ if (packPath is not null)
 }
 var config = new TranscriptionConfig(language, hints);
 
-var printLock = new object();
 var partialShown = false;
 
 if (wavPath is not null)
 {
     Console.WriteLine($"Transcribing {wavPath} as [{role.ToString().ToLowerInvariant()}], language={language} (plays out at real-time rate)");
     using var source = new WavAudioSource(wavPath);
-    await foreach (var segment in engine.TranscribeAsync(role, source, config))
-        Print(segment);
-    ClearPartial();
+    await PrintMergedAsync(TranscriptMerger.MergeAsync([engine.TranscribeAsync(role, source, config)]));
     Console.WriteLine("Done.");
     return 0;
 }
@@ -88,61 +86,50 @@ mic.Start();
 loopback.Start();
 using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(seconds));
 
-var repTask = ConsumeAsync(engine.TranscribeAsync(Speaker.Rep, mic, config, cts.Token));
-var customerTask = ConsumeAsync(engine.TranscribeAsync(Speaker.Customer, loopback, config, cts.Token));
-await Task.WhenAll(repTask, customerTask);
+await PrintMergedAsync(TranscriptMerger.MergeAsync(
+    [engine.TranscribeAsync(Speaker.Rep, mic, config, cts.Token),
+     engine.TranscribeAsync(Speaker.Customer, loopback, config, cts.Token)],
+    ct: cts.Token));
 
 mic.Stop();
 loopback.Stop();
-ClearPartial();
 Console.WriteLine("Done.");
 return 0;
 
-async Task ConsumeAsync(IAsyncEnumerable<TranscriptSegment> segments)
+async Task PrintMergedAsync(IAsyncEnumerable<TranscriptEvent> events)
 {
     try
     {
-        await foreach (var segment in segments)
-            Print(segment);
+        await foreach (var e in events)
+        {
+            switch (e)
+            {
+                case TranscriptEvent.UtteranceFinalized(var utterance):
+                    ClearPartial();
+                    var tag = $"[{utterance.Speaker.ToString().ToLowerInvariant()}]";
+                    Console.WriteLine($"T{utterance.Index,2} {TimeSpan.FromMilliseconds(utterance.TimestampMs):mm\\:ss} {tag,-10} {utterance.Text}");
+                    break;
+                case TranscriptEvent.PartialUpdated(var speaker, var text):
+                    ClearPartial();
+                    var line = $"~ [{speaker.ToString().ToLowerInvariant()}] {text}";
+                    Console.Write(line.Length > 110 ? line[..110] : line);
+                    partialShown = true;
+                    break;
+            }
+        }
     }
     catch (OperationCanceledException)
     {
     }
     catch (Exception ex)
     {
-        lock (printLock)
-        {
-            ClearPartialUnlocked();
-            Console.WriteLine($"! {ex.Message}");
-        }
+        ClearPartial();
+        Console.WriteLine($"! {ex.Message}");
     }
-}
-
-void Print(TranscriptSegment segment)
-{
-    lock (printLock)
-    {
-        ClearPartialUnlocked();
-        var tag = $"[{segment.Speaker.ToString().ToLowerInvariant()}]";
-        if (segment.IsFinal)
-        {
-            Console.WriteLine($"{segment.Offset:mm\\:ss} {tag,-10} {segment.Text}");
-        }
-        else
-        {
-            var line = $"~ {tag} {segment.Text}";
-            Console.Write(line.Length > 110 ? line[..110] : line);
-            partialShown = true;
-        }
-    }
+    ClearPartial();
 }
 
 void ClearPartial()
-{
-    lock (printLock) ClearPartialUnlocked();
-}
-
-void ClearPartialUnlocked()
 {
     if (!partialShown) return;
     Console.Write("\r" + new string(' ', 112) + "\r");
