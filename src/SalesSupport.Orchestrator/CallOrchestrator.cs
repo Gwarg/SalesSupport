@@ -9,7 +9,9 @@ public sealed record TickResult(
     GateDiff Diff,
     MergeOutcome Merge,
     bool AdvisorRan,
-    PanelDelta? PanelDelta);
+    PanelDelta? PanelDelta,
+    long GateMs = 0,
+    long AdvisorMs = 0);
 
 public sealed record AskResult(string Answer, PanelDelta PanelDelta);
 
@@ -35,7 +37,9 @@ public sealed class CallOrchestrator(ILlmProvider llm, IKnowledgeSource knowledg
         _transcript.Add(utterance);
 
         var gateConversation = PromptBuilder.Gate(Picture, window, utterance, Panel.ActiveQuestions, options);
+        var gateStarted = Environment.TickCount64;
         var diff = await llm.CompleteJsonAsync<GateDiff>(LlmRole.Gate, gateConversation, ct);
+        var gateMs = Environment.TickCount64 - gateStarted;
 
         var merge = PictureMerger.Apply(Picture, diff, turn);
         Tombstones.AddRange(merge.RemovedFacts);
@@ -44,21 +48,24 @@ public sealed class CallOrchestrator(ILlmProvider llm, IKnowledgeSource knowledg
 
         var advisorRan = false;
         PanelDelta? delta = null;
+        long advisorMs = 0;
 
         if (diff.Advice.Needed && turn - _lastAdviceTurn >= options.MinTurnsBetweenAdvice)
         {
             _lastAdviceTurn = turn;
             advisorRan = true;
 
+            var advisorStarted = Environment.TickCount64;
             var cards = await RetrieveForTopicsAsync(diff.Advice.Topics, ct);
             var advisorConversation = PromptBuilder.Advisor(Picture, cards, Panel, knowledge.GetCatalogMap(), options);
             var result = await llm.CompleteJsonAsync<AdvisorResult>(LlmRole.Advisor, advisorConversation, ct);
+            advisorMs = Environment.TickCount64 - advisorStarted;
 
             delta = Panel.Reconcile(result);
             PictureMerger.ApplyThreadUpdates(Picture, result.ThreadUpdates, turn);
         }
 
-        return new TickResult(utterance, diff, merge, advisorRan, delta);
+        return new TickResult(utterance, diff, merge, advisorRan, delta, gateMs, advisorMs);
     }
 
     /// <summary>Ask lane (D15): fires the advisor directly; the answer renders in zone 4.</summary>

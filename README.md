@@ -122,3 +122,17 @@ Run the harness against a real pack instead of the in-memory stub:
 ```
 dotnet run --project tools/SalesSupport.ReplayHarness -- --all --pack packs/duab-demo_demo.pack.sqlite
 ```
+## Full-loop live demo (L1)
+
+The complete system on real speech: capture → STT → merger → orchestrator → panel output,
+in a console. Needs an STT key (Azure or Speechmatics) and a model backend — Ollama for
+free local inference, `claude` when API credits exist, `fake` for plumbing checks:
+
+```
+dotnet run --project tools/SalesSupport.LiveDemo
+```
+
+Talk (and play customer-side audio); finals tick the orchestrator and panel deltas print
+with real gate/advisor latency per tick. Enter ends the call → interactive ask lane →
+post-call summary, final panel, threads, and customer picture. `--wav-mic captures/mic_16k.wav`
+replays a recorded channel instead of live capture — the deterministic first run.

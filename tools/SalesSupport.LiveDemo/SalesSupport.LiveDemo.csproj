@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\SalesSupport.Core\SalesSupport.Core.csproj" />
+    <ProjectReference Include="..\..\src\SalesSupport.Capture\SalesSupport.Capture.csproj" />
+    <ProjectReference Include="..\..\src\SalesSupport.Orchestrator\SalesSupport.Orchestrator.csproj" />
+    <ProjectReference Include="..\..\src\SalesSupport.Knowledge\SalesSupport.Knowledge.csproj" />
+    <ProjectReference Include="..\..\src\SalesSupport.Transcription.Azure\SalesSupport.Transcription.Azure.csproj" />
+    <ProjectReference Include="..\..\src\SalesSupport.Transcription.Speechmatics\SalesSupport.Transcription.Speechmatics.csproj" />
+    <ProjectReference Include="..\..\src\SalesSupport.Providers.Claude\SalesSupport.Providers.Claude.csproj" />
+    <ProjectReference Include="..\..\src\SalesSupport.Providers.Ollama\SalesSupport.Providers.Ollama.csproj" />
+    <ProjectReference Include="..\SalesSupport.ReplayHarness\SalesSupport.ReplayHarness.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>
