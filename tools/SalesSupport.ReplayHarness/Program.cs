@@ -9,6 +9,7 @@ using SalesSupport.ReplayHarness;
 Console.OutputEncoding = Encoding.UTF8;
 
 var live = false;
+var ollama = false;
 var useFixtures = false;
 var runAll = false;
 string? dumpDir = null;
@@ -20,6 +21,7 @@ for (var i = 0; i < args.Length; i++)
     switch (args[i])
     {
         case "--live": live = true; break;
+        case "--ollama": ollama = true; break;
         case "--fixtures": useFixtures = true; break;
         case "--all": runAll = true; useFixtures = true; break;
         case "--dump": dumpDir = i + 1 < args.Length && !args[i + 1].StartsWith("--", StringComparison.Ordinal) ? args[++i] : "prompt-dumps"; break;
@@ -102,7 +104,12 @@ async Task<CallStats> RunCallAsync(string path, bool verbose)
         FixtureLlmProvider? fixtures = null;
 
         ILlmProvider llm;
-        if (useFixtures && File.Exists(fixturesPath))
+        if (ollama)
+        {
+            llm = new SalesSupport.Providers.Ollama.OllamaLlmProvider();
+            stats.Mode = "ollama";
+        }
+        else if (useFixtures && File.Exists(fixturesPath))
         {
             fixtures = new FixtureLlmProvider(fixturesPath);
             llm = fixtures;

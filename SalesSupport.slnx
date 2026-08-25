@@ -6,6 +6,7 @@
     <Project Path="src/SalesSupport.Orchestrator/SalesSupport.Orchestrator.csproj" />
     <Project Path="src/SalesSupport.Pipeline/SalesSupport.Pipeline.csproj" />
     <Project Path="src/SalesSupport.Providers.Claude/SalesSupport.Providers.Claude.csproj" />
+    <Project Path="src/SalesSupport.Providers.Ollama/SalesSupport.Providers.Ollama.csproj" />
     <Project Path="src/SalesSupport.Transcription.Azure/SalesSupport.Transcription.Azure.csproj" />
     <Project Path="src/SalesSupport.Transcription.Speechmatics/SalesSupport.Transcription.Speechmatics.csproj" />
   </Folder>

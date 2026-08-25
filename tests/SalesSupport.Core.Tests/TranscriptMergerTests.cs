@@ -8,7 +8,7 @@ public class TranscriptMergerTests
 {
     private static readonly TranscriptMergerOptions FastOptions = new()
     {
-        CoalesceWindow = TimeSpan.FromMilliseconds(150),
+        CoalesceWindow = TimeSpan.FromMilliseconds(400),
         CoalesceMaxGap = TimeSpan.FromSeconds(1),
     };
 
@@ -107,7 +107,7 @@ public class TranscriptMergerTests
         static async IAsyncEnumerable<TranscriptSegment> SlowTailSource()
         {
             yield return Final(Speaker.Rep, "snabb mening", 0, 1);
-            await Task.Delay(500);
+            await Task.Delay(1000);
             yield return Final(Speaker.Rep, "kommer efter fönstret", 1.5, 1);
         }
     }

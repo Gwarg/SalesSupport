@@ -20,8 +20,14 @@ gate → merge → retrieval → advisor → panel loop — no audio required. T
 ```
 dotnet run --project tools/SalesSupport.ReplayHarness                # fake heuristics (plumbing only)
 dotnet run --project tools/SalesSupport.ReplayHarness -- --fixtures  # Claude-authored golden responses, zero API cost
+dotnet run --project tools/SalesSupport.ReplayHarness -- --ollama    # local models via Ollama (free real inference)
 dotnet run --project tools/SalesSupport.ReplayHarness -- --live      # real Claude API (needs ANTHROPIC_API_KEY)
 ```
+
+Ollama mode (D14/D27 local path): install from ollama.com, `ollama pull qwen2.5:7b`,
+then run with `--ollama` (optionally `--all --ollama` to run the whole corpus with real
+local inference and compare against the fixture goldens). Output shape is enforced by
+passing the same JSON schemas as Ollama's `format` parameter.
 
 Fixtures live in samples/fixtures/*.fixtures.json — authored during Claude Code sessions
 (subscription-funded development, D27) and doubling as the golden corpus that live runs
