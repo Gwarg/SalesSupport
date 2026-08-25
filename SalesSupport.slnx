@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/SalesSupport.Backend/SalesSupport.Backend.csproj" />
     <Project Path="src/SalesSupport.Capture/SalesSupport.Capture.csproj" />
     <Project Path="src/SalesSupport.Core/SalesSupport.Core.csproj" />
     <Project Path="src/SalesSupport.Knowledge/SalesSupport.Knowledge.csproj" />

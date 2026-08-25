@@ -1,0 +1,74 @@
+using SalesSupport.Backend;
+using SalesSupport.Core.Contracts;
+using SalesSupport.Core.Serialization;
+using SalesSupport.Knowledge;
+using SalesSupport.Providers.Claude;
+using SalesSupport.Providers.Ollama;
+
+var builder = WebApplication.CreateBuilder(args);
+
+var options = builder.Configuration.GetSection("Backend").Get<BackendOptions>() ?? new BackendOptions();
+builder.Services.AddSingleton(options);
+
+var packPath = options.PackPath;
+if (string.IsNullOrEmpty(packPath))
+{
+    packPath = Directory.Exists(options.PacksDirectory)
+        ? Directory.GetFiles(options.PacksDirectory, "*.pack.sqlite").OrderByDescending(File.GetLastWriteTimeUtc).FirstOrDefault()
+        : null;
+}
+if (packPath is null)
+    throw new InvalidOperationException(
+        $"No knowledge pack found (Backend:PackPath unset, no *.pack.sqlite in '{options.PacksDirectory}'). " +
+        "Build one: dotnet run --project src/SalesSupport.Pipeline -- --input samples/catalog/duab-demo.canonical.jsonl --company duab-demo");
+
+var pack = SqlitePackKnowledge.Load(packPath, EmbedderFactory.ForPack(packPath, options.ModelDirectory));
+builder.Services.AddSingleton<IKnowledgeSource>(pack);
+
+builder.Services.AddSingleton<ILlmProvider>(options.LlmProvider switch
+{
+    "ollama" => new OllamaLlmProvider(),
+    "claude" => new ClaudeLlmProvider(),
+    var other => throw new InvalidOperationException($"Unknown Backend:LlmProvider '{other}' (ollama | claude)"),
+});
+
+builder.Services.AddHttpClient();
+builder.Services.AddSingleton<SttTokenService>();
+builder.Services.AddSingleton(sp => new StorageService(options.DatabasePath, options.RetentionDays));
+builder.Services.AddSingleton(sp => new CallSessionService(
+    sp.GetRequiredService<ILlmProvider>(),
+    sp.GetRequiredService<IKnowledgeSource>(),
+    pack.SttVocabulary,
+    sp.GetRequiredService<StorageService>(),
+    options));
+
+builder.Services.AddSignalR().AddJsonProtocol(o =>
+{
+    o.PayloadSerializerOptions = JsonDefaults.Options;
+});
+
+var app = builder.Build();
+
+app.MapHub<CallHub>("/hub/call");
+
+app.MapGet("/healthz", (IKnowledgeSource knowledge) => Results.Ok(new
+{
+    status = "ok",
+    pack = pack.PackVersion,
+    company = pack.CompanyId,
+    llm = options.LlmProvider,
+}));
+
+app.MapGet("/api/stt-token", async (SttTokenService tokens, CancellationToken ct) =>
+{
+    if (!tokens.IsConfigured)
+        return Results.Problem("Azure Speech is not configured on the backend.", statusCode: 503);
+    return Results.Ok(await tokens.IssueAsync(ct));
+});
+
+app.Logger.LogInformation("SalesSupport backend up — pack {Pack} ({Company}), llm {Llm}",
+    Path.GetFileName(packPath), pack.CompanyId, options.LlmProvider);
+
+app.Run();
+
+public partial class Program;

@@ -136,3 +136,20 @@ Talk (and play customer-side audio); finals tick the orchestrator and panel delt
 with real gate/advisor latency per tick. Enter ends the call → interactive ask lane →
 post-call summary, final panel, threads, and customer picture. `--wav-mic captures/mic_16k.wav`
 replays a recorded channel instead of live capture — the deterministic first run.
+
+## Backend (L1)
+
+The thin ASP.NET Core backend (D20): hosts the orchestrator per call, serves the SignalR
+contract (`/hub/call`: StartCall → Utterance/Ask → EndCall; events TranscriptAppended,
+PictureUpdated, PanelDelta, TickCompleted, AnswerReady, SummaryReady), issues short-lived
+Azure STT tokens (`/api/stt-token`, D9 — model and speech keys never reach the desktop),
+and stores interactions (transcript + picture + summary, never audio) in SQLite with
+`interaction_kind` and retention purging (D17/D30). StartCall carries the pre-call card;
+a non-empty card seeds the customer picture via the seeder prompt (D16/D28).
+
+```
+dotnet run --project src/SalesSupport.Backend
+```
+
+Requires a knowledge pack (newest in `packs/` by default) and a model backend per
+`appsettings.json` (`Backend:LlmProvider`: `ollama` | `claude`). Health: `GET /healthz`.

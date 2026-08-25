@@ -10,3 +10,5 @@ models/
 captures/
 .env
 appsettings.local.json
+src/SalesSupport.Backend/data/
+backend-smoke.log

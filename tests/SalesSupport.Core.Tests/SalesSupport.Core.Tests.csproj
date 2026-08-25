@@ -26,6 +26,7 @@
     <ProjectReference Include="..\..\src\SalesSupport.Transcription.Azure\SalesSupport.Transcription.Azure.csproj" />
     <ProjectReference Include="..\..\src\SalesSupport.Transcription.Speechmatics\SalesSupport.Transcription.Speechmatics.csproj" />
     <ProjectReference Include="..\..\src\SalesSupport.Providers.Ollama\SalesSupport.Providers.Ollama.csproj" />
+    <ProjectReference Include="..\..\src\SalesSupport.Backend\SalesSupport.Backend.csproj" />
   </ItemGroup>
 
 </Project>

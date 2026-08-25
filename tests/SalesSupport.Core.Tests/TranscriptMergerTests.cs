@@ -6,9 +6,13 @@ namespace SalesSupport.Core.Tests;
 
 public class TranscriptMergerTests
 {
+    // Long window: these tests flush via speaker change or stream completion, never via
+    // window expiry — a generous window makes coalescing immune to JIT/GC stalls between
+    // segments (the observed first-run-after-build flake). Only the expiry test uses a
+    // short window, with its own options.
     private static readonly TranscriptMergerOptions FastOptions = new()
     {
-        CoalesceWindow = TimeSpan.FromMilliseconds(400),
+        CoalesceWindow = TimeSpan.FromSeconds(2),
         CoalesceMaxGap = TimeSpan.FromSeconds(1),
     };
 
@@ -95,9 +99,14 @@ public class TranscriptMergerTests
     [Fact]
     public async Task Window_expiry_flushes_pending_without_more_input()
     {
+        var expiryOptions = new TranscriptMergerOptions
+        {
+            CoalesceWindow = TimeSpan.FromMilliseconds(400),
+            CoalesceMaxGap = TimeSpan.FromSeconds(1),
+        };
         var slowTail = SlowTailSource();
         var events = new List<TranscriptEvent>();
-        await foreach (var e in TranscriptMerger.MergeAsync([slowTail], FastOptions))
+        await foreach (var e in TranscriptMerger.MergeAsync([slowTail], expiryOptions))
             events.Add(e);
 
         var utterances = Utterances(events);

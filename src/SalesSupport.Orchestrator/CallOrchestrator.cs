@@ -29,6 +29,18 @@ public sealed class CallOrchestrator(ILlmProvider llm, IKnowledgeSource knowledg
     public PanelSession Panel { get; } = new();
     public List<string> RollingSummary { get; } = [];
     public List<Fact> Tombstones { get; } = [];
+    public IReadOnlyList<Utterance> Transcript => _transcript;
+
+    /// <summary>
+    /// Seeds the picture from a customer brief / pre-call card before the first utterance
+    /// (D16/D28, docs/prompts.md "Seeder"). Reuses the gate schema; runs as turn 0.
+    /// </summary>
+    public async Task<MergeOutcome> SeedFromBriefAsync(string briefText, CancellationToken ct = default)
+    {
+        var conversation = PromptBuilder.Seeder(briefText, Picture, options);
+        var diff = await llm.CompleteJsonAsync<GateDiff>(LlmRole.Gate, conversation, ct);
+        return PictureMerger.Apply(Picture, diff, turn: 0);
+    }
 
     public async Task<TickResult> OnUtteranceAsync(Utterance utterance, CancellationToken ct = default)
     {

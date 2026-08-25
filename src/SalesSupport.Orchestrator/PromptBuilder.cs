@@ -192,6 +192,37 @@ public static class PromptBuilder
         return new LlmConversation(system, [LlmMessage.User(sb.ToString())]);
     }
 
+    /// <summary>Seeder = the gate prompt with the brief as the material to extract from (docs/prompts.md).</summary>
+    public static LlmConversation Seeder(string briefText, CustomerPicture picture, OrchestratorOptions options)
+    {
+        var system = GateSystemTemplate
+            .Replace("{call_language}", options.CallLanguage)
+            .Replace("{strictness_bias}", "leave advice.needed false")
+            + """
+
+
+              SEEDING MODE: the call has not started. Extract the initial picture from the
+              CUSTOMER BRIEF below instead of a transcript. Everything extracted gets
+              source "crm" (free text the rep typed on the pre-call card: "rep").
+              Order lines resolved to products become product_interest with stance "owns".
+              advice.needed is always false; signals stay empty.
+              """;
+
+        var sb = new StringBuilder();
+        sb.AppendLine($"CONTEXT: company={options.CompanyName} call_language={options.CallLanguage}");
+        sb.AppendLine("PICTURE:");
+        sb.AppendLine(JsonDefaults.Serialize(picture));
+        sb.AppendLine("ACTIVE_QUESTIONS:");
+        sb.AppendLine("TRANSCRIPT:");
+        sb.AppendLine("(call not started)");
+        sb.AppendLine("BRIEF:");
+        sb.AppendLine(briefText);
+        sb.AppendLine("NEW:");
+        sb.AppendLine("[rep] (pre-call preparation — extract the brief above)");
+
+        return new LlmConversation(system, [LlmMessage.User(sb.ToString())]);
+    }
+
     public static LlmConversation Summarizer(
         CustomerPicture picture,
         IReadOnlyList<string> rollingSummary,

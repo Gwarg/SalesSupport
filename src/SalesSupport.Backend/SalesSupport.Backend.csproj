@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <ItemGroup>
+    <ProjectReference Include="..\SalesSupport.Core\SalesSupport.Core.csproj" />
+    <ProjectReference Include="..\SalesSupport.Orchestrator\SalesSupport.Orchestrator.csproj" />
+    <ProjectReference Include="..\SalesSupport.Knowledge\SalesSupport.Knowledge.csproj" />
+    <ProjectReference Include="..\SalesSupport.Providers.Claude\SalesSupport.Providers.Claude.csproj" />
+    <ProjectReference Include="..\SalesSupport.Providers.Ollama\SalesSupport.Providers.Ollama.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+</Project>
