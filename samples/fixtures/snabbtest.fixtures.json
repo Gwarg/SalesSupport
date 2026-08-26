@@ -1,0 +1,30 @@
+[
+  {
+    "role": "gate",
+    "response": { "signals": [{ "type": "smalltalk", "note": "hälsning" }], "company_update": null, "facts_upsert": [], "facts_remove": [], "threads_upsert": [], "product_interest_upsert": [], "action_items_upsert": [], "questions_addressed": [], "summary_append": null, "advice": { "needed": false, "reason": "", "topics": [] }, "language_flag": null }
+  },
+  {
+    "role": "gate",
+    "response": { "signals": [], "company_update": null, "facts_upsert": [{ "id": null, "category": "pain", "text": "X40-skannrarna tappar batteri i frysen", "source": "call", "confidence": "high" }], "facts_remove": [], "threads_upsert": [{ "id": null, "topic": "Batteriproblem i frysen", "kind": "discovery", "status": "open", "salience": "high", "note": "pain bekräftad, omfattning okänd" }], "product_interest_upsert": [{ "id": null, "product_ref": null, "name_as_said": "X40", "stance": "owns", "reason": "har X40 med batteriproblem i frys", "source": "call" }], "action_items_upsert": [], "questions_addressed": [], "summary_append": "Batteriproblem på X40 i frysen.", "advice": { "needed": true, "reason": "ny smärtpunkt", "topics": ["t1"] }, "language_flag": null }
+  },
+  {
+    "role": "advisor",
+    "response": { "questions": [{ "id": null, "text": "Hur många enheter kör ni i frysen?", "thread": "t1" }], "products": [{ "id": null, "product_ref": "prod:du-bat40a", "display_name": "Arktiskt batteripaket X40", "why": "Löser batteriproblemet i frys utan att byta skannrar.", "thread": "t1", "price_note": "ca 450 kr/st (indikativt)" }], "thread_updates": [], "answer": null }
+  },
+  {
+    "role": "gate",
+    "response": { "signals": [], "company_update": null, "facts_upsert": [], "facts_remove": [], "threads_upsert": [], "product_interest_upsert": [], "action_items_upsert": [], "questions_addressed": ["q1"], "summary_append": null, "advice": { "needed": false, "reason": "säljaren ställer föreslagen fråga", "topics": [] }, "language_flag": null }
+  },
+  {
+    "role": "gate",
+    "response": { "signals": [{ "type": "buying_signal", "note": "tidsram: före november" }], "company_update": null, "facts_upsert": [{ "id": null, "category": "situation", "text": "Åtta X40 i frysen", "source": "call", "confidence": "high" }, { "id": null, "category": "timeline", "text": "Vill ha det löst före november", "source": "call", "confidence": "high" }], "facts_remove": [], "threads_upsert": [], "product_interest_upsert": [], "action_items_upsert": [], "questions_addressed": [], "summary_append": null, "advice": { "needed": false, "reason": "panelen är redan aktuell", "topics": [] }, "language_flag": null }
+  },
+  {
+    "role": "gate",
+    "response": { "signals": [], "company_update": null, "facts_upsert": [], "facts_remove": [], "threads_upsert": [], "product_interest_upsert": [], "action_items_upsert": [{ "id": null, "text": "Skicka offert på arktiskt batteripaket", "owner": "rep", "source": "call" }], "questions_addressed": [], "summary_append": "Offert på batteripaket utlovad.", "advice": { "needed": false, "reason": "avslutande åtagande", "topics": [] }, "language_flag": null }
+  },
+  {
+    "role": "summarizer",
+    "response": { "summary": "Kunden har åtta X40-skannrar som tappar batteri i frysen och vill ha en lösning före november. Arktiskt batteripaket föreslogs som snabb åtgärd och en offert utlovades.", "next_steps": [{ "text": "Skicka offert på arktiskt batteripaket", "owner": "rep" }] }
+  }
+]

@@ -14,6 +14,7 @@ string? ollamaModel = null;
 var ollamaNoThink = false;
 var useFixtures = false;
 var runAll = false;
+var quick = false;
 string? dumpDir = null;
 string? samplePath = null;
 string? packPath = null;
@@ -28,6 +29,7 @@ for (var i = 0; i < args.Length; i++)
         case "--ollama-nothink": ollama = true; ollamaNoThink = true; break;
         case "--fixtures": useFixtures = true; break;
         case "--all": runAll = true; useFixtures = true; break;
+        case "--quick": quick = true; break;
         case "--dump": dumpDir = i + 1 < args.Length && !args[i + 1].StartsWith("--", StringComparison.Ordinal) ? args[++i] : "prompt-dumps"; break;
         case "--pack": packPath = args[++i]; break;
         default: samplePath = args[i]; break;
@@ -58,6 +60,7 @@ if (runAll)
     var failures = 0;
     foreach (var sample in samples)
     {
+        Console.WriteLine($"  → {Path.GetFileNameWithoutExtension(sample)} …");
         var stats = await RunCallAsync(sample, verbose: false);
         var flags = stats.FixturesUnused > 0 ? $" UNUSED-FIXTURES={stats.FixturesUnused}" : "";
         flags += stats.MergeNotes > 0 ? $" notes={stats.MergeNotes}" : "";
@@ -73,6 +76,7 @@ if (runAll)
     return failures == 0 ? 0 : 1;
 }
 
+if (quick) samplePath = Path.Combine(repoRoot, "samples", "calls", "snabbtest.jsonl");
 samplePath ??= Path.Combine(repoRoot, "samples", "calls", "nordfrys-cold-storage.jsonl");
 if (!File.Exists(samplePath))
 {

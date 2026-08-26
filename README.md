@@ -36,6 +36,7 @@ to files. Run the whole corpus as a regression suite with:
 
 ```
 dotnet run --project tools/SalesSupport.ReplayHarness -- --all
+dotnet run --project tools/SalesSupport.ReplayHarness -- --quick --ollama   # ~1 min smoke: 5 ticks, 1 advisor fire
 ```
 
 Sample format: JSONL with an optional first meta line `{"language":"en","customer":"…"}`,
