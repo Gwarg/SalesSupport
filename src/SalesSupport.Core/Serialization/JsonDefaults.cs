@@ -1,6 +1,7 @@
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
 
 namespace SalesSupport.Core.Serialization;
 
@@ -12,6 +13,10 @@ public static class JsonDefaults
 {
     public static readonly JsonSerializerOptions Options = new()
     {
+        // Explicit resolver: JsonSchemaExporter and the serializer share these options
+        // across threads; relying on lazy first-use initialization races (observed as
+        // "must specify a TypeInfoResolver before being marked as read-only").
+        TypeInfoResolver = new DefaultJsonTypeInfoResolver(),
         PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
         DictionaryKeyPolicy = JsonNamingPolicy.SnakeCaseLower,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
