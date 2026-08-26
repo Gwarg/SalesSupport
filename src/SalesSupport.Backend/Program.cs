@@ -27,7 +27,7 @@ builder.Services.AddSingleton<IKnowledgeSource>(pack);
 
 builder.Services.AddSingleton<ILlmProvider>(options.LlmProvider switch
 {
-    "ollama" => new OllamaLlmProvider(),
+    "ollama" => new OllamaLlmProvider(OllamaProviderOptions.ForModel(options.OllamaModel, options.OllamaNoThink ? false : null)),
     "claude" => new ClaudeLlmProvider(),
     var other => throw new InvalidOperationException($"Unknown Backend:LlmProvider '{other}' (ollama | claude)"),
 });

@@ -32,6 +32,22 @@ public class OllamaProviderTests
         var format = request["format"]!.AsObject();
         Assert.Equal("object", format["type"]!.GetValue<string>());
         Assert.True(format["properties"]!.AsObject().ContainsKey("facts_upsert"));
+        Assert.False(request.ContainsKey("think"));
+    }
+
+    [Fact]
+    public void Think_false_is_sent_for_thinking_models_and_omitted_otherwise()
+    {
+        var conversation = new LlmConversation("s", []);
+        var schema = JsonSchemaFactory.For<GateDiff>();
+
+        var thinking = OllamaLlmProvider.BuildRequest(
+            new OllamaRoleConfig { Model = "qwen3:8b", Think = false }, "5m", conversation, schema);
+        Assert.False(thinking["think"]!.GetValue<bool>());
+
+        var plain = OllamaLlmProvider.BuildRequest(
+            new OllamaRoleConfig { Model = "gemma3:4b" }, "5m", conversation, JsonSchemaFactory.For<GateDiff>());
+        Assert.False(plain.ContainsKey("think"));
     }
 
     [Fact]

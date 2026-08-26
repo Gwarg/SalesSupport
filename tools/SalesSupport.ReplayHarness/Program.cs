@@ -10,6 +10,8 @@ Console.OutputEncoding = Encoding.UTF8;
 
 var live = false;
 var ollama = false;
+string? ollamaModel = null;
+var ollamaNoThink = false;
 var useFixtures = false;
 var runAll = false;
 string? dumpDir = null;
@@ -22,6 +24,8 @@ for (var i = 0; i < args.Length; i++)
     {
         case "--live": live = true; break;
         case "--ollama": ollama = true; break;
+        case "--ollama-model": ollama = true; ollamaModel = args[++i]; break;
+        case "--ollama-nothink": ollama = true; ollamaNoThink = true; break;
         case "--fixtures": useFixtures = true; break;
         case "--all": runAll = true; useFixtures = true; break;
         case "--dump": dumpDir = i + 1 < args.Length && !args[i + 1].StartsWith("--", StringComparison.Ordinal) ? args[++i] : "prompt-dumps"; break;
@@ -106,8 +110,12 @@ async Task<CallStats> RunCallAsync(string path, bool verbose)
         ILlmProvider llm;
         if (ollama)
         {
-            llm = new SalesSupport.Providers.Ollama.OllamaLlmProvider();
-            stats.Mode = "ollama";
+            llm = ollamaModel is null && !ollamaNoThink
+                ? new SalesSupport.Providers.Ollama.OllamaLlmProvider()
+                : new SalesSupport.Providers.Ollama.OllamaLlmProvider(
+                    SalesSupport.Providers.Ollama.OllamaProviderOptions.ForModel(
+                        ollamaModel ?? "qwen3:8b", ollamaNoThink || ollamaModel is null ? false : null));
+            stats.Mode = ollamaModel is null ? "ollama" : $"ollama:{ollamaModel}";
         }
         else if (useFixtures && File.Exists(fixturesPath))
         {

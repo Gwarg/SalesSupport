@@ -24,7 +24,7 @@ dotnet run --project tools/SalesSupport.ReplayHarness -- --ollama    # local mod
 dotnet run --project tools/SalesSupport.ReplayHarness -- --live      # real Claude API (needs ANTHROPIC_API_KEY)
 ```
 
-Ollama mode (D14/D27 local path): install from ollama.com, `ollama pull qwen2.5:7b`,
+Ollama mode (D14/D27 local path): install from ollama.com, `ollama pull qwen3:8b`,
 then run with `--ollama` (optionally `--all --ollama` to run the whole corpus with real
 local inference and compare against the fixture goldens). Output shape is enforced by
 passing the same JSON schemas as Ollama's `format` parameter.
