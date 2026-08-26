@@ -2,24 +2,6 @@ using SalesSupport.Core.Model;
 
 namespace SalesSupport.Orchestrator;
 
-public enum PanelItemStatus { Active, Asked, Dismissed }
-
-public sealed record QuestionItem(string Id, string Text, string? ThreadId, PanelItemStatus Status);
-public sealed record ProductItem(string Id, string ProductRef, string DisplayName, string Why, string? ThreadId, string? PriceNote, PanelItemStatus Status);
-
-public sealed record PanelDelta(
-    IReadOnlyList<QuestionItem> AddedQuestions,
-    IReadOnlyList<string> KeptQuestionIds,
-    IReadOnlyList<string> RemovedQuestionIds,
-    IReadOnlyList<ProductItem> AddedProducts,
-    IReadOnlyList<string> KeptProductIds,
-    IReadOnlyList<string> RemovedProductIds)
-{
-    public bool IsEmpty =>
-        AddedQuestions.Count == 0 && RemovedQuestionIds.Count == 0 &&
-        AddedProducts.Count == 0 && RemovedProductIds.Count == 0;
-}
-
 /// <summary>
 /// Panel suggestion lifecycle (docs/panel.md) — session state, deliberately NOT part of the
 /// customer picture. Reconciles the advisor's desired state (id reuse) into a delta:

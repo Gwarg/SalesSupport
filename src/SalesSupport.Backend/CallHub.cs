@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.SignalR;
+using SalesSupport.Core.Model;
 
 namespace SalesSupport.Backend;
 

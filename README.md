@@ -153,3 +153,24 @@ dotnet run --project src/SalesSupport.Backend
 
 Requires a knowledge pack (newest in `packs/` by default) and a model backend per
 `appsettings.json` (`Backend:LlmProvider`: `ollama` | `claude`). Health: `GET /healthz`.
+
+## Panel client (L1)
+
+The WPF copilot panel (docs/panel.md): always-on-top, three states — pre-call card
+(devices, language, customer + goal), the live four-zone panel (questions with check-off
+and fresh accents, product suggestions, kundbild with thread chips/facts/action items,
+ask lane with answer bubble), and post-call summary with next steps + copy. Status strip
+shows live mic/speaker meters, call timer, advisor activity, and per-tick latency.
+
+```
+dotnet run --project src/SalesSupport.Backend
+```
+
+```
+dotnet run --project src/SalesSupport.Client
+```
+
+The client captures locally, streams audio to Azure STT with the token issued by the
+backend (keys never reach the desktop, D9), merges channels client-side, and sends only
+text up the SignalR hub. Requires the backend running with a pack + LLM (Ollama/Claude)
+and an Azure Speech key on the backend (or AZURE_SPEECH_KEY locally as fallback).

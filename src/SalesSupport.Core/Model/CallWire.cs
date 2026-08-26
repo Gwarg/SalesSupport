@@ -1,11 +1,9 @@
-using SalesSupport.Core.Model;
-using SalesSupport.Orchestrator;
+namespace SalesSupport.Core.Model;
 
-namespace SalesSupport.Backend;
-
-// The SignalR contract (DESIGN.md §3). Client→backend: StartCall (carries the pre-call
-// card, D16), Utterance, Ask, EndCall. Backend→client events: TranscriptAppended,
-// PictureUpdated, PanelDelta, TickCompleted, AnswerReady, SummaryReady.
+// The client↔backend wire contract (DESIGN.md §3), shared by the backend hub and the
+// WPF client. Client→backend: StartCall (carries the pre-call card, D16), Utterance,
+// Ask, EndCall. Backend→client events: TranscriptAppended, PictureUpdated, PanelDelta,
+// TickCompleted, AnswerReady, SummaryReady.
 
 public sealed record StartCallRequest(string? Language, string? CustomerCompany, string? Goal);
 

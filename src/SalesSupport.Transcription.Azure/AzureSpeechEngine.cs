@@ -9,7 +9,12 @@ namespace SalesSupport.Transcription.Azure;
 
 public sealed class AzureSpeechEngineOptions
 {
-    public required string Key { get; init; }
+    /// <summary>Subscription key — server-side use. Clients use FromToken (D9) so the key never reaches the desktop.</summary>
+    public string? Key { get; init; }
+
+    /// <summary>Short-lived authorization token issued by the backend (/api/stt-token).</summary>
+    public string? AuthorizationToken { get; init; }
+
     public required string Region { get; init; }
 
     public static AzureSpeechEngineOptions FromEnvironment()
@@ -21,6 +26,9 @@ public sealed class AzureSpeechEngineOptions
                 "Set AZURE_SPEECH_KEY and AZURE_SPEECH_REGION (a free F0 Speech resource works — e.g. region 'swedencentral').");
         return new AzureSpeechEngineOptions { Key = key, Region = region };
     }
+
+    public static AzureSpeechEngineOptions FromToken(string token, string region) =>
+        new() { AuthorizationToken = token, Region = region };
 
     /// <summary>Installation language codes (D7) → Azure locales. Full locales pass through.</summary>
     internal static string MapLanguage(string language) => language switch
@@ -49,7 +57,11 @@ public sealed class AzureSpeechEngine(AzureSpeechEngineOptions options) : ITrans
         Speaker speaker, IAudioSource audio, TranscriptionConfig config,
         [EnumeratorCancellation] CancellationToken ct = default)
     {
-        var speechConfig = SpeechConfig.FromSubscription(options.Key, options.Region);
+        var speechConfig = options.AuthorizationToken is { } token
+            ? SpeechConfig.FromAuthorizationToken(token, options.Region)
+            : SpeechConfig.FromSubscription(
+                options.Key ?? throw new InvalidOperationException("AzureSpeechEngineOptions needs a Key or an AuthorizationToken."),
+                options.Region);
         speechConfig.SpeechRecognitionLanguage = AzureSpeechEngineOptions.MapLanguage(config.Language);
 
         using var pushStream = AudioInputStream.CreatePushStream(AudioStreamFormat.GetWaveFormatPCM(16000, 16, 1));

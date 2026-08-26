@@ -1,3 +1,5 @@
+using SalesSupport.Core.Model;
+
 namespace SalesSupport.Backend;
 
 /// <summary>
