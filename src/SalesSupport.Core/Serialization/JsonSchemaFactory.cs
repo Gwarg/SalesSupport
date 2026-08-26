@@ -24,10 +24,22 @@ public static class JsonSchemaFactory
                 && obj.TryGetPropertyValue("type", out var typeNode)
                 && typeNode is JsonValue value
                 && value.TryGetValue<string>(out var type)
-                && type == "object"
-                && !obj.ContainsKey("additionalProperties"))
+                && type == "object")
             {
-                obj["additionalProperties"] = false;
+                if (!obj.ContainsKey("additionalProperties"))
+                    obj["additionalProperties"] = false;
+
+                // Every property is required (nullable ones may still be null). Optional
+                // fields are a grammar escape hatch for small models under constrained
+                // decoding: observed live — a 7B gate emitted ~11-token near-empty objects
+                // for an entire call because the shortest valid path skipped every field.
+                if (obj.TryGetPropertyValue("properties", out var props) && props is JsonObject propsObj)
+                {
+                    var required = new JsonArray();
+                    foreach (var (name, _) in propsObj)
+                        required.Add(name);
+                    obj["required"] = required;
+                }
             }
             return schema;
         },

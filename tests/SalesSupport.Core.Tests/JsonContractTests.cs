@@ -45,6 +45,11 @@ public class JsonContractTests
         Assert.True(properties.ContainsKey("facts_upsert"));
         Assert.True(properties.ContainsKey("advice"));
         Assert.True(properties.ContainsKey("questions_addressed"));
+
+        // All properties must be required — optional fields let small models under
+        // grammar-constrained decoding emit near-empty objects (the shortest valid path).
+        var required = schema["required"]!.AsArray().Select(n => n!.GetValue<string>()).ToHashSet();
+        Assert.Equal(properties.Select(p => p.Key).ToHashSet(), required);
     }
 
     [Fact]
