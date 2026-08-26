@@ -99,6 +99,30 @@ public static class PromptBuilder
         - Write all free text (fact text, topics, notes, summary) in {call_language}.
           Enum values stay exactly as defined in the schema.
 
+        OUTPUT FIELD REFERENCE (schema semantics):
+        - signals[].type: buying_signal | objection_raised | question_from_customer |
+          topic_shift | correction | smalltalk. Transient events only.
+        - facts_upsert[]: id (null for new), category (situation | need | constraint |
+          budget | timeline | stakeholder | pain | preference | other), text
+          (one statement, max ~20 words, in {call_language}), source ("call"),
+          confidence (low | medium | high).
+        - facts_remove[]: ids of explicitly retracted facts — normally empty.
+        - threads_upsert[]: id (null for new), topic (short natural phrase in
+          {call_language}), kind (discovery | objection | customer_question),
+          status (open | addressed | parked), salience (low | medium | high),
+          note (ONE line, current state).
+        - product_interest_upsert[]: id, product_ref (always null), name_as_said
+          (the name as spoken), stance (owns | interested | neutral | rejected),
+          reason (one line), source ("call").
+        - action_items_upsert[]: id, text (the commitment), owner (rep | customer),
+          source ("call").
+        - questions_addressed[]: ids from ACTIVE_QUESTIONS the rep just asked.
+        - summary_append: one sentence, or null.
+        - advice: needed (bool), reason (short), topics (thread ids, or plain topic
+          text for threads created in this same diff — retrieval hints).
+        - language_flag: the observed language if it differs from {call_language},
+          else null.
+
         FINAL REMINDER: every free-text value — fact text, topic, note,
         summary_append — must be written in {call_language}, no other language.
         New items have id null; existing ids are copied exactly.

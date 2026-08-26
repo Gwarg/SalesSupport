@@ -120,6 +120,8 @@ call end ─→ summarizer ─→ summary + next steps (stored, shown, copyable)
 
 **End-to-end latency target:** statement → panel change in 3–5 s (STT finalization 0.5–1 s + gate 0.5–1 s + retrieval ~50 ms + advisor 1.5–3 s).
 
+*Measured (2026-08-26, live Claude API):* the Haiku 4.5 gate runs 2–4 s and the Opus 5 advisor 7–9 s — and the advisor floor is generation-bound, not config-bound (Sonnet 5 was no faster; effort low saves ~15%). Real statement→panel is therefore ~10–14 s today. The target stands as the goal; closing the gap is panel-UX work (streaming/staged arrival, visible thinking state) and future model speed — not something to buy with quality downgrades. Also measured: Haiku prompt caching needs a ≥2048-token prefix (our gate system is ~1250, so gate calls do not cache; advisor's catalog block caches correctly).
+
 **Cost estimate:** with prompt caching over transcript + catalog map, roughly $0.50–1.00 per 30-minute call at current list prices, dominated by advisor calls — which is why the gate exists.
 
 ### Interfaces (the seams that make this product-ready)

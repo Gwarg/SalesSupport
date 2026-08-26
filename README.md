@@ -43,7 +43,7 @@ Sample format: JSONL with an optional first meta line `{"language":"en","custome
 then `{"speaker":"rep|customer","text":"…"}` utterances and `{"ask":"…"}` for typed
 rep queries mid-call. Corpus scenarios: happy-path discovery (nordfrys), multi-thread
 allocation/parking (vaxholm), rejected-product stance + budget pivot (kylgrossisten),
-English call (danfrost), and a no-fit call where correct output is nothing (stålgrossisten).
+English call (danfrost), and a no-fit call (stålgrossisten) where the required behavior is no product push — live Opus legitimately probes for alternate fit and future timing there, which the fixture's total silence does not capture; judge that call on +p=0, not on advisor fires.
 
 ## Capture spike (L1)
 
