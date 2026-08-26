@@ -109,6 +109,38 @@ public class PictureMergerTests
     }
 
     [Fact]
+    public void Duplicate_text_with_invented_id_merges_instead_of_adding()
+    {
+        var picture = new CustomerPicture();
+        PictureMerger.Apply(picture, DiffWithFact(null, "Vill ha det löst före november", Source.Call), turn: 1);
+
+        var outcome = PictureMerger.Apply(picture,
+            DiffWithFact("fact_007", "vill ha det löst före november.", Source.Call), turn: 3);
+
+        Assert.Single(picture.Facts);
+        Assert.Equal("f1", picture.Facts[0].Id);
+        Assert.Contains(outcome.Notes, n => n.Contains("duplicate of f1"));
+    }
+
+    [Fact]
+    public void Duplicate_thread_topic_merges_and_updates_status()
+    {
+        var picture = new CustomerPicture();
+        PictureMerger.Apply(picture, new GateDiff
+        {
+            ThreadsUpsert = [new ThreadUpsert(null, "Batteriproblem i frysen", ThreadKind.Discovery, ThreadStatus.Open, Salience.Medium, "")],
+        }, turn: 1);
+
+        PictureMerger.Apply(picture, new GateDiff
+        {
+            ThreadsUpsert = [new ThreadUpsert("thread_002", "batteriproblem i frysen", ThreadKind.Discovery, ThreadStatus.Addressed, Salience.High, "besvarad")],
+        }, turn: 4);
+
+        Assert.Single(picture.Threads);
+        Assert.Equal(ThreadStatus.Addressed, picture.Threads[0].Status);
+    }
+
+    [Fact]
     public void Removal_is_archival_removed_fact_is_returned()
     {
         var picture = new CustomerPicture();

@@ -44,6 +44,11 @@ public static class PictureMerger
             var existing = up.Id is null ? null : picture.Facts.FirstOrDefault(f => f.Id == up.Id);
             if (up.Id is not null && existing is null)
                 outcome.Notes.Add($"facts: unknown id {up.Id}, treated as add");
+            if (existing is null && picture.Facts.FirstOrDefault(f => Normalize(f.Text) == Normalize(up.Text)) is { } duplicateFact)
+            {
+                existing = duplicateFact;
+                outcome.Notes.Add($"facts: duplicate of {duplicateFact.Id}, merged");
+            }
 
             if (existing is null)
             {
@@ -79,6 +84,11 @@ public static class PictureMerger
             var existing = up.Id is null ? null : picture.Threads.FirstOrDefault(t => t.Id == up.Id);
             if (up.Id is not null && existing is null)
                 outcome.Notes.Add($"threads: unknown id {up.Id}, treated as add");
+            if (existing is null && picture.Threads.FirstOrDefault(t => Normalize(t.Topic) == Normalize(up.Topic)) is { } duplicateThread)
+            {
+                existing = duplicateThread;
+                outcome.Notes.Add($"threads: duplicate of {duplicateThread.Id}, merged");
+            }
 
             if (existing is null)
             {
@@ -105,6 +115,11 @@ public static class PictureMerger
             var existing = up.Id is null ? null : picture.ProductInterest.FirstOrDefault(p => p.Id == up.Id);
             if (up.Id is not null && existing is null)
                 outcome.Notes.Add($"product_interest: unknown id {up.Id}, treated as add");
+            if (existing is null && picture.ProductInterest.FirstOrDefault(p => Normalize(p.NameAsSaid) == Normalize(up.NameAsSaid)) is { } duplicateProduct)
+            {
+                existing = duplicateProduct;
+                outcome.Notes.Add($"product_interest: duplicate of {duplicateProduct.Id}, merged");
+            }
 
             if (existing is null)
             {
@@ -131,6 +146,11 @@ public static class PictureMerger
             var existing = up.Id is null ? null : picture.ActionItems.FirstOrDefault(a => a.Id == up.Id);
             if (up.Id is not null && existing is null)
                 outcome.Notes.Add($"action_items: unknown id {up.Id}, treated as add");
+            if (existing is null && picture.ActionItems.FirstOrDefault(a => Normalize(a.Text) == Normalize(up.Text)) is { } duplicateAction)
+            {
+                existing = duplicateAction;
+                outcome.Notes.Add($"action_items: duplicate of {duplicateAction.Id}, merged");
+            }
 
             if (existing is null)
             {
@@ -177,6 +197,10 @@ public static class PictureMerger
         }
         return changed;
     }
+
+    /// <summary>Dedup key: small models re-emit items with invented ids; identical text means the same item.</summary>
+    private static string Normalize(string text) =>
+        string.Join(' ', text.ToLowerInvariant().Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries)).TrimEnd('.', '!', '?');
 
     private static string NextId(IEnumerable<string> existingIds, string prefix)
     {
