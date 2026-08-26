@@ -121,6 +121,13 @@ async Task<CallStats> RunCallAsync(string path, bool verbose)
                         ollamaModel ?? "qwen3:8b", ollamaNoThink || ollamaModel is null ? false : null));
             stats.Mode = ollamaModel is null ? "ollama" : $"ollama:{ollamaModel}";
         }
+        else if (live)
+        {
+            // Explicit model flags beat the fixtures that --all implies — fixtures are the
+            // comparison baseline, not the runtime, when a real backend was requested.
+            llm = new ClaudeLlmProvider();
+            stats.Mode = "live";
+        }
         else if (useFixtures && File.Exists(fixturesPath))
         {
             fixtures = new FixtureLlmProvider(fixturesPath);
