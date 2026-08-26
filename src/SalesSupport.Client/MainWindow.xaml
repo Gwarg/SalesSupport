@@ -85,7 +85,17 @@
             <!-- status strip -->
             <DockPanel Grid.Row="0" Margin="0,0,0,4">
                 <Button DockPanel.Dock="Right" Content="Avsluta" Command="{Binding EndCommand}"
-                        Padding="10,4" Background="Transparent" BorderBrush="#A32D2D" Foreground="#A32D2D"/>
+                        Padding="10,4" Background="Transparent" BorderBrush="#A32D2D" Foreground="#A32D2D">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsEnding}" Value="True">
+                                    <Setter Property="IsEnabled" Value="False"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <Ellipse Width="9" Height="9" Margin="0,0,6,0">
                         <Ellipse.Style>
@@ -108,17 +118,30 @@
                 </StackPanel>
             </DockPanel>
 
-            <TextBlock Grid.Row="1" Text="{Binding ErrorBanner}" Foreground="#A32D2D" TextWrapping="Wrap">
-                <TextBlock.Style>
-                    <Style TargetType="TextBlock">
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding ErrorBanner}" Value="">
-                                <Setter Property="Visibility" Value="Collapsed"/>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </TextBlock.Style>
-            </TextBlock>
+            <StackPanel Grid.Row="1">
+                <TextBlock Text="{Binding ErrorBanner}" Foreground="#A32D2D" TextWrapping="Wrap">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ErrorBanner}" Value="">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+                <TextBlock Text="{Binding EndingNotice}" Foreground="{StaticResource Accent}" TextWrapping="Wrap">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding EndingNotice}" Value="">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </StackPanel>
 
             <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
                 <StackPanel>

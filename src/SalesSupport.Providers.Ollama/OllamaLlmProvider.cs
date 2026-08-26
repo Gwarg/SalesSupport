@@ -18,6 +18,13 @@ public sealed class OllamaRoleConfig
     /// models without a thinking mode, which reject the parameter).
     /// </summary>
     public bool? Think { get; init; }
+
+    /// <summary>
+    /// Hard output-token cap. Small models degenerate into repetition loops on long
+    /// free-text generation (observed: a summarizer looping one sentence for minutes);
+    /// Ollama's default is unbounded, so every role gets a ceiling.
+    /// </summary>
+    public int NumPredict { get; init; } = 1024;
 }
 
 /// <summary>
@@ -35,18 +42,26 @@ public sealed class OllamaProviderOptions
     /// <summary>Keeps the model resident between ticks — cold loads would blow the latency budget.</summary>
     public string KeepAlive { get; init; } = "15m";
 
-    public OllamaRoleConfig Gate { get; init; } = new() { Model = "qwen3:8b", NumCtx = 8192, Temperature = 0.1, Think = false };
-    public OllamaRoleConfig Advisor { get; init; } = new() { Model = "qwen3:8b", NumCtx = 16384, Temperature = 0.3, Think = false };
-    public OllamaRoleConfig Summarizer { get; init; } = new() { Model = "qwen3:8b", NumCtx = 16384, Temperature = 0.3, Think = false };
-    public OllamaRoleConfig Drafter { get; init; } = new() { Model = "qwen3:8b", NumCtx = 16384, Temperature = 0.4, Think = false };
+    // Context windows sized for an 8 GB GPU: the model (~5 GB) plus KV cache must stay
+    // on-GPU or Ollama spills to CPU and every call crawls. 16k ctx on qwen3:8b costs
+    // ~2-3 GB KV — too much; our prompts fit comfortably in these windows. Raise only
+    // for very large catalog maps, and check `ollama ps` says 100% GPU afterwards.
+    public OllamaRoleConfig Gate { get; init; } = new() { Model = "qwen3:8b", NumCtx = 4096, Temperature = 0.1, Think = false };
+    public OllamaRoleConfig Advisor { get; init; } = new() { Model = "qwen3:8b", NumCtx = 8192, Temperature = 0.3, Think = false };
+    public OllamaRoleConfig Summarizer { get; init; } = new() { Model = "qwen3:8b", NumCtx = 8192, Temperature = 0.3, Think = false };
+    public OllamaRoleConfig Drafter { get; init; } = new() { Model = "qwen3:8b", NumCtx = 8192, Temperature = 0.4, Think = false };
+
+    /// <summary>Per-call performance lines ("gate qwen3:8b: prompt 2381 tok in 6.2s …") — wire to a logger.</summary>
+    public Action<string>? Diagnostics { get; init; }
 
     /// <summary>One model for every role — think=false for thinking models (qwen3), null for the rest.</summary>
-    public static OllamaProviderOptions ForModel(string model, bool? think) => new()
+    public static OllamaProviderOptions ForModel(string model, bool? think, Action<string>? diagnostics = null) => new()
     {
-        Gate = new OllamaRoleConfig { Model = model, NumCtx = 8192, Temperature = 0.1, Think = think },
-        Advisor = new OllamaRoleConfig { Model = model, NumCtx = 16384, Temperature = 0.3, Think = think },
-        Summarizer = new OllamaRoleConfig { Model = model, NumCtx = 16384, Temperature = 0.3, Think = think },
-        Drafter = new OllamaRoleConfig { Model = model, NumCtx = 16384, Temperature = 0.4, Think = think },
+        Gate = new OllamaRoleConfig { Model = model, NumCtx = 4096, Temperature = 0.1, Think = think },
+        Advisor = new OllamaRoleConfig { Model = model, NumCtx = 8192, Temperature = 0.3, Think = think },
+        Summarizer = new OllamaRoleConfig { Model = model, NumCtx = 8192, Temperature = 0.3, Think = think },
+        Drafter = new OllamaRoleConfig { Model = model, NumCtx = 8192, Temperature = 0.4, Think = think },
+        Diagnostics = diagnostics,
     };
 
     public OllamaRoleConfig Resolve(LlmRole role) => role switch
@@ -101,6 +116,9 @@ public sealed class OllamaLlmProvider(OllamaProviderOptions? options = null) : I
             throw new InvalidOperationException($"Ollama {role} request failed ({(int)response.StatusCode}): {Truncate(body)}{hint}");
         }
 
+        if (_options.Diagnostics is { } diagnostics)
+            diagnostics($"{role} {config.Model}: {DescribeTimings(body)}");
+
         var content = ParseResponseContent(body);
         try
         {
@@ -134,10 +152,24 @@ public sealed class OllamaLlmProvider(OllamaProviderOptions? options = null) : I
             {
                 ["num_ctx"] = config.NumCtx,
                 ["temperature"] = config.Temperature,
+                ["num_predict"] = config.NumPredict,
+                ["repeat_penalty"] = 1.1,
             },
         };
         if (config.Think is { } think) request["think"] = think;
         return request;
+    }
+
+    /// <summary>Ollama's per-call stats: prompt-eval vs generation split shows where time goes.</summary>
+    internal static string DescribeTimings(string body)
+    {
+        using var doc = JsonDocument.Parse(body);
+        var root = doc.RootElement;
+        double Seconds(string name) => root.TryGetProperty(name, out var v) ? v.GetInt64() / 1e9 : 0;
+        long Count(string name) => root.TryGetProperty(name, out var v) ? v.GetInt64() : 0;
+        return $"prompt {Count("prompt_eval_count")} tok in {Seconds("prompt_eval_duration"):F1}s, " +
+               $"gen {Count("eval_count")} tok in {Seconds("eval_duration"):F1}s, " +
+               $"load {Seconds("load_duration"):F1}s, total {Seconds("total_duration"):F1}s";
     }
 
     internal static string ParseResponseContent(string body)

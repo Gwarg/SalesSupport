@@ -21,7 +21,7 @@ public sealed record UtteranceIn(Speaker Speaker, string Text, long TimestampMs)
 public sealed record TranscriptEntry(int Turn, Speaker Speaker, string Text, long TimestampMs);
 
 public sealed record TickStats(
-    bool AdvisorRan, bool Damped, long GateMs, long AdvisorMs, IReadOnlyList<string> QuestionsAddressed);
+    bool AdvisorRan, bool Damped, long GateMs, long AdvisorMs, long QueueMs, IReadOnlyList<string> QuestionsAddressed);
 
 /// <summary>Everything one utterance produced — the hub fans these out as separate events.</summary>
 public sealed record TickEnvelope(

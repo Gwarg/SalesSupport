@@ -20,7 +20,23 @@ public sealed class CallHub(CallSessionService sessions, SttTokenService sttToke
 
     public async Task Utterance(UtteranceIn utterance)
     {
-        var envelope = await sessions.HandleUtteranceAsync(Context.ConnectionId, utterance);
+        TickEnvelope? envelope;
+        try
+        {
+            envelope = await sessions.HandleUtteranceAsync(Context.ConnectionId, utterance);
+        }
+        catch (InvalidOperationException)
+        {
+            return; // call already ended — late finals from the merger are expected stragglers
+        }
+        catch (Exception ex)
+        {
+            // A failing tick must be visible on the panel, not just in the server log.
+            await Clients.Caller.SendAsync("TickFailed", ex.Message);
+            throw;
+        }
+        if (envelope is null) return;
+
         var caller = Clients.Caller;
         await caller.SendAsync("TranscriptAppended", envelope.Transcript);
         if (envelope.Picture is not null)

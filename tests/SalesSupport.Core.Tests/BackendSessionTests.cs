@@ -36,13 +36,16 @@ public class BackendSessionTests : IDisposable
         await service.StartCallAsync("conn1", new StartCallRequest(null, null, null), null);
 
         var first = await service.HandleUtteranceAsync("conn1", new UtteranceIn(Speaker.Rep, "hej", 100));
-        Assert.Equal(1, first.Transcript.Turn);
+        Assert.NotNull(first);
+        Assert.Equal(1, first!.Transcript.Turn);
         Assert.NotNull(first.Picture);
         Assert.Null(first.PanelDelta);
         Assert.True(first.Stats.GateMs >= 0);
+        Assert.True(first.Stats.QueueMs >= 0);
 
         var second = await service.HandleUtteranceAsync("conn1", new UtteranceIn(Speaker.Customer, "batterierna dör", 5000));
-        Assert.Equal(2, second.Transcript.Turn);
+        Assert.NotNull(second);
+        Assert.Equal(2, second!.Transcript.Turn);
         Assert.True(second.Stats.AdvisorRan);
         Assert.NotNull(second.PanelDelta);
         Assert.Single(second.PanelDelta!.AddedQuestions);
@@ -85,6 +88,24 @@ public class BackendSessionTests : IDisposable
     }
 
     [Fact]
+    public async Task Ending_drops_queued_utterances_instead_of_processing_them()
+    {
+        var stub = new StubLlm { SummarizerDelayMs = 250 };
+        var service = new CallSessionService(stub, new StubKnowledge(), [], new StorageService(_dbPath, 90), new BackendOptions());
+        await service.StartCallAsync("conn1", new StartCallRequest(null, null, null), null);
+        await service.HandleUtteranceAsync("conn1", new UtteranceIn(Speaker.Rep, "hej", 0));
+
+        var ending = service.EndCallAsync("conn1");
+        await Task.Delay(50);
+
+        var dropped = await service.HandleUtteranceAsync("conn1", new UtteranceIn(Speaker.Customer, "för sent", 100));
+        Assert.Null(dropped);
+
+        var summary = await ending;
+        Assert.NotNull(summary);
+    }
+
+    [Fact]
     public void Storage_purges_beyond_retention()
     {
         var storage = new StorageService(_dbPath, retentionDays: 30);
@@ -106,10 +127,13 @@ public class BackendSessionTests : IDisposable
     private sealed class StubLlm : ILlmProvider
     {
         private int _gateCalls;
+        public int SummarizerDelayMs { get; init; }
 
-        public Task<T> CompleteJsonAsync<T>(LlmRole role, LlmConversation conversation, CancellationToken ct = default)
+        public async Task<T> CompleteJsonAsync<T>(LlmRole role, LlmConversation conversation, CancellationToken ct = default)
             where T : class
         {
+            if (role == LlmRole.Summarizer && SummarizerDelayMs > 0)
+                await Task.Delay(SummarizerDelayMs, ct);
             object result = (role, typeof(T).Name) switch
             {
                 (LlmRole.Gate, nameof(GateDiff)) => NextGateDiff(),
@@ -121,7 +145,7 @@ public class BackendSessionTests : IDisposable
                 (LlmRole.Summarizer, nameof(SummaryResult)) => new SummaryResult { Summary = "stub summary" },
                 _ => throw new NotSupportedException($"{role}/{typeof(T).Name}"),
             };
-            return Task.FromResult((T)result);
+            return (T)result;
         }
 
         private GateDiff NextGateDiff()

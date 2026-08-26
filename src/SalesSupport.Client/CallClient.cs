@@ -16,6 +16,7 @@ public sealed class CallClient : IAsyncDisposable
     public event Action<TickStats>? TickCompleted;
     public event Action<AnswerEnvelope>? AnswerReady;
     public event Action<SummaryEnvelope>? SummaryReady;
+    public event Action<string>? TickFailed;
     public event Action<string?>? ConnectionClosed;
 
     public bool IsConnected => _connection?.State == HubConnectionState.Connected;
@@ -36,6 +37,7 @@ public sealed class CallClient : IAsyncDisposable
         _connection.On<TickStats>("TickCompleted", s => TickCompleted?.Invoke(s));
         _connection.On<AnswerEnvelope>("AnswerReady", a => AnswerReady?.Invoke(a));
         _connection.On<SummaryEnvelope>("SummaryReady", s => SummaryReady?.Invoke(s));
+        _connection.On<string>("TickFailed", m => TickFailed?.Invoke(m));
         _connection.Closed += ex =>
         {
             ConnectionClosed?.Invoke(ex?.Message);

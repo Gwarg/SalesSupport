@@ -12,3 +12,4 @@ captures/
 appsettings.local.json
 src/SalesSupport.Backend/data/
 backend-smoke.log
+src/SalesSupport.Backend/logs/

@@ -37,6 +37,7 @@ public sealed class MainViewModel : ViewModelBase
         _client.TickCompleted += s => UI(() => ApplyTick(s));
         _client.AnswerReady += a => UI(() => { AnswerText = a.Answer; ApplyPanelDelta(a.PanelDelta); });
         _client.SummaryReady += s => UI(() => ShowSummary(s.Summary));
+        _client.TickFailed += m => UI(() => ErrorBanner = $"Tick misslyckades: {m}");
         _client.ConnectionClosed += reason => UI(() =>
         {
             if (Stage == "Live") ErrorBanner = $"Anslutningen tappades{(reason is null ? "" : $": {reason}")}";
@@ -99,6 +100,10 @@ public sealed class MainViewModel : ViewModelBase
     public string AnswerText { get => _answerText; set => Set(ref _answerText, value); }
     private string _errorBanner = "";
     public string ErrorBanner { get => _errorBanner; set => Set(ref _errorBanner, value); }
+    private bool _isEnding;
+    public bool IsEnding { get => _isEnding; set => Set(ref _isEnding, value); }
+    private string _endingNotice = "";
+    public string EndingNotice { get => _endingNotice; set => Set(ref _endingNotice, value); }
 
     // Post-call
     private string _summaryText = "";
@@ -165,16 +170,22 @@ public sealed class MainViewModel : ViewModelBase
 
     private async Task EndCallAsync()
     {
+        if (IsEnding) return;
         try
         {
+            IsEnding = true;
+            EndingNotice = "Avslutar — hoppar över kön och skriver sammanfattning…";
             _audio?.Stop();
             _meterTimer.Stop();
             _clockTimer.Stop();
+            LiveLine = "";
             await _client.EndCallAsync();
         }
         catch (Exception ex)
         {
             ErrorBanner = $"Kunde inte avsluta: {ex.Message}";
+            IsEnding = false;
+            EndingNotice = "";
         }
     }
 
@@ -247,13 +258,16 @@ public sealed class MainViewModel : ViewModelBase
             var question = Questions.FirstOrDefault(q => q.Id == id);
             if (question is not null) question.Asked = true;
         }
+        var queue = stats.QueueMs > 500 ? $"kö {stats.QueueMs / 1000.0:F1}s + " : "";
         LastTiming = stats.AdvisorRan
-            ? $"gate {stats.GateMs / 1000.0:F1}s + advisor {stats.AdvisorMs / 1000.0:F1}s"
-            : $"gate {stats.GateMs / 1000.0:F1}s";
+            ? $"{queue}gate {stats.GateMs / 1000.0:F1}s + advisor {stats.AdvisorMs / 1000.0:F1}s"
+            : $"{queue}gate {stats.GateMs / 1000.0:F1}s";
     }
 
     private void ShowSummary(SummaryResult summary)
     {
+        IsEnding = false;
+        EndingNotice = "";
         SummaryText = summary.Summary;
         NextSteps.Clear();
         foreach (var step in summary.NextSteps)
@@ -281,6 +295,8 @@ public sealed class MainViewModel : ViewModelBase
         LiveLine = "";
         AnswerText = "";
         ErrorBanner = "";
+        IsEnding = false;
+        EndingNotice = "";
         SummaryText = "";
         NextSteps.Clear();
         Stage = "PreCall";

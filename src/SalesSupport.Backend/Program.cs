@@ -10,6 +10,9 @@ var builder = WebApplication.CreateBuilder(args);
 var options = builder.Configuration.GetSection("Backend").Get<BackendOptions>() ?? new BackendOptions();
 builder.Services.AddSingleton(options);
 
+var logFile = Path.Combine("logs", $"backend-{DateTime.Now:yyyyMMdd}.log");
+builder.Logging.AddProvider(new FileLoggerProvider(logFile));
+
 var packPath = options.PackPath;
 if (string.IsNullOrEmpty(packPath))
 {
@@ -25,9 +28,12 @@ if (packPath is null)
 var pack = SqlitePackKnowledge.Load(packPath, EmbedderFactory.ForPack(packPath, options.ModelDirectory));
 builder.Services.AddSingleton<IKnowledgeSource>(pack);
 
-builder.Services.AddSingleton<ILlmProvider>(options.LlmProvider switch
+builder.Services.AddSingleton<ILlmProvider>(sp => options.LlmProvider switch
 {
-    "ollama" => new OllamaLlmProvider(OllamaProviderOptions.ForModel(options.OllamaModel, options.OllamaNoThink ? false : null)),
+    "ollama" => new OllamaLlmProvider(OllamaProviderOptions.ForModel(
+        options.OllamaModel,
+        options.OllamaNoThink ? false : null,
+        diagnostics: message => sp.GetRequiredService<ILoggerFactory>().CreateLogger("Ollama").LogInformation("{Stats}", message))),
     "claude" => new ClaudeLlmProvider(),
     var other => throw new InvalidOperationException($"Unknown Backend:LlmProvider '{other}' (ollama | claude)"),
 });
@@ -40,9 +46,15 @@ builder.Services.AddSingleton(sp => new CallSessionService(
     sp.GetRequiredService<IKnowledgeSource>(),
     pack.SttVocabulary,
     sp.GetRequiredService<StorageService>(),
-    options));
+    options,
+    sp.GetRequiredService<ILogger<CallSessionService>>()));
 
-builder.Services.AddSignalR().AddJsonProtocol(o =>
+builder.Services.AddSignalR(o =>
+{
+    // Slow inference queues ticks on the session lock; parallel invocations let EndCall
+    // and Ask overtake queued Utterance calls instead of waiting behind the whole backlog.
+    o.MaximumParallelInvocationsPerClient = 8;
+}).AddJsonProtocol(o =>
 {
     o.PayloadSerializerOptions = JsonDefaults.Options;
 });
