@@ -1,3 +1,4 @@
+using SalesSupport.Core.Merging;
 using SalesSupport.Core.Model;
 using SalesSupport.Orchestrator;
 
@@ -37,12 +38,54 @@ public class OrchestratorGuardTests
             ActionItemsUpsert = [new ActionItemUpsert(null, "skicka offert", ActionOwner.Rep, Source.Rep)],
         };
 
-        var coerced = CallOrchestrator.CoerceSpokenSources(diff);
+        var coerced = CallOrchestrator.CoerceSpokenSources(diff, "Duab (demo)");
 
         Assert.Equal(Source.Call, coerced.CompanyUpdate!.Source);
         Assert.Equal(Source.Call, coerced.FactsUpsert[0].Source);
         Assert.Equal(Source.Call, coerced.ProductInterestUpsert[0].Source);
         Assert.Equal(Source.Call, coerced.ActionItemsUpsert[0].Source);
         Assert.Equal(ActionOwner.Rep, coerced.ActionItemsUpsert[0].Owner);
+    }
+
+    [Fact]
+    public void Seller_hallucinated_as_customer_company_is_dropped()
+    {
+        var diff = new GateDiff
+        {
+            CompanyUpdate = new CompanyInfo("Duab", "skanningsteknik", "small", "Sverige", Source.Call),
+        };
+
+        var coerced = CallOrchestrator.CoerceSpokenSources(diff, "Duab (demo)");
+
+        Assert.Null(coerced.CompanyUpdate);
+    }
+
+    [Fact]
+    public void Real_customer_company_survives_the_seller_guard()
+    {
+        var diff = new GateDiff
+        {
+            CompanyUpdate = new CompanyInfo("Nordfrys AB", null, null, null, Source.Call),
+        };
+
+        var coerced = CallOrchestrator.CoerceSpokenSources(diff, "Duab (demo)");
+
+        Assert.NotNull(coerced.CompanyUpdate);
+        Assert.Equal("Nordfrys AB", coerced.CompanyUpdate!.Name);
+    }
+
+    [Fact]
+    public void Ballooning_thread_notes_are_clipped()
+    {
+        var picture = new CustomerPicture();
+        var longNote = string.Join(" ", Enumerable.Repeat("kunden sa något viktigt", 20));
+
+        PictureMerger.Apply(picture, new GateDiff
+        {
+            ThreadsUpsert = [new ThreadUpsert(null, "ämne", ThreadKind.Discovery, ThreadStatus.Open, Salience.Medium, longNote)],
+        }, turn: 1);
+
+        Assert.True(picture.Threads[0].Note.Length <= 160);
+        Assert.EndsWith("…", picture.Threads[0].Note);
     }
 }

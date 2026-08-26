@@ -113,13 +113,13 @@ public static class PictureMerger
                 if (picture.Threads.Count >= MaxThreads) { outcome.Notes.Add("threads: at cap, add rejected"); continue; }
                 if (up.Status == ThreadStatus.Open && picture.Threads.Count(t => t.Status == ThreadStatus.Open) >= MaxOpenThreads)
                 { outcome.Notes.Add("threads: open cap reached, add rejected"); continue; }
-                var thread = new ConversationThread(NextId(picture.Threads.Select(t => t.Id), "t"), up.Topic, up.Kind, up.Status, up.Salience, up.Note, turn);
+                var thread = new ConversationThread(NextId(picture.Threads.Select(t => t.Id), "t"), up.Topic, up.Kind, up.Status, up.Salience, Clip(up.Note), turn);
                 picture.Threads.Add(thread);
                 outcome.ChangedIds.Add(thread.Id);
             }
             else
             {
-                var updated = existing with { Topic = up.Topic, Kind = up.Kind, Status = up.Status, Salience = up.Salience, Note = up.Note, Turn = turn };
+                var updated = existing with { Topic = up.Topic, Kind = up.Kind, Status = up.Status, Salience = up.Salience, Note = Clip(up.Note), Turn = turn };
                 if (updated != existing)
                 {
                     picture.Threads[picture.Threads.IndexOf(existing)] = updated;
@@ -142,7 +142,7 @@ public static class PictureMerger
             if (existing is null)
             {
                 if (picture.ProductInterest.Count >= MaxProductInterest) { outcome.Notes.Add("product_interest: at cap, add rejected"); continue; }
-                var item = new ProductInterest(NextId(picture.ProductInterest.Select(p => p.Id), "p"), up.ProductRef, up.NameAsSaid, up.Stance, up.Reason, up.Source, turn);
+                var item = new ProductInterest(NextId(picture.ProductInterest.Select(p => p.Id), "p"), up.ProductRef, up.NameAsSaid, up.Stance, Clip(up.Reason), up.Source, turn);
                 picture.ProductInterest.Add(item);
                 outcome.ChangedIds.Add(item.Id);
             }
@@ -150,7 +150,7 @@ public static class PictureMerger
             {
                 if (existing.Source == Source.Rep && up.Source != Source.Rep)
                 { outcome.Notes.Add($"product_interest: {existing.Id} rep-sourced, non-rep update rejected"); continue; }
-                var updated = existing with { ProductRef = up.ProductRef ?? existing.ProductRef, NameAsSaid = up.NameAsSaid, Stance = up.Stance, Reason = up.Reason, Source = up.Source, Turn = turn };
+                var updated = existing with { ProductRef = up.ProductRef ?? existing.ProductRef, NameAsSaid = up.NameAsSaid, Stance = up.Stance, Reason = Clip(up.Reason), Source = up.Source, Turn = turn };
                 if (updated != existing)
                 {
                     picture.ProductInterest[picture.ProductInterest.IndexOf(existing)] = updated;
@@ -221,6 +221,9 @@ public static class PictureMerger
         string.Join(' ', text.ToLowerInvariant().Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries)).TrimEnd('.', '!', '?');
 
     private static string Normalize(string text) => NormalizeText(text);
+
+    /// <summary>Notes and reasons are one-liners; models that append running history get clipped.</summary>
+    private static string Clip(string text) => text.Length <= 160 ? text : text[..159] + "…";
 
     private static HashSet<string> TokenSet(string text) =>
         [.. NormalizeText(text).Split(' ', StringSplitOptions.RemoveEmptyEntries)];

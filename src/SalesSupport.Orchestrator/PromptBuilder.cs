@@ -34,6 +34,10 @@ public static class PromptBuilder
            remove facts to tidy up. Output ONLY what this utterance adds or
            changes — never re-emit items already in PICTURE. A typical utterance
            yields 0-2 upserts; an utterance that adds nothing yields empty lists.
+           Facts describe the CUSTOMER's situation and needs — never what was
+           asked or proposed in the conversation. Pick category by meaning:
+           a problem = pain, a deadline = timeline, money = budget, who decides
+           = stakeholder, how they work today = situation.
 
         2. THREADS — a thread is a distinct line of questioning. Open one when the
            conversation starts a new line (kind: discovery), when the customer raises
@@ -42,7 +46,8 @@ public static class PromptBuilder
            one-line note current as the conversation moves. An objection is always a
            thread, never just a fact. topic is a short natural phrase in
            {call_language} (like "Batteriproblem i frysen") — never snake_case or
-           English labels.
+           English labels. note is ONE short line describing the current state of
+           the thread — never a running history of the conversation.
 
         3. PRODUCTS — record products mentioned and the customer's stance in
            product_interest (owns / interested / neutral / rejected), with the reason.
@@ -51,7 +56,8 @@ public static class PromptBuilder
            make it rejected. product_ref is always null (resolved elsewhere).
 
         4. COMMITMENTS — record promises ("I'll send...", "I'll check with...") as
-           action_items with the right owner.
+           action_items with the right owner. Only explicit commitments someone
+           made count — a wish, need or deadline is a fact, not an action item.
 
         5. QUESTIONS ADDRESSED — if the rep just asked one of the active panel
            suggestions, even loosely paraphrased, list its id in questions_addressed.

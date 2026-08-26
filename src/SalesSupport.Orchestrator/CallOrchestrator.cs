@@ -52,7 +52,7 @@ public sealed class CallOrchestrator(ILlmProvider llm, IKnowledgeSource knowledg
         var gateStarted = Environment.TickCount64;
         var diff = await llm.CompleteJsonAsync<GateDiff>(LlmRole.Gate, gateConversation, ct);
         var gateMs = Environment.TickCount64 - gateStarted;
-        diff = CoerceSpokenSources(diff);
+        diff = CoerceSpokenSources(diff, options.CompanyName);
 
         var merge = PictureMerger.Apply(Picture, diff, turn);
         Tombstones.AddRange(merge.RemovedFacts);
@@ -104,10 +104,10 @@ public sealed class CallOrchestrator(ILlmProvider llm, IKnowledgeSource knowledg
     /// items against future updates via the provenance guard. The code knows the channel;
     /// the model doesn't get a vote.
     /// </summary>
-    internal static GateDiff CoerceSpokenSources(GateDiff diff) => new()
+    internal static GateDiff CoerceSpokenSources(GateDiff diff, string sellerName) => new()
     {
         Signals = diff.Signals,
-        CompanyUpdate = diff.CompanyUpdate is { Source: Source.Rep } company ? company with { Source = Source.Call } : diff.CompanyUpdate,
+        CompanyUpdate = SanitizeCompany(diff.CompanyUpdate, sellerName),
         FactsUpsert = diff.FactsUpsert.Select(f => f.Source == Source.Rep ? f with { Source = Source.Call } : f).ToList(),
         FactsRemove = diff.FactsRemove,
         ThreadsUpsert = diff.ThreadsUpsert,
@@ -118,6 +118,17 @@ public sealed class CallOrchestrator(ILlmProvider llm, IKnowledgeSource knowledg
         Advice = diff.Advice,
         LanguageFlag = diff.LanguageFlag,
     };
+
+    /// <summary>Models persistently mistake the seller (heard in the rep's intro) for the customer's company — we know our own name, so drop it.</summary>
+    private static CompanyInfo? SanitizeCompany(CompanyInfo? company, string sellerName)
+    {
+        if (company is null) return null;
+        var candidate = PictureMerger.NormalizeText(company.Name);
+        var seller = PictureMerger.NormalizeText(sellerName);
+        if (candidate.Length >= 3 && seller.Length >= 3 && (seller.Contains(candidate) || candidate.Contains(seller)))
+            return null;
+        return company.Source == Source.Rep ? company with { Source = Source.Call } : company;
+    }
 
     /// <summary>Never suggest a product the customer owns or has rejected — enforced in code, not hoped for in prompt.</summary>
     private AdvisorResult FilterProducts(AdvisorResult result)
