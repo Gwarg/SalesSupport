@@ -35,7 +35,9 @@ public static class PromptBuilder
            changes — never re-emit items already in PICTURE. A typical utterance
            yields 0-2 upserts; an utterance that adds nothing yields empty lists.
            Facts describe the CUSTOMER's situation and needs — never what was
-           asked or proposed in the conversation. Pick category by meaning:
+           asked or proposed in the conversation, and never the ABSENCE of
+           information ("has not said how many...") — unknowns are what open
+           threads and questions are for. Pick category by meaning:
            a problem = pain, a deadline = timeline, money = budget, who decides
            = stakeholder, how they work today = situation.
 

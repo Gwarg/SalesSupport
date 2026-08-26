@@ -48,6 +48,19 @@ public class OrchestratorGuardTests
     }
 
     [Fact]
+    public void Crm_mislabels_on_spoken_ticks_are_also_coerced_to_call()
+    {
+        var diff = new GateDiff
+        {
+            FactsUpsert = [new FactUpsert(null, FactCategory.Pain, "text", Source.Crm, Confidence.High)],
+        };
+
+        var coerced = CallOrchestrator.CoerceSpokenSources(diff, "Duab (demo)");
+
+        Assert.Equal(Source.Call, coerced.FactsUpsert[0].Source);
+    }
+
+    [Fact]
     public void Seller_hallucinated_as_customer_company_is_dropped()
     {
         var diff = new GateDiff

@@ -100,19 +100,19 @@ public sealed class CallOrchestrator(ILlmProvider llm, IKnowledgeSource knowledg
 
     /// <summary>
     /// Spoken-tick diffs can only carry source "call": "rep" is reserved for typed input and
-    /// "crm" for the brief — and a model that mislabels sources as "rep" would otherwise lock
-    /// items against future updates via the provenance guard. The code knows the channel;
-    /// the model doesn't get a vote.
+    /// "crm" for the brief — and models mislabel both (a "rep" mislabel would even lock items
+    /// against future updates via the provenance guard). The code knows the channel; the
+    /// model doesn't get a vote — every source becomes "call".
     /// </summary>
     internal static GateDiff CoerceSpokenSources(GateDiff diff, string sellerName) => new()
     {
         Signals = diff.Signals,
         CompanyUpdate = SanitizeCompany(diff.CompanyUpdate, sellerName),
-        FactsUpsert = diff.FactsUpsert.Select(f => f.Source == Source.Rep ? f with { Source = Source.Call } : f).ToList(),
+        FactsUpsert = diff.FactsUpsert.Select(f => f.Source == Source.Call ? f : f with { Source = Source.Call }).ToList(),
         FactsRemove = diff.FactsRemove,
         ThreadsUpsert = diff.ThreadsUpsert,
-        ProductInterestUpsert = diff.ProductInterestUpsert.Select(p => p.Source == Source.Rep ? p with { Source = Source.Call } : p).ToList(),
-        ActionItemsUpsert = diff.ActionItemsUpsert.Select(a => a.Source == Source.Rep ? a with { Source = Source.Call } : a).ToList(),
+        ProductInterestUpsert = diff.ProductInterestUpsert.Select(p => p.Source == Source.Call ? p : p with { Source = Source.Call }).ToList(),
+        ActionItemsUpsert = diff.ActionItemsUpsert.Select(a => a.Source == Source.Call ? a : a with { Source = Source.Call }).ToList(),
         QuestionsAddressed = diff.QuestionsAddressed,
         SummaryAppend = diff.SummaryAppend,
         Advice = diff.Advice,
@@ -127,7 +127,7 @@ public sealed class CallOrchestrator(ILlmProvider llm, IKnowledgeSource knowledg
         var seller = PictureMerger.NormalizeText(sellerName);
         if (candidate.Length >= 3 && seller.Length >= 3 && (seller.Contains(candidate) || candidate.Contains(seller)))
             return null;
-        return company.Source == Source.Rep ? company with { Source = Source.Call } : company;
+        return company.Source == Source.Call ? company : company with { Source = Source.Call };
     }
 
     /// <summary>Never suggest a product the customer owns or has rejected — enforced in code, not hoped for in prompt.</summary>
