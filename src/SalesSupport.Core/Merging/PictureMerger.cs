@@ -49,6 +49,24 @@ public static class PictureMerger
                 existing = duplicateFact;
                 outcome.Notes.Add($"facts: duplicate of {duplicateFact.Id}, merged");
             }
+            if (existing is null)
+            {
+                // Paraphrase guard: same category, token subset one way or the other.
+                var newTokens = TokenSet(up.Text);
+                var related = picture.Facts.FirstOrDefault(f =>
+                    f.Category == up.Category &&
+                    (newTokens.IsSubsetOf(TokenSet(f.Text)) || TokenSet(f.Text).IsSubsetOf(newTokens)));
+                if (related is not null)
+                {
+                    if (newTokens.IsSubsetOf(TokenSet(related.Text)) && !TokenSet(related.Text).SetEquals(newTokens))
+                    {
+                        outcome.Notes.Add($"facts: subsumed by {related.Id}, skipped");
+                        continue;
+                    }
+                    existing = related;
+                    outcome.Notes.Add($"facts: paraphrase of {related.Id}, merged");
+                }
+            }
 
             if (existing is null)
             {
@@ -199,8 +217,13 @@ public static class PictureMerger
     }
 
     /// <summary>Dedup key: small models re-emit items with invented ids; identical text means the same item.</summary>
-    private static string Normalize(string text) =>
+    public static string NormalizeText(string text) =>
         string.Join(' ', text.ToLowerInvariant().Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries)).TrimEnd('.', '!', '?');
+
+    private static string Normalize(string text) => NormalizeText(text);
+
+    private static HashSet<string> TokenSet(string text) =>
+        [.. NormalizeText(text).Split(' ', StringSplitOptions.RemoveEmptyEntries)];
 
     private static string NextId(IEnumerable<string> existingIds, string prefix)
     {

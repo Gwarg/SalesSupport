@@ -141,6 +141,23 @@ public class PictureMergerTests
     }
 
     [Fact]
+    public void Poorer_paraphrase_is_skipped_richer_paraphrase_updates()
+    {
+        var picture = new CustomerPicture();
+        PictureMerger.Apply(picture, DiffWithFact(null, "X40-skannrarna tappar batteri i frysen och måste lösas före november", Source.Call), turn: 1);
+
+        var poorer = PictureMerger.Apply(picture, DiffWithFact(null, "X40-skannrarna tappar batteri i frysen", Source.Call), turn: 2);
+        Assert.Single(picture.Facts);
+        Assert.Contains(poorer.Notes, n => n.Contains("subsumed"));
+
+        var richer = PictureMerger.Apply(picture,
+            DiffWithFact(null, "X40-skannrarna tappar batteri i frysen och måste lösas före november helst redan i oktober", Source.Call), turn: 3);
+        Assert.Single(picture.Facts);
+        Assert.Contains(richer.Notes, n => n.Contains("paraphrase"));
+        Assert.Contains("oktober", picture.Facts[0].Text);
+    }
+
+    [Fact]
     public void Removal_is_archival_removed_fact_is_returned()
     {
         var picture = new CustomerPicture();

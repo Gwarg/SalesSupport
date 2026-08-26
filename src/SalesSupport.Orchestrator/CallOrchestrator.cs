@@ -52,6 +52,7 @@ public sealed class CallOrchestrator(ILlmProvider llm, IKnowledgeSource knowledg
         var gateStarted = Environment.TickCount64;
         var diff = await llm.CompleteJsonAsync<GateDiff>(LlmRole.Gate, gateConversation, ct);
         var gateMs = Environment.TickCount64 - gateStarted;
+        diff = CoerceSpokenSources(diff);
 
         var merge = PictureMerger.Apply(Picture, diff, turn);
         Tombstones.AddRange(merge.RemovedFacts);
@@ -73,7 +74,7 @@ public sealed class CallOrchestrator(ILlmProvider llm, IKnowledgeSource knowledg
             var result = await llm.CompleteJsonAsync<AdvisorResult>(LlmRole.Advisor, advisorConversation, ct);
             advisorMs = Environment.TickCount64 - advisorStarted;
 
-            delta = Panel.Reconcile(result);
+            delta = Panel.Reconcile(FilterProducts(result));
             PictureMerger.ApplyThreadUpdates(Picture, result.ThreadUpdates, turn);
         }
 
@@ -87,7 +88,7 @@ public sealed class CallOrchestrator(ILlmProvider llm, IKnowledgeSource knowledg
         var conversation = PromptBuilder.Advisor(Picture, cards, Panel, knowledge.GetCatalogMap(), options, repQuery: query);
         var result = await llm.CompleteJsonAsync<AdvisorResult>(LlmRole.Advisor, conversation, ct);
 
-        var delta = Panel.Reconcile(result);
+        var delta = Panel.Reconcile(FilterProducts(result));
         return new AskResult(result.Answer ?? "", delta);
     }
 
@@ -95,6 +96,44 @@ public sealed class CallOrchestrator(ILlmProvider llm, IKnowledgeSource knowledg
     {
         var conversation = PromptBuilder.Summarizer(Picture, RollingSummary, options);
         return await llm.CompleteJsonAsync<SummaryResult>(LlmRole.Summarizer, conversation, ct);
+    }
+
+    /// <summary>
+    /// Spoken-tick diffs can only carry source "call": "rep" is reserved for typed input and
+    /// "crm" for the brief — and a model that mislabels sources as "rep" would otherwise lock
+    /// items against future updates via the provenance guard. The code knows the channel;
+    /// the model doesn't get a vote.
+    /// </summary>
+    internal static GateDiff CoerceSpokenSources(GateDiff diff) => new()
+    {
+        Signals = diff.Signals,
+        CompanyUpdate = diff.CompanyUpdate is { Source: Source.Rep } company ? company with { Source = Source.Call } : diff.CompanyUpdate,
+        FactsUpsert = diff.FactsUpsert.Select(f => f.Source == Source.Rep ? f with { Source = Source.Call } : f).ToList(),
+        FactsRemove = diff.FactsRemove,
+        ThreadsUpsert = diff.ThreadsUpsert,
+        ProductInterestUpsert = diff.ProductInterestUpsert.Select(p => p.Source == Source.Rep ? p with { Source = Source.Call } : p).ToList(),
+        ActionItemsUpsert = diff.ActionItemsUpsert.Select(a => a.Source == Source.Rep ? a with { Source = Source.Call } : a).ToList(),
+        QuestionsAddressed = diff.QuestionsAddressed,
+        SummaryAppend = diff.SummaryAppend,
+        Advice = diff.Advice,
+        LanguageFlag = diff.LanguageFlag,
+    };
+
+    /// <summary>Never suggest a product the customer owns or has rejected — enforced in code, not hoped for in prompt.</summary>
+    private AdvisorResult FilterProducts(AdvisorResult result)
+    {
+        var blocked = Picture.ProductInterest
+            .Where(p => p.Stance is Stance.Owns or Stance.Rejected)
+            .Select(p => PictureMerger.NormalizeText(p.NameAsSaid))
+            .ToHashSet();
+        if (blocked.Count == 0) return result;
+
+        var kept = result.Products
+            .Where(p => p.Id is not null || !blocked.Contains(PictureMerger.NormalizeText(p.DisplayName)))
+            .ToList();
+        return kept.Count == result.Products.Count
+            ? result
+            : new AdvisorResult { Questions = result.Questions, Products = kept, ThreadUpdates = result.ThreadUpdates, Answer = result.Answer };
     }
 
     private async Task<IReadOnlyList<RetrievedCard>> RetrieveForTopicsAsync(IEnumerable<string> topics, CancellationToken ct)

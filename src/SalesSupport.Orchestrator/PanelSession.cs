@@ -39,6 +39,11 @@ public sealed class PanelSession
             {
                 // Unknown/stale id with no text — nothing renderable; ignore rather than show an empty slot.
             }
+            else if (IsAlreadyCovered(question.Text))
+            {
+                // Small models re-suggest questions already asked/dismissed despite the history
+                // in their prompt — enforce "never repeat" in code.
+            }
             else
             {
                 var item = new QuestionItem($"q{++_questionSeq}", question.Text, question.Thread, PanelItemStatus.Active);
@@ -98,6 +103,13 @@ public sealed class PanelSession
             _questions[index] = _questions[index] with { Status = PanelItemStatus.Asked };
             AskedHistory.Add(_questions[index].Text);
         }
+    }
+
+    private bool IsAlreadyCovered(string text)
+    {
+        var normalized = Core.Merging.PictureMerger.NormalizeText(text);
+        return AskedHistory.Concat(DismissedHistory)
+            .Any(h => Core.Merging.PictureMerger.NormalizeText(h) == normalized);
     }
 
     public void DismissQuestion(string id)
