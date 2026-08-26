@@ -11,6 +11,9 @@ public sealed class ClaudeRoleConfig
     public string? Effort { get; init; }
 }
 
+/// <summary>Per-call token usage — the cost ledger for logs and run accounting.</summary>
+public sealed record LlmUsage(LlmRole Role, string Model, long InputTokens, long CacheReadTokens, long OutputTokens);
+
 /// <summary>
 /// Role → model mapping per D12/D14: gate = Haiku 4.5 (fast, no thinking), advisor and
 /// above = Opus 5 with adaptive thinking, effort as the latency dial (tuned in L0 against
@@ -18,6 +21,9 @@ public sealed class ClaudeRoleConfig
 /// </summary>
 public sealed class ClaudeProviderOptions
 {
+    /// <summary>Invoked after every completed call with its token usage.</summary>
+    public Action<LlmUsage>? UsageReported { get; init; }
+
     public ClaudeRoleConfig Gate { get; init; } = new() { Model = "claude-haiku-4-5", MaxTokens = 2048 };
     public ClaudeRoleConfig Advisor { get; init; } = new() { Model = "claude-opus-5", MaxTokens = 4096, Effort = "medium" };
     public ClaudeRoleConfig Summarizer { get; init; } = new() { Model = "claude-opus-5", MaxTokens = 4096, Effort = "high" };

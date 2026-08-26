@@ -45,6 +45,14 @@ public sealed class ClaudeLlmProvider(ClaudeProviderOptions? options = null) : I
 
         var response = await _client.Messages.Create(parameters, cancellationToken: ct);
 
+        if (_options.UsageReported is { } report)
+        {
+            report(new LlmUsage(role, config.Model,
+                response.Usage.InputTokens,
+                response.Usage.CacheReadInputTokens ?? 0,
+                response.Usage.OutputTokens));
+        }
+
         if (response.StopReason == "refusal")
             throw new InvalidOperationException($"Claude declined the {role} request (stop_reason=refusal).");
         if (response.StopReason == "max_tokens")

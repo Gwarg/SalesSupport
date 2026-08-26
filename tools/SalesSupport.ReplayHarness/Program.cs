@@ -37,6 +37,8 @@ for (var i = 0; i < args.Length; i++)
 }
 
 var repoRoot = FindRepoRoot();
+var modeLabel = ollama ? "ollama" : live ? "live" : useFixtures ? "fixtures" : "fake";
+var runDir = Path.Combine(repoRoot, "runs", $"{DateTime.Now:yyyyMMdd-HHmmss}-{modeLabel}");
 
 if (live && string.IsNullOrEmpty(Environment.GetEnvironmentVariable("ANTHROPIC_API_KEY")))
 {
@@ -58,21 +60,30 @@ if (runAll)
     Console.WriteLine($"Corpus run: {samples.Count} calls");
     Console.WriteLine(new string('-', 104));
     var failures = 0;
+    var tableLines = new List<string>();
     foreach (var sample in samples)
     {
         Console.WriteLine($"  → {Path.GetFileNameWithoutExtension(sample)} …");
         var stats = await RunCallAsync(sample, verbose: false);
         var flags = stats.FixturesUnused > 0 ? $" UNUSED-FIXTURES={stats.FixturesUnused}" : "";
         flags += stats.MergeNotes > 0 ? $" notes={stats.MergeNotes}" : "";
+        flags += stats.TokensOut > 0 ? $" tok={stats.TokensIn}+{stats.TokensCached}c/{stats.TokensOut}" : "";
         var status = stats.Error is null ? "OK  " : "FAIL";
-        Console.WriteLine(
+        var line =
             $"{status} {Path.GetFileNameWithoutExtension(sample),-28} [{stats.Mode,-8}] lang={stats.Language} " +
             $"ticks={stats.Ticks,2} advisor={stats.AdvisorRuns} +q={stats.AddedQuestions} -q={stats.RemovedQuestions} " +
-            $"+p={stats.AddedProducts} asks={stats.Asks}{flags}");
+            $"+p={stats.AddedProducts} asks={stats.Asks}{flags}";
+        Console.WriteLine(line);
+        tableLines.Add(line);
         if (stats.Error is not null) { Console.WriteLine($"     {stats.Error}"); failures++; }
     }
     Console.WriteLine(new string('-', 104));
     Console.WriteLine(failures == 0 ? "All calls completed." : $"{failures} call(s) failed.");
+    if (Directory.Exists(runDir))
+    {
+        File.WriteAllLines(Path.Combine(runDir, "summary.txt"), tableLines);
+        Console.WriteLine($"Detailed logs: {runDir}");
+    }
     return failures == 0 ? 0 : 1;
 }
 
@@ -85,17 +96,22 @@ if (!File.Exists(samplePath))
 }
 
 var result = await RunCallAsync(samplePath, verbose: true);
+if (Directory.Exists(runDir))
+    Console.WriteLine($"Log: {Path.Combine(runDir, Path.GetFileNameWithoutExtension(samplePath) + ".log")}");
 if (result.Error is not null)
 {
     Console.Error.WriteLine($"FAIL: {result.Error}");
     return 1;
 }
+if (result.TokensOut > 0)
+    Console.WriteLine($"Tokens: {result.TokensIn} in + {result.TokensCached} cached / {result.TokensOut} out");
 return 0;
 
 async Task<CallStats> RunCallAsync(string path, bool verbose)
 {
     var name = Path.GetFileNameWithoutExtension(path);
     var stats = new CallStats();
+    var log = new System.Text.StringBuilder();
 
     try
     {
@@ -125,7 +141,16 @@ async Task<CallStats> RunCallAsync(string path, bool verbose)
         {
             // Explicit model flags beat the fixtures that --all implies — fixtures are the
             // comparison baseline, not the runtime, when a real backend was requested.
-            llm = new ClaudeLlmProvider();
+            llm = new ClaudeLlmProvider(new ClaudeProviderOptions
+            {
+                UsageReported = usage =>
+                {
+                    stats.TokensIn += usage.InputTokens;
+                    stats.TokensCached += usage.CacheReadTokens;
+                    stats.TokensOut += usage.OutputTokens;
+                    log.AppendLine($"   [usage] {usage.Role} {usage.Model}: in={usage.InputTokens} cached={usage.CacheReadTokens} out={usage.OutputTokens}");
+                },
+            });
             stats.Mode = "live";
         }
         else if (useFixtures && File.Exists(fixturesPath))
@@ -159,6 +184,8 @@ async Task<CallStats> RunCallAsync(string path, bool verbose)
             UiLanguage = language,
         };
         var orchestrator = new CallOrchestrator(llm, knowledge, options);
+        log.AppendLine($"{name} [{stats.Mode}] lang={language} {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
+        log.AppendLine(new string('-', 72));
 
         if (verbose)
         {
@@ -175,8 +202,11 @@ async Task<CallStats> RunCallAsync(string path, bool verbose)
             {
                 stats.Asks++;
                 if (verbose) Console.WriteLine($"    [rep typed] {query}");
+                log.AppendLine($"ASK: {query}");
                 var ask = await orchestrator.AskAsync(query);
                 CountDelta(ask.PanelDelta, stats);
+                log.AppendLine($"   svar: {ask.Answer}");
+                AppendDeltaLog(log, ask.PanelDelta);
                 if (verbose)
                 {
                     Console.WriteLine($"     svar: {ask.Answer}");
@@ -187,6 +217,7 @@ async Task<CallStats> RunCallAsync(string path, bool verbose)
 
             var utterance = new Utterance(++index, line.Speaker!.Value, line.Text!);
             var tick = await orchestrator.OnUtteranceAsync(utterance);
+            AppendTickLog(log, utterance, tick);
             stats.Ticks++;
             stats.MergeNotes += tick.Merge.Notes.Count;
             if (tick.AdvisorRan) stats.AdvisorRuns++;
@@ -205,6 +236,13 @@ async Task<CallStats> RunCallAsync(string path, bool verbose)
 
         var summary = await orchestrator.EndCallAsync();
         stats.FixturesUnused = fixtures?.Remaining ?? 0;
+        log.AppendLine(new string('-', 72));
+        log.AppendLine($"SUMMARY: {summary.Summary}");
+        foreach (var step in summary.NextSteps)
+            log.AppendLine($"   next: {step.Text} ({step.Owner.ToString().ToLowerInvariant()})");
+        log.AppendLine();
+        log.AppendLine("FINAL PICTURE:");
+        log.AppendLine(JsonDefaults.Serialize(orchestrator.Picture, pretty: true));
 
         if (verbose)
         {
@@ -220,6 +258,19 @@ async Task<CallStats> RunCallAsync(string path, bool verbose)
     catch (Exception ex)
     {
         stats.Error = ex.Message;
+        log.AppendLine($"ERROR: {ex}");
+    }
+
+    if (log.Length > 0)
+    {
+        try
+        {
+            Directory.CreateDirectory(runDir);
+            File.WriteAllText(Path.Combine(runDir, name + ".log"), log.ToString());
+        }
+        catch
+        {
+        }
     }
 
     return stats;
@@ -231,6 +282,45 @@ static void CountDelta(PanelDelta? delta, CallStats stats)
     stats.AddedQuestions += delta.AddedQuestions.Count;
     stats.RemovedQuestions += delta.RemovedQuestionIds.Count;
     stats.AddedProducts += delta.AddedProducts.Count;
+}
+
+static void AppendTickLog(System.Text.StringBuilder log, Utterance utterance, TickResult tick)
+{
+    log.AppendLine($"T{utterance.Index,2} [{utterance.Speaker.ToString().ToLowerInvariant()}] {utterance.Text}");
+    foreach (var f in tick.Diff.FactsUpsert)
+        log.AppendLine($"   +fact[{f.Category.ToString().ToLowerInvariant()}] {f.Text}");
+    foreach (var id in tick.Diff.FactsRemove)
+        log.AppendLine($"   -fact {id}");
+    foreach (var t in tick.Diff.ThreadsUpsert)
+        log.AppendLine($"   ~thread \"{t.Topic}\" [{t.Kind.ToString().ToLowerInvariant()}/{t.Status.ToString().ToLowerInvariant()}/{t.Salience.ToString().ToLowerInvariant()}] {t.Note}");
+    foreach (var p in tick.Diff.ProductInterestUpsert)
+        log.AppendLine($"   ~product {p.NameAsSaid} [{p.Stance.ToString().ToLowerInvariant()}] {p.Reason}");
+    foreach (var a in tick.Diff.ActionItemsUpsert)
+        log.AppendLine($"   +action ({a.Owner.ToString().ToLowerInvariant()}) {a.Text}");
+    if (tick.Diff.QuestionsAddressed.Count > 0)
+        log.AppendLine($"   asked: {string.Join(", ", tick.Diff.QuestionsAddressed)}");
+    if (tick.Diff.SummaryAppend is { } summaryAppend)
+        log.AppendLine($"   summary+: {summaryAppend}");
+    log.AppendLine(tick.Diff.Advice.Needed
+        ? $"   advice: NEEDED ({tick.Diff.Advice.Reason}) topics=[{string.Join("; ", tick.Diff.Advice.Topics)}]{(tick.AdvisorRan ? "" : " -> DAMPED")}"
+        : $"   advice: no ({tick.Diff.Advice.Reason})");
+    foreach (var note in tick.Merge.Notes)
+        log.AppendLine($"   note: {note}");
+    AppendDeltaLog(log, tick.PanelDelta);
+    log.AppendLine($"   timing: gate {tick.GateMs} ms{(tick.AdvisorRan ? $", advisor {tick.AdvisorMs} ms" : "")}");
+}
+
+static void AppendDeltaLog(System.Text.StringBuilder log, PanelDelta? delta)
+{
+    if (delta is null) return;
+    foreach (var q in delta.AddedQuestions)
+        log.AppendLine($"   +q {q.Id}: {q.Text}");
+    foreach (var p in delta.AddedProducts)
+        log.AppendLine($"   +p {p.Id}: {p.DisplayName} — {p.Why}{(p.PriceNote is null ? "" : $" ({p.PriceNote})")}");
+    foreach (var id in delta.RemovedQuestionIds)
+        log.AppendLine($"   -q {id}");
+    foreach (var id in delta.RemovedProductIds)
+        log.AppendLine($"   -p {id}");
 }
 
 static void PrintDelta(PanelDelta? delta)
@@ -264,5 +354,8 @@ internal sealed class CallStats
     public int Asks;
     public int MergeNotes;
     public int FixturesUnused;
+    public long TokensIn;
+    public long TokensCached;
+    public long TokensOut;
     public string? Error;
 }
