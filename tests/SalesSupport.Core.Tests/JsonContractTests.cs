@@ -50,6 +50,12 @@ public class JsonContractTests
         // grammar-constrained decoding emit near-empty objects (the shortest valid path).
         var required = schema["required"]!.AsArray().Select(n => n!.GetValue<string>()).ToHashSet();
         Assert.Equal(properties.Select(p => p.Key).ToHashSet(), required);
+
+        // Nullable object properties ("type": ["object","null"]) must be closed too —
+        // the Claude API rejects any object schema without explicit additionalProperties.
+        var companyUpdate = properties["company_update"]!.AsObject();
+        Assert.False(companyUpdate["additionalProperties"]!.GetValue<bool>());
+        Assert.True(companyUpdate.ContainsKey("required"));
     }
 
     [Fact]

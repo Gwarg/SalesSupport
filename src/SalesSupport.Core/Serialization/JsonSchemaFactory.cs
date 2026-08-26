@@ -20,11 +20,10 @@ public static class JsonSchemaFactory
         TreatNullObliviousAsNonNullable = true,
         TransformSchemaNode = (_, schema) =>
         {
-            if (schema is JsonObject obj
-                && obj.TryGetPropertyValue("type", out var typeNode)
-                && typeNode is JsonValue value
-                && value.TryGetValue<string>(out var type)
-                && type == "object")
+            // Nullable object properties export as "type": ["object","null"] — they need
+            // the same closing as plain objects (the Claude API rejects any object schema
+            // without an explicit additionalProperties: false).
+            if (schema is JsonObject obj && IsObjectSchema(obj))
             {
                 if (!obj.ContainsKey("additionalProperties"))
                     obj["additionalProperties"] = false;
@@ -44,6 +43,17 @@ public static class JsonSchemaFactory
             return schema;
         },
     };
+
+    private static bool IsObjectSchema(JsonObject obj)
+    {
+        if (!obj.TryGetPropertyValue("type", out var typeNode)) return false;
+        return typeNode switch
+        {
+            JsonValue value when value.TryGetValue<string>(out var type) => type == "object",
+            JsonArray types => types.Any(t => t is JsonValue v && v.TryGetValue<string>(out var s) && s == "object"),
+            _ => false,
+        };
+    }
 
     public static JsonNode For(Type type) =>
         Cache.GetOrAdd(type, t => JsonSchemaExporter.GetJsonSchemaAsNode(JsonDefaults.Options, t, ExporterOptions)).DeepClone();
