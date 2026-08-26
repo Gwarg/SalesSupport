@@ -48,10 +48,37 @@
             <TextBlock Text="Nytt samtal" FontSize="18" FontWeight="Medium" Margin="0,4,0,12"/>
             <TextBlock Text="Backend" Style="{StaticResource ZoneLabel}"/>
             <TextBox Text="{Binding BackendUrl, UpdateSourceTrigger=PropertyChanged}"/>
-            <TextBlock Text="Mikrofon (du)" Style="{StaticResource ZoneLabel}"/>
-            <ComboBox ItemsSource="{Binding Microphones}" SelectedItem="{Binding SelectedMicrophone}" DisplayMemberPath="Name"/>
-            <TextBlock Text="Högtalare (kunden, loopback)" Style="{StaticResource ZoneLabel}"/>
-            <ComboBox ItemsSource="{Binding Speakers}" SelectedItem="{Binding SelectedSpeaker}" DisplayMemberPath="Name"/>
+            <TextBlock Text="Källa" Style="{StaticResource ZoneLabel}"/>
+            <ComboBox ItemsSource="{Binding Sources}" SelectedItem="{Binding SelectedSource}" Width="120" HorizontalAlignment="Left"/>
+            <StackPanel>
+                <StackPanel.Style>
+                    <Style TargetType="StackPanel">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding SelectedSource}" Value="Replay">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </StackPanel.Style>
+                <TextBlock Text="Mikrofon (du)" Style="{StaticResource ZoneLabel}"/>
+                <ComboBox ItemsSource="{Binding Microphones}" SelectedItem="{Binding SelectedMicrophone}" DisplayMemberPath="Name"/>
+                <TextBlock Text="Högtalare (kunden, loopback)" Style="{StaticResource ZoneLabel}"/>
+                <ComboBox ItemsSource="{Binding Speakers}" SelectedItem="{Binding SelectedSpeaker}" DisplayMemberPath="Name"/>
+            </StackPanel>
+            <StackPanel>
+                <StackPanel.Style>
+                    <Style TargetType="StackPanel">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding SelectedSource}" Value="Replay">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </StackPanel.Style>
+                <TextBlock Text="Samtal att spela upp" Style="{StaticResource ZoneLabel}"/>
+                <ComboBox ItemsSource="{Binding ReplaySamples}" SelectedItem="{Binding SelectedSample}"/>
+            </StackPanel>
             <TextBlock Text="Språk" Style="{StaticResource ZoneLabel}"/>
             <ComboBox ItemsSource="{Binding Languages}" SelectedItem="{Binding SelectedLanguage}" Width="80" HorizontalAlignment="Left"/>
             <TextBlock Text="Kund (valfritt)" Style="{StaticResource ZoneLabel}"/>

@@ -175,3 +175,10 @@ The client captures locally, streams audio to Azure STT with the token issued by
 backend (keys never reach the desktop, D9), merges channels client-side, and sends only
 text up the SignalR hub. Requires the backend running with a pack + LLM (Ollama/Claude)
 and an Azure Speech key on the backend (or AZURE_SPEECH_KEY locally as fallback).
+
+**Replay in the panel** — the pre-call card has a Källa selector: `Live` (capture + STT)
+or `Replay`, which plays a `samples/calls/*.jsonl` script through the real hub at
+conversation pace (partials, finals, `ask` lines) so the panel fills in exactly as in a
+live call — no mic, no STT key. Language/customer come from the sample's meta line when
+present. The backend runs its real provider, so replay costs cents on Claude and is free
+on Ollama. Press Avsluta after "uppspelning klar" for the summary.

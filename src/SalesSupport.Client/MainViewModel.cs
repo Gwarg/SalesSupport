@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Windows;
 using System.Windows.Threading;
 using SalesSupport.Capture;
@@ -15,6 +16,7 @@ public sealed class MainViewModel : ViewModelBase
 {
     private readonly CallClient _client = new();
     private AudioSession? _audio;
+    private ReplaySession? _replay;
     private readonly DispatcherTimer _meterTimer = new() { Interval = TimeSpan.FromMilliseconds(100) };
     private readonly DispatcherTimer _clockTimer = new() { Interval = TimeSpan.FromSeconds(1) };
     private DateTime _callStarted;
@@ -31,6 +33,12 @@ public sealed class MainViewModel : ViewModelBase
         Speakers = new ObservableCollection<AudioDeviceInfo>(AudioDevices.ListSpeakers());
         SelectedMicrophone = Microphones.FirstOrDefault(d => d.DefaultCommunications) ?? Microphones.FirstOrDefault();
         SelectedSpeaker = Speakers.FirstOrDefault(d => d.DefaultCommunications) ?? Speakers.FirstOrDefault();
+
+        _samplesDir = Path.Combine(FindRepoRoot(), "samples", "calls");
+        if (Directory.Exists(_samplesDir))
+            foreach (var sample in Directory.GetFiles(_samplesDir, "*.jsonl").OrderBy(p => p, StringComparer.Ordinal))
+                ReplaySamples.Add(Path.GetFileName(sample));
+        SelectedSample = ReplaySamples.FirstOrDefault();
 
         _client.PictureUpdated += p => UI(() => ApplyPicture(p));
         _client.PanelDeltaReceived += d => UI(() => ApplyPanelDelta(d));
@@ -62,6 +70,14 @@ public sealed class MainViewModel : ViewModelBase
     public AudioDeviceInfo? SelectedMicrophone { get => _selectedMicrophone; set => Set(ref _selectedMicrophone, value); }
     private AudioDeviceInfo? _selectedSpeaker;
     public AudioDeviceInfo? SelectedSpeaker { get => _selectedSpeaker; set => Set(ref _selectedSpeaker, value); }
+    private readonly string _samplesDir;
+    public string[] Sources { get; } = ["Live", "Replay"];
+    private string _selectedSource = "Live";
+    public string SelectedSource { get => _selectedSource; set => Set(ref _selectedSource, value); }
+    public ObservableCollection<string> ReplaySamples { get; } = [];
+    private string? _selectedSample;
+    public string? SelectedSample { get => _selectedSample; set => Set(ref _selectedSample, value); }
+
     public string[] Languages { get; } = ["sv", "en"];
     private string _selectedLanguage = "sv";
     public string SelectedLanguage { get => _selectedLanguage; set => Set(ref _selectedLanguage, value); }
@@ -120,45 +136,83 @@ public sealed class MainViewModel : ViewModelBase
     {
         try
         {
+            var replayMode = SelectedSource == "Replay";
+            if (replayMode && SelectedSample is null)
+            {
+                StatusText = "Välj ett samtal att spela upp.";
+                return;
+            }
+
             StatusText = "Ansluter…";
             await _client.ConnectAsync(BackendUrl);
 
+            var samplePath = replayMode ? Path.Combine(_samplesDir, SelectedSample!) : null;
+            var language = SelectedLanguage;
+            var customer = string.IsNullOrWhiteSpace(CustomerCompany) ? null : CustomerCompany;
+            if (samplePath is not null)
+            {
+                var meta = ReplaySession.ReadMeta(samplePath);
+                language = meta.Language ?? language;
+                customer ??= meta.Customer;
+            }
+
             StatusText = "Startar samtal…";
             var started = await _client.StartCallAsync(new StartCallRequest(
-                SelectedLanguage,
-                string.IsNullOrWhiteSpace(CustomerCompany) ? null : CustomerCompany,
+                language, customer,
                 string.IsNullOrWhiteSpace(Goal) ? null : Goal));
-
-            AzureSpeechEngineOptions sttOptions;
-            if (started.Stt is { } stt)
-            {
-                sttOptions = AzureSpeechEngineOptions.FromToken(stt.Token, stt.Region);
-            }
-            else
-            {
-                StatusText = "Backend saknar STT-nyckel — provar lokal AZURE_SPEECH_KEY…";
-                sttOptions = AzureSpeechEngineOptions.FromEnvironment();
-            }
 
             ApplyPicture(started.Picture);
 
-            _audio = AudioSession.Start(
-                SelectedMicrophone?.Name, SelectedSpeaker?.Name,
-                sttOptions, started.Language, started.PhraseHints,
-                onPartial: (speaker, text) => UI(() =>
-                    LiveLine = $"~ [{speaker.ToString().ToLowerInvariant()}] {text}"),
-                onFinal: utterance =>
+            if (samplePath is not null)
+            {
+                _replay = ReplaySession.Start(
+                    samplePath,
+                    onPartial: (speaker, text) => UI(() =>
+                        LiveLine = $"~ [{speaker.ToString().ToLowerInvariant()}] {text}"),
+                    onFinal: utterance =>
+                    {
+                        UI(() => { LiveLine = ""; IsThinking = true; });
+                        return _client.SendUtteranceAsync(new UtteranceIn(utterance.Speaker, utterance.Text, utterance.TimestampMs));
+                    },
+                    onAsk: query =>
+                    {
+                        UI(() => { LiveLine = $"⌨ {query}"; AnswerText = "…"; });
+                        return _client.AskAsync(query);
+                    },
+                    onCompleted: () => UI(() =>
+                        LiveLine = "— uppspelning klar — tryck Avsluta för sammanfattning —"));
+            }
+            else
+            {
+                AzureSpeechEngineOptions sttOptions;
+                if (started.Stt is { } stt)
                 {
-                    UI(() => { LiveLine = ""; IsThinking = true; });
-                    return _client.SendUtteranceAsync(new UtteranceIn(utterance.Speaker, utterance.Text, utterance.TimestampMs));
-                },
-                onError: message => UI(() => ErrorBanner = message));
+                    sttOptions = AzureSpeechEngineOptions.FromToken(stt.Token, stt.Region);
+                }
+                else
+                {
+                    StatusText = "Backend saknar STT-nyckel — provar lokal AZURE_SPEECH_KEY…";
+                    sttOptions = AzureSpeechEngineOptions.FromEnvironment();
+                }
+
+                _audio = AudioSession.Start(
+                    SelectedMicrophone?.Name, SelectedSpeaker?.Name,
+                    sttOptions, started.Language, started.PhraseHints,
+                    onPartial: (speaker, text) => UI(() =>
+                        LiveLine = $"~ [{speaker.ToString().ToLowerInvariant()}] {text}"),
+                    onFinal: utterance =>
+                    {
+                        UI(() => { LiveLine = ""; IsThinking = true; });
+                        return _client.SendUtteranceAsync(new UtteranceIn(utterance.Speaker, utterance.Text, utterance.TimestampMs));
+                    },
+                    onError: message => UI(() => ErrorBanner = message));
+                _meterTimer.Start();
+            }
 
             _callStarted = DateTime.UtcNow;
             ErrorBanner = "";
             AnswerText = "";
             Stage = "Live";
-            _meterTimer.Start();
             _clockTimer.Start();
             StatusText = "";
         }
@@ -175,6 +229,7 @@ public sealed class MainViewModel : ViewModelBase
         {
             IsEnding = true;
             EndingNotice = "Avslutar — hoppar över kön och skriver sammanfattning…";
+            _replay?.Stop();
             _audio?.Stop();
             _meterTimer.Stop();
             _clockTimer.Stop();
@@ -284,6 +339,8 @@ public sealed class MainViewModel : ViewModelBase
 
     private void ResetToPreCall()
     {
+        _replay?.Dispose();
+        _replay = null;
         _audio?.Dispose();
         _audio = null;
         Questions.Clear();
@@ -313,5 +370,13 @@ public sealed class MainViewModel : ViewModelBase
         var dispatcher = Application.Current?.Dispatcher;
         if (dispatcher is null || dispatcher.CheckAccess()) action();
         else dispatcher.Invoke(action);
+    }
+
+    private static string FindRepoRoot()
+    {
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        while (dir is not null && !File.Exists(Path.Combine(dir.FullName, "SalesSupport.slnx")))
+            dir = dir.Parent;
+        return dir?.FullName ?? Directory.GetCurrentDirectory();
     }
 }
