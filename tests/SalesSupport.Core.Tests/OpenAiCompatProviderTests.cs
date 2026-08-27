@@ -53,16 +53,34 @@ public class OpenAiCompatProviderTests
     }
 
     [Fact]
-    public void Response_parse_extracts_content_and_splits_cached_from_prompt_tokens()
+    public void Reasoning_control_maps_none_to_disabled_and_levels_to_effort()
     {
-        var (text, usage) = OpenAiCompatLlmProvider.ParseResponse(
+        var conversation = new LlmConversation("s", []);
+        var schema = JsonSchemaFactory.For<GateDiff>();
+        var config = new OpenAiCompatRoleConfig { Model = "m" };
+
+        var off = OpenAiCompatLlmProvider.BuildRequest(config, conversation, schema, "GateDiff", true, "none");
+        Assert.False(off["reasoning"]!["enabled"]!.GetValue<bool>());
+
+        var low = OpenAiCompatLlmProvider.BuildRequest(config, conversation, schema, "GateDiff", true, "low");
+        Assert.Equal("low", low["reasoning"]!["effort"]!.GetValue<string>());
+
+        var unset = OpenAiCompatLlmProvider.BuildRequest(config, conversation, schema, "GateDiff", true);
+        Assert.False(unset.ContainsKey("reasoning"));
+    }
+
+    [Fact]
+    public void Response_parse_extracts_content_finish_reason_and_splits_cached_tokens()
+    {
+        var (text, finishReason, usage) = OpenAiCompatLlmProvider.ParseResponse(
             """
-            {"choices":[{"message":{"role":"assistant","content":"{\"answer\":42}"}}],
+            {"choices":[{"finish_reason":"length","message":{"role":"assistant","content":"{\"answer\":42}"}}],
              "usage":{"prompt_tokens":1200,"completion_tokens":80,
                       "prompt_tokens_details":{"cached_tokens":900}}}
             """);
 
         Assert.Equal("""{"answer":42}""", text);
+        Assert.Equal("length", finishReason);
         Assert.NotNull(usage);
         Assert.Equal(300, usage!.Value.Input);
         Assert.Equal(900, usage.Value.Cached);
@@ -70,12 +88,13 @@ public class OpenAiCompatProviderTests
     }
 
     [Fact]
-    public void Response_parse_tolerates_missing_usage_and_fenced_content()
+    public void Response_parse_tolerates_missing_usage_finish_reason_and_fenced_content()
     {
-        var (text, usage) = OpenAiCompatLlmProvider.ParseResponse(
+        var (text, finishReason, usage) = OpenAiCompatLlmProvider.ParseResponse(
             """{"choices":[{"message":{"content":"```json\n{\"answer\":42}\n```"}}]}""");
 
         Assert.Equal("""{"answer":42}""", text);
+        Assert.Null(finishReason);
         Assert.Null(usage);
     }
 

@@ -16,6 +16,7 @@ var compat = false;
 var compatLoose = false;
 string? compatModel = Environment.GetEnvironmentVariable("OPENAI_COMPAT_MODEL");
 string? compatUrl = Environment.GetEnvironmentVariable("OPENAI_COMPAT_BASE_URL");
+string? compatReasoning = null;
 var useFixtures = false;
 var runAll = false;
 var quick = false;
@@ -35,6 +36,7 @@ for (var i = 0; i < args.Length; i++)
         case "--compat-model": compat = true; compatModel = args[++i]; break;
         case "--compat-url": compat = true; compatUrl = args[++i]; break;
         case "--compat-loose": compat = true; compatLoose = true; break;
+        case "--compat-reasoning": compat = true; compatReasoning = args[++i]; break;
         case "--fixtures": useFixtures = true; break;
         case "--all": runAll = true; useFixtures = true; break;
         case "--quick": quick = true; break;
@@ -158,7 +160,8 @@ async Task<CallStats> RunCallAsync(string path, bool verbose)
                         stats.TokensOut += usage.OutputTokens;
                         log.AppendLine($"   [usage] {usage.Role} {usage.Model}: in={usage.InputTokens} cached={usage.CacheReadTokens} out={usage.OutputTokens}");
                     },
-                    strictSchema: !compatLoose));
+                    strictSchema: !compatLoose,
+                    reasoningEffort: compatReasoning));
             stats.Mode = $"compat:{compatModel}";
         }
         else if (ollama)

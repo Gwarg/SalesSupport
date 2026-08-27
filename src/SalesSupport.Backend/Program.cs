@@ -46,7 +46,8 @@ builder.Services.AddSingleton<ILlmProvider>(sp => options.LlmProvider switch
         options.OpenAiCompatModel
             ?? throw new InvalidOperationException("Backend:LlmProvider is 'openai-compat' but Backend:OpenAiCompatModel is not set."),
         UsageLogger(sp, "OpenAiCompat"),
-        strictSchema: options.OpenAiCompatStrictSchema)),
+        strictSchema: options.OpenAiCompatStrictSchema,
+        reasoningEffort: options.OpenAiCompatReasoning)),
     var other => throw new InvalidOperationException($"Unknown Backend:LlmProvider '{other}' (ollama | claude | openai-compat)"),
 });
 

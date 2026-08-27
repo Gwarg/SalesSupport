@@ -39,23 +39,37 @@ public sealed class OpenAiCompatProviderOptions
     /// <summary>Invoked after every completed call with its token usage (D31 cost ledger).</summary>
     public Action<LlmUsage>? UsageReported { get; init; }
 
-    public OpenAiCompatRoleConfig Gate { get; init; } = new() { Model = "", Temperature = 0.1 };
-    public OpenAiCompatRoleConfig Advisor { get; init; } = new() { Model = "", Temperature = 0.3 };
-    public OpenAiCompatRoleConfig Summarizer { get; init; } = new() { Model = "", Temperature = 0.3 };
-    public OpenAiCompatRoleConfig Drafter { get; init; } = new() { Model = "", Temperature = 0.4, MaxTokens = 4096 };
+    /// <summary>
+    /// OpenRouter's unified reasoning control for thinking-class models (GLM, DeepSeek-R…):
+    /// "none" sends reasoning.enabled=false, anything else is passed as reasoning.effort
+    /// (low/medium/high). Null omits the field entirely — required for endpoints that
+    /// reject unknown parameters. Reasoning tokens bill as output and count toward
+    /// MaxTokens, so an uncontrolled thinking model truncates its own JSON (observed:
+    /// GLM-5.3-Flash gate at 1645 output tokens vs Haiku's ~330 for the same diff).
+    /// </summary>
+    public string? ReasoningEffort { get; init; }
+
+    // Caps sized for thinking-class models whose reasoning shares the output budget;
+    // a cap is insurance, not spend — unused headroom costs nothing.
+    public OpenAiCompatRoleConfig Gate { get; init; } = new() { Model = "", Temperature = 0.1, MaxTokens = 4096 };
+    public OpenAiCompatRoleConfig Advisor { get; init; } = new() { Model = "", Temperature = 0.3, MaxTokens = 8192 };
+    public OpenAiCompatRoleConfig Summarizer { get; init; } = new() { Model = "", Temperature = 0.3, MaxTokens = 8192 };
+    public OpenAiCompatRoleConfig Drafter { get; init; } = new() { Model = "", Temperature = 0.4, MaxTokens = 8192 };
 
     /// <summary>One model for every role — the typical bench setup.</summary>
     public static OpenAiCompatProviderOptions ForModel(
-        Uri baseUrl, string? apiKey, string model, Action<LlmUsage>? usageReported = null, bool strictSchema = true) => new()
+        Uri baseUrl, string? apiKey, string model, Action<LlmUsage>? usageReported = null,
+        bool strictSchema = true, string? reasoningEffort = null) => new()
     {
         BaseUrl = baseUrl,
         ApiKey = apiKey,
         StrictSchema = strictSchema,
         UsageReported = usageReported,
-        Gate = new OpenAiCompatRoleConfig { Model = model, Temperature = 0.1 },
-        Advisor = new OpenAiCompatRoleConfig { Model = model, Temperature = 0.3 },
-        Summarizer = new OpenAiCompatRoleConfig { Model = model, Temperature = 0.3 },
-        Drafter = new OpenAiCompatRoleConfig { Model = model, Temperature = 0.4, MaxTokens = 4096 },
+        ReasoningEffort = reasoningEffort,
+        Gate = new OpenAiCompatRoleConfig { Model = model, Temperature = 0.1, MaxTokens = 4096 },
+        Advisor = new OpenAiCompatRoleConfig { Model = model, Temperature = 0.3, MaxTokens = 8192 },
+        Summarizer = new OpenAiCompatRoleConfig { Model = model, Temperature = 0.3, MaxTokens = 8192 },
+        Drafter = new OpenAiCompatRoleConfig { Model = model, Temperature = 0.4, MaxTokens = 8192 },
     };
 
     public OpenAiCompatRoleConfig Resolve(LlmRole role) => role switch
@@ -85,7 +99,7 @@ public sealed class OpenAiCompatLlmProvider(OpenAiCompatProviderOptions options)
         if (config.Model.Length == 0)
             throw new InvalidOperationException($"OpenAI-compat provider has no model configured for role {role}.");
 
-        var request = BuildRequest(config, conversation, JsonSchemaFactory.For<T>(), typeof(T).Name, options.StrictSchema);
+        var request = BuildRequest(config, conversation, JsonSchemaFactory.For<T>(), typeof(T).Name, options.StrictSchema, options.ReasoningEffort);
         using var content = new StringContent(request.ToJsonString(), Encoding.UTF8, "application/json");
         using var message = new HttpRequestMessage(HttpMethod.Post, new Uri(options.BaseUrl.AbsoluteUri.TrimEnd('/') + "/chat/completions"))
         {
@@ -118,7 +132,7 @@ public sealed class OpenAiCompatLlmProvider(OpenAiCompatProviderOptions options)
             throw new InvalidOperationException($"OpenAI-compat {role} request failed ({(int)response.StatusCode}): {Truncate(body)}{hint}");
         }
 
-        var (text, usage) = ParseResponse(body);
+        var (text, finishReason, usage) = ParseResponse(body);
         if (usage is not null && options.UsageReported is { } report)
             report(new LlmUsage(role, config.Model, usage.Value.Input, usage.Value.Cached, usage.Value.Output));
 
@@ -128,13 +142,17 @@ public sealed class OpenAiCompatLlmProvider(OpenAiCompatProviderOptions options)
         }
         catch (JsonException ex)
         {
+            var cause = finishReason == "length"
+                ? $"output was truncated at the MaxTokens cap ({config.MaxTokens}, finish_reason=length) — on thinking models reasoning shares this budget; raise the cap or pass --compat-reasoning none/low"
+                : $"returned JSON that failed to parse as {typeof(T).Name}";
             throw new InvalidOperationException(
-                $"OpenAI-compat {role} ({config.Model}) returned JSON that failed to parse as {typeof(T).Name}: {ex.Message}\n{Truncate(text)}", ex);
+                $"OpenAI-compat {role} ({config.Model}) {cause}: {ex.Message}\n{Truncate(text)}", ex);
         }
     }
 
     internal static JsonObject BuildRequest(
-        OpenAiCompatRoleConfig config, LlmConversation conversation, JsonNode schema, string schemaName, bool strictSchema)
+        OpenAiCompatRoleConfig config, LlmConversation conversation, JsonNode schema, string schemaName, bool strictSchema,
+        string? reasoningEffort = null)
     {
         var system = conversation.System;
         if (!strictSchema)
@@ -148,7 +166,7 @@ public sealed class OpenAiCompatLlmProvider(OpenAiCompatProviderOptions options)
         foreach (var message in conversation.Messages)
             messages.Add(new JsonObject { ["role"] = message.Role, ["content"] = message.Content });
 
-        return new JsonObject
+        var request = new JsonObject
         {
             ["model"] = config.Model,
             ["messages"] = messages,
@@ -163,20 +181,30 @@ public sealed class OpenAiCompatLlmProvider(OpenAiCompatProviderOptions options)
                     {
                         ["name"] = schemaName,
                         ["strict"] = true,
-                        ["schema"] = schema,
+                        // A JsonNode belongs to one tree; clone so a caller-held schema stays reusable.
+                        ["schema"] = schema.DeepClone(),
                     },
                 }
                 : new JsonObject { ["type"] = "json_object" },
         };
+        if (reasoningEffort is { Length: > 0 })
+            request["reasoning"] = reasoningEffort == "none"
+                ? new JsonObject { ["enabled"] = false }
+                : new JsonObject { ["effort"] = reasoningEffort };
+        return request;
     }
 
-    internal static (string Text, (long Input, long Cached, long Output)? Usage) ParseResponse(string body)
+    internal static (string Text, string? FinishReason, (long Input, long Cached, long Output)? Usage) ParseResponse(string body)
     {
         using var doc = JsonDocument.Parse(body);
         var root = doc.RootElement;
-        var text = root.GetProperty("choices")[0].GetProperty("message").GetProperty("content").GetString()
+        var choice = root.GetProperty("choices")[0];
+        var text = choice.GetProperty("message").GetProperty("content").GetString()
             ?? throw new InvalidOperationException("OpenAI-compat response had no message content.");
         text = StripFences(text);
+        var finishReason = choice.TryGetProperty("finish_reason", out var f) && f.ValueKind == JsonValueKind.String
+            ? f.GetString()
+            : null;
 
         (long, long, long)? usage = null;
         if (root.TryGetProperty("usage", out var u))
@@ -189,7 +217,7 @@ public sealed class OpenAiCompatLlmProvider(OpenAiCompatProviderOptions options)
             // OpenAI's prompt_tokens includes cached tokens; our ledger keeps them apart.
             usage = (prompt - cached, cached, output);
         }
-        return (text, usage);
+        return (text, finishReason, usage);
     }
 
     /// <summary>json_object mode on weaker endpoints sometimes wraps the payload in ```json fences.</summary>

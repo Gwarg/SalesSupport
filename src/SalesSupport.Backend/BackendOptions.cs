@@ -27,6 +27,9 @@ public sealed class BackendOptions
     /// <summary>false switches to json_object + schema-in-prompt for endpoints that reject json_schema.</summary>
     public bool OpenAiCompatStrictSchema { get; init; } = true;
 
+    /// <summary>Reasoning control for thinking-class models: "none", "low", "medium", "high" or null (omit).</summary>
+    public string? OpenAiCompatReasoning { get; init; }
+
     /// <summary>true sends think=false (needed for qwen3-class models); set false for models without a thinking mode.</summary>
     public bool OllamaNoThink { get; init; } = true;
 
