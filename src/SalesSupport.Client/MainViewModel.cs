@@ -40,6 +40,10 @@ public sealed class MainViewModel : ViewModelBase
                 ReplaySamples.Add(Path.GetFileName(sample));
         SelectedSample = ReplaySamples.FirstOrDefault();
 
+        _client.TranscriptAppended += e => UI(() => TranscriptLog.Add(new TranscriptRowVm(
+            FormatCallTime(e.TimestampMs),
+            e.Speaker == Speaker.Rep ? "Du:" : "Kund:",
+            e.Text, e.Speaker == Speaker.Rep, IsAsk: false)));
         _client.PictureUpdated += p => UI(() => ApplyPicture(p));
         _client.PanelDeltaReceived += d => UI(() => ApplyPanelDelta(d));
         _client.TickCompleted += s => UI(() => ApplyTick(s));
@@ -75,6 +79,7 @@ public sealed class MainViewModel : ViewModelBase
     private string _selectedSource = "Live";
     public string SelectedSource { get => _selectedSource; set => Set(ref _selectedSource, value); }
     public ObservableCollection<string> ReplaySamples { get; } = [];
+    public ObservableCollection<TranscriptRowVm> TranscriptLog { get; } = [];
     private string? _selectedSample;
     public string? SelectedSample { get => _selectedSample; set => Set(ref _selectedSample, value); }
 
@@ -176,7 +181,7 @@ public sealed class MainViewModel : ViewModelBase
                     },
                     onAsk: query =>
                     {
-                        UI(() => { LiveLine = $"⌨ {query}"; AnswerText = "…"; });
+                        UI(() => { LiveLine = $"⌨ {query}"; AnswerText = "…"; LogAsk(query); });
                         return _client.AskAsync(query);
                     },
                     onCompleted: () => UI(() =>
@@ -250,6 +255,7 @@ public sealed class MainViewModel : ViewModelBase
         if (query.Length == 0) return;
         AskText = "";
         AnswerText = "…";
+        LogAsk(query);
         try
         {
             await _client.AskAsync(query);
@@ -259,6 +265,12 @@ public sealed class MainViewModel : ViewModelBase
             AnswerText = $"Fel: {ex.Message}";
         }
     }
+
+    private void LogAsk(string query) => TranscriptLog.Add(new TranscriptRowVm(
+        FormatCallTime((long)(DateTime.UtcNow - _callStarted).TotalMilliseconds),
+        "⌨", query, IsRep: false, IsAsk: true));
+
+    private static string FormatCallTime(long ms) => $"{ms / 60000}:{ms / 1000 % 60:D2}";
 
     private void ApplyPicture(CustomerPicture picture)
     {
@@ -343,6 +355,7 @@ public sealed class MainViewModel : ViewModelBase
         _replay = null;
         _audio?.Dispose();
         _audio = null;
+        TranscriptLog.Clear();
         Questions.Clear();
         Products.Clear();
         Threads.Clear();

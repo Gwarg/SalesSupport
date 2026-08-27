@@ -182,3 +182,8 @@ conversation pace (partials, finals, `ask` lines) so the panel fills in exactly 
 live call — no mic, no STT key. Language/customer come from the sample's meta line when
 present. The backend runs its real provider, so replay costs cents on Claude and is free
 on Ollama. Press Avsluta after "uppspelning klar" for the summary.
+
+**Transcript log** — the Logg button (live strip) or Transkript (post-call) opens a
+side window with the running conversation: every backend-confirmed utterance
+(color-coded rep/customer), typed asks (⌨), and the in-flight partial at the bottom.
+Follows the tail unless you scroll up; clears on Nytt samtal.
