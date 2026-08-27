@@ -4,6 +4,7 @@ using SalesSupport.Core.Serialization;
 using SalesSupport.Knowledge;
 using SalesSupport.Providers.Claude;
 using SalesSupport.Providers.Ollama;
+using SalesSupport.Providers.OpenAiCompat;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,11 +37,17 @@ builder.Services.AddSingleton<ILlmProvider>(sp => options.LlmProvider switch
         diagnostics: message => sp.GetRequiredService<ILoggerFactory>().CreateLogger("Ollama").LogInformation("{Stats}", message))),
     "claude" => new ClaudeLlmProvider(new ClaudeProviderOptions
     {
-        UsageReported = usage => sp.GetRequiredService<ILoggerFactory>().CreateLogger("Claude").LogInformation(
-            "{Role} {Model}: in={Input} cached={CacheRead} out={Output} tokens",
-            usage.Role, usage.Model, usage.InputTokens, usage.CacheReadTokens, usage.OutputTokens),
+        UsageReported = UsageLogger(sp, "Claude"),
     }),
-    var other => throw new InvalidOperationException($"Unknown Backend:LlmProvider '{other}' (ollama | claude)"),
+    "openai-compat" => new OpenAiCompatLlmProvider(OpenAiCompatProviderOptions.ForModel(
+        new Uri(options.OpenAiCompatBaseUrl
+            ?? throw new InvalidOperationException("Backend:LlmProvider is 'openai-compat' but Backend:OpenAiCompatBaseUrl is not set.")),
+        Environment.GetEnvironmentVariable(options.OpenAiCompatApiKeyEnv),
+        options.OpenAiCompatModel
+            ?? throw new InvalidOperationException("Backend:LlmProvider is 'openai-compat' but Backend:OpenAiCompatModel is not set."),
+        UsageLogger(sp, "OpenAiCompat"),
+        strictSchema: options.OpenAiCompatStrictSchema)),
+    var other => throw new InvalidOperationException($"Unknown Backend:LlmProvider '{other}' (ollama | claude | openai-compat)"),
 });
 
 builder.Services.AddHttpClient();
@@ -87,5 +94,10 @@ app.Logger.LogInformation("SalesSupport backend up — pack {Pack} ({Company}), 
     Path.GetFileName(packPath), pack.CompanyId, options.LlmProvider);
 
 app.Run();
+
+static Action<LlmUsage> UsageLogger(IServiceProvider sp, string category) =>
+    usage => sp.GetRequiredService<ILoggerFactory>().CreateLogger(category).LogInformation(
+        "{Role} {Model}: in={Input} cached={CacheRead} out={Output} tokens",
+        usage.Role, usage.Model, usage.InputTokens, usage.CacheReadTokens, usage.OutputTokens);
 
 public partial class Program;

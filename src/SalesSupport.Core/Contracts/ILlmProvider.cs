@@ -14,6 +14,9 @@ public sealed record LlmMessage(string Role, string Content)
 
 public sealed record LlmConversation(string System, IReadOnlyList<LlmMessage> Messages);
 
+/// <summary>Per-call token usage — the cost ledger for logs and run accounting (D31).</summary>
+public sealed record LlmUsage(LlmRole Role, string Model, long InputTokens, long CacheReadTokens, long OutputTokens);
+
 /// <summary>
 /// The hard boundary of D14: chat completion + strict JSON output, nothing provider-specific.
 /// Implementations enforce the JSON schema for T (structured outputs / guided decoding)

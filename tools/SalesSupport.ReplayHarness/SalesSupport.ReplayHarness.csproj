@@ -6,6 +6,7 @@
     <ProjectReference Include="..\..\src\SalesSupport.Providers.Claude\SalesSupport.Providers.Claude.csproj" />
     <ProjectReference Include="..\..\src\SalesSupport.Knowledge\SalesSupport.Knowledge.csproj" />
     <ProjectReference Include="..\..\src\SalesSupport.Providers.Ollama\SalesSupport.Providers.Ollama.csproj" />
+    <ProjectReference Include="..\..\src\SalesSupport.Providers.OpenAiCompat\SalesSupport.Providers.OpenAiCompat.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

@@ -22,7 +22,26 @@ dotnet run --project tools/SalesSupport.ReplayHarness                # fake heur
 dotnet run --project tools/SalesSupport.ReplayHarness -- --fixtures  # Claude-authored golden responses, zero API cost
 dotnet run --project tools/SalesSupport.ReplayHarness -- --ollama    # local models via Ollama (free real inference)
 dotnet run --project tools/SalesSupport.ReplayHarness -- --live      # real Claude API (needs ANTHROPIC_API_KEY)
+dotnet run --project tools/SalesSupport.ReplayHarness -- --compat    # any OpenAI-compatible endpoint (D31 bench)
 ```
+
+**Cheap-model bench (D31)** — `--compat` drives any OpenAI-chat-completions endpoint:
+OpenRouter (one key, most cheap models), Gemini-compat, or self-hosted vLLM. Configure
+via env or flags, then run the same corpus/quick modes as every other backend:
+
+```
+set OPENAI_COMPAT_BASE_URL=https://openrouter.ai/api/v1
+set OPENAI_COMPAT_API_KEY=sk-or-...
+dotnet run --project tools/SalesSupport.ReplayHarness -- --quick --compat-model z-ai/glm-5.3-flash
+dotnet run --project tools/SalesSupport.ReplayHarness -- --all --compat-model deepseek/deepseek-chat
+```
+
+Output shape uses `response_format: json_schema` (strict); add `--compat-loose` for
+endpoints that reject it (json_object + schema in the prompt). Token usage lands in the
+runs/ log exactly like `--live`, so cost columns are directly comparable. The backend
+runs the same provider with `Backend:LlmProvider = "openai-compat"` plus
+`OpenAiCompatBaseUrl`/`OpenAiCompatModel` (key via the env var named in
+`OpenAiCompatApiKeyEnv`, default `OPENAI_COMPAT_API_KEY`).
 
 Ollama mode (D14/D27 local path): install from ollama.com, `ollama pull qwen3:8b`,
 then run with `--ollama` (optionally `--all --ollama` to run the whole corpus with real

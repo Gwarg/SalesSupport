@@ -9,11 +9,23 @@ public sealed class BackendOptions
     public string DefaultLanguage { get; init; } = "sv";
     public string UiLanguage { get; init; } = "sv";
 
-    /// <summary>"ollama" or "claude" (D14). The desktop client never sees model keys (D20).</summary>
+    /// <summary>"ollama", "claude" or "openai-compat" (D14/D31). The desktop client never sees model keys (D20).</summary>
     public string LlmProvider { get; init; } = "ollama";
 
     /// <summary>One local model for all roles (small-VRAM constraint). Benchmark alternatives with the harness.</summary>
     public string OllamaModel { get; init; } = "qwen3:8b";
+
+    /// <summary>API root of an OpenAI-compatible endpoint (D31), e.g. https://openrouter.ai/api/v1.</summary>
+    public string? OpenAiCompatBaseUrl { get; init; }
+
+    /// <summary>Model id at that endpoint, used for all roles.</summary>
+    public string? OpenAiCompatModel { get; init; }
+
+    /// <summary>Name of the env var holding the key — the key itself never sits in appsettings (D9 spirit).</summary>
+    public string OpenAiCompatApiKeyEnv { get; init; } = "OPENAI_COMPAT_API_KEY";
+
+    /// <summary>false switches to json_object + schema-in-prompt for endpoints that reject json_schema.</summary>
+    public bool OpenAiCompatStrictSchema { get; init; } = true;
 
     /// <summary>true sends think=false (needed for qwen3-class models); set false for models without a thinking mode.</summary>
     public bool OllamaNoThink { get; init; } = true;

@@ -11,9 +11,6 @@ public sealed class ClaudeRoleConfig
     public string? Effort { get; init; }
 }
 
-/// <summary>Per-call token usage — the cost ledger for logs and run accounting.</summary>
-public sealed record LlmUsage(LlmRole Role, string Model, long InputTokens, long CacheReadTokens, long OutputTokens);
-
 /// <summary>
 /// Role → model mapping per D12/D14: gate = Haiku 4.5 (fast, no thinking), advisor and
 /// above = Opus 5 with adaptive thinking, effort as the latency dial (tuned in L0 against

@@ -12,6 +12,10 @@ var live = false;
 var ollama = false;
 string? ollamaModel = null;
 var ollamaNoThink = false;
+var compat = false;
+var compatLoose = false;
+string? compatModel = Environment.GetEnvironmentVariable("OPENAI_COMPAT_MODEL");
+string? compatUrl = Environment.GetEnvironmentVariable("OPENAI_COMPAT_BASE_URL");
 var useFixtures = false;
 var runAll = false;
 var quick = false;
@@ -27,6 +31,10 @@ for (var i = 0; i < args.Length; i++)
         case "--ollama": ollama = true; break;
         case "--ollama-model": ollama = true; ollamaModel = args[++i]; break;
         case "--ollama-nothink": ollama = true; ollamaNoThink = true; break;
+        case "--compat": compat = true; break;
+        case "--compat-model": compat = true; compatModel = args[++i]; break;
+        case "--compat-url": compat = true; compatUrl = args[++i]; break;
+        case "--compat-loose": compat = true; compatLoose = true; break;
         case "--fixtures": useFixtures = true; break;
         case "--all": runAll = true; useFixtures = true; break;
         case "--quick": quick = true; break;
@@ -37,12 +45,18 @@ for (var i = 0; i < args.Length; i++)
 }
 
 var repoRoot = FindRepoRoot();
-var modeLabel = ollama ? "ollama" : live ? "live" : useFixtures ? "fixtures" : "fake";
+var modeLabel = compat ? "compat" : ollama ? "ollama" : live ? "live" : useFixtures ? "fixtures" : "fake";
 var runDir = Path.Combine(repoRoot, "runs", $"{DateTime.Now:yyyyMMdd-HHmmss}-{modeLabel}");
 
 if (live && string.IsNullOrEmpty(Environment.GetEnvironmentVariable("ANTHROPIC_API_KEY")))
 {
     Console.Error.WriteLine("--live requires ANTHROPIC_API_KEY to be set.");
+    return 1;
+}
+if (compat && (string.IsNullOrEmpty(compatUrl) || string.IsNullOrEmpty(compatModel)))
+{
+    Console.Error.WriteLine("--compat requires a base URL and model: --compat-url/--compat-model " +
+                            "or env OPENAI_COMPAT_BASE_URL/OPENAI_COMPAT_MODEL (key: OPENAI_COMPAT_API_KEY).");
     return 1;
 }
 
@@ -128,7 +142,26 @@ async Task<CallStats> RunCallAsync(string path, bool verbose)
         FixtureLlmProvider? fixtures = null;
 
         ILlmProvider llm;
-        if (ollama)
+        if (compat)
+        {
+            // The D31 bench gateway: any OpenAI-compatible endpoint, usage-accounted
+            // like --live so runs are directly comparable on cost.
+            llm = new SalesSupport.Providers.OpenAiCompat.OpenAiCompatLlmProvider(
+                SalesSupport.Providers.OpenAiCompat.OpenAiCompatProviderOptions.ForModel(
+                    new Uri(compatUrl!),
+                    Environment.GetEnvironmentVariable("OPENAI_COMPAT_API_KEY"),
+                    compatModel!,
+                    usage =>
+                    {
+                        stats.TokensIn += usage.InputTokens;
+                        stats.TokensCached += usage.CacheReadTokens;
+                        stats.TokensOut += usage.OutputTokens;
+                        log.AppendLine($"   [usage] {usage.Role} {usage.Model}: in={usage.InputTokens} cached={usage.CacheReadTokens} out={usage.OutputTokens}");
+                    },
+                    strictSchema: !compatLoose));
+            stats.Mode = $"compat:{compatModel}";
+        }
+        else if (ollama)
         {
             llm = ollamaModel is null && !ollamaNoThink
                 ? new SalesSupport.Providers.Ollama.OllamaLlmProvider()
