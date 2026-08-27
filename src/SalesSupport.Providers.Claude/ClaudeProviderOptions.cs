@@ -23,15 +23,21 @@ public sealed class ClaudeProviderOptions
 
     public ClaudeRoleConfig Gate { get; init; } = new() { Model = "claude-haiku-4-5", MaxTokens = 2048 };
 
-    /// <summary>Advisor model/effort overridable via CLAUDE_ADVISOR_MODEL / CLAUDE_ADVISOR_EFFORT for latency experiments.</summary>
-    public ClaudeRoleConfig Advisor { get; init; } = new()
+    /// <summary>Advisor model/effort overridable via CLAUDE_ADVISOR_MODEL / CLAUDE_ADVISOR_EFFORT ("none" disables) for experiments.</summary>
+    public ClaudeRoleConfig Advisor { get; init; } = BuildAdvisorConfig();
+
+    private static ClaudeRoleConfig BuildAdvisorConfig()
     {
         // Measured 2026-08-26 (runs/): low matches medium's quality on the corpus at ~15%
         // lower latency and ~25% fewer output tokens; Sonnet 5 was no faster than Opus.
-        Model = Environment.GetEnvironmentVariable("CLAUDE_ADVISOR_MODEL") is { Length: > 0 } model ? model : "claude-opus-5",
-        MaxTokens = 4096,
-        Effort = Environment.GetEnvironmentVariable("CLAUDE_ADVISOR_EFFORT") is { Length: > 0 } effort ? effort : "low",
-    };
+        var model = Environment.GetEnvironmentVariable("CLAUDE_ADVISOR_MODEL") is { Length: > 0 } m ? m : "claude-opus-5";
+        var effort = Environment.GetEnvironmentVariable("CLAUDE_ADVISOR_EFFORT") is { Length: > 0 } e ? e : "low";
+        // Haiku-class models reject output_config.effort — a model override to Haiku must
+        // drop the effort dial instead of 400-ing every advisor call.
+        if (effort == "none" || model.Contains("haiku", StringComparison.OrdinalIgnoreCase))
+            return new ClaudeRoleConfig { Model = model, MaxTokens = 4096 };
+        return new ClaudeRoleConfig { Model = model, MaxTokens = 4096, Effort = effort };
+    }
     public ClaudeRoleConfig Summarizer { get; init; } = new() { Model = "claude-opus-5", MaxTokens = 4096, Effort = "high" };
     public ClaudeRoleConfig Drafter { get; init; } = new() { Model = "claude-opus-5", MaxTokens = 8192, Effort = "high" };
 
