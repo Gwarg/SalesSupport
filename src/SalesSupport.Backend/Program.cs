@@ -34,7 +34,12 @@ builder.Services.AddSingleton<ILlmProvider>(sp => options.LlmProvider switch
         options.OllamaModel,
         options.OllamaNoThink ? false : null,
         diagnostics: message => sp.GetRequiredService<ILoggerFactory>().CreateLogger("Ollama").LogInformation("{Stats}", message))),
-    "claude" => new ClaudeLlmProvider(),
+    "claude" => new ClaudeLlmProvider(new ClaudeProviderOptions
+    {
+        UsageReported = usage => sp.GetRequiredService<ILoggerFactory>().CreateLogger("Claude").LogInformation(
+            "{Role} {Model}: in={Input} cached={CacheRead} out={Output} tokens",
+            usage.Role, usage.Model, usage.InputTokens, usage.CacheReadTokens, usage.OutputTokens),
+    }),
     var other => throw new InvalidOperationException($"Unknown Backend:LlmProvider '{other}' (ollama | claude)"),
 });
 
