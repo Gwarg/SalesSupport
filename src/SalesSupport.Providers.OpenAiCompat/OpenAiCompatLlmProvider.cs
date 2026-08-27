@@ -14,6 +14,17 @@ public sealed class OpenAiCompatRoleConfig
 
     /// <summary>Hard output cap — same repetition-loop insurance as the Ollama provider.</summary>
     public int MaxTokens { get; init; } = 2048;
+
+    /// <summary>
+    /// Reasoning control for thinking-class models (OpenRouter unified parameter):
+    /// "none" sends reasoning.enabled=false (some endpoints refuse — GLM-5.3-Flash
+    /// requires reasoning on), other values pass as reasoning.effort (low/medium/high).
+    /// Null omits the field — required for endpoints that reject unknown parameters.
+    /// Per-role because the right dial differs: reasoning tokens bill as output and
+    /// count toward MaxTokens, so a live-path gate wants low while a post-call
+    /// summarizer can afford full thinking.
+    /// </summary>
+    public string? ReasoningEffort { get; init; }
 }
 
 /// <summary>
@@ -39,16 +50,6 @@ public sealed class OpenAiCompatProviderOptions
     /// <summary>Invoked after every completed call with its token usage (D31 cost ledger).</summary>
     public Action<LlmUsage>? UsageReported { get; init; }
 
-    /// <summary>
-    /// OpenRouter's unified reasoning control for thinking-class models (GLM, DeepSeek-R…):
-    /// "none" sends reasoning.enabled=false, anything else is passed as reasoning.effort
-    /// (low/medium/high). Null omits the field entirely — required for endpoints that
-    /// reject unknown parameters. Reasoning tokens bill as output and count toward
-    /// MaxTokens, so an uncontrolled thinking model truncates its own JSON (observed:
-    /// GLM-5.3-Flash gate at 1645 output tokens vs Haiku's ~330 for the same diff).
-    /// </summary>
-    public string? ReasoningEffort { get; init; }
-
     // Caps sized for thinking-class models whose reasoning shares the output budget;
     // a cap is insurance, not spend — unused headroom costs nothing.
     public OpenAiCompatRoleConfig Gate { get; init; } = new() { Model = "", Temperature = 0.1, MaxTokens = 4096 };
@@ -65,11 +66,10 @@ public sealed class OpenAiCompatProviderOptions
         ApiKey = apiKey,
         StrictSchema = strictSchema,
         UsageReported = usageReported,
-        ReasoningEffort = reasoningEffort,
-        Gate = new OpenAiCompatRoleConfig { Model = model, Temperature = 0.1, MaxTokens = 4096 },
-        Advisor = new OpenAiCompatRoleConfig { Model = model, Temperature = 0.3, MaxTokens = 8192 },
-        Summarizer = new OpenAiCompatRoleConfig { Model = model, Temperature = 0.3, MaxTokens = 8192 },
-        Drafter = new OpenAiCompatRoleConfig { Model = model, Temperature = 0.4, MaxTokens = 8192 },
+        Gate = new OpenAiCompatRoleConfig { Model = model, Temperature = 0.1, MaxTokens = 4096, ReasoningEffort = reasoningEffort },
+        Advisor = new OpenAiCompatRoleConfig { Model = model, Temperature = 0.3, MaxTokens = 8192, ReasoningEffort = reasoningEffort },
+        Summarizer = new OpenAiCompatRoleConfig { Model = model, Temperature = 0.3, MaxTokens = 8192, ReasoningEffort = reasoningEffort },
+        Drafter = new OpenAiCompatRoleConfig { Model = model, Temperature = 0.4, MaxTokens = 8192, ReasoningEffort = reasoningEffort },
     };
 
     public OpenAiCompatRoleConfig Resolve(LlmRole role) => role switch
@@ -99,7 +99,7 @@ public sealed class OpenAiCompatLlmProvider(OpenAiCompatProviderOptions options)
         if (config.Model.Length == 0)
             throw new InvalidOperationException($"OpenAI-compat provider has no model configured for role {role}.");
 
-        var request = BuildRequest(config, conversation, JsonSchemaFactory.For<T>(), typeof(T).Name, options.StrictSchema, options.ReasoningEffort);
+        var request = BuildRequest(config, conversation, JsonSchemaFactory.For<T>(), typeof(T).Name, options.StrictSchema);
         using var content = new StringContent(request.ToJsonString(), Encoding.UTF8, "application/json");
         using var message = new HttpRequestMessage(HttpMethod.Post, new Uri(options.BaseUrl.AbsoluteUri.TrimEnd('/') + "/chat/completions"))
         {
@@ -151,8 +151,7 @@ public sealed class OpenAiCompatLlmProvider(OpenAiCompatProviderOptions options)
     }
 
     internal static JsonObject BuildRequest(
-        OpenAiCompatRoleConfig config, LlmConversation conversation, JsonNode schema, string schemaName, bool strictSchema,
-        string? reasoningEffort = null)
+        OpenAiCompatRoleConfig config, LlmConversation conversation, JsonNode schema, string schemaName, bool strictSchema)
     {
         var system = conversation.System;
         if (!strictSchema)
@@ -187,10 +186,10 @@ public sealed class OpenAiCompatLlmProvider(OpenAiCompatProviderOptions options)
                 }
                 : new JsonObject { ["type"] = "json_object" },
         };
-        if (reasoningEffort is { Length: > 0 })
-            request["reasoning"] = reasoningEffort == "none"
+        if (config.ReasoningEffort is { Length: > 0 } effort)
+            request["reasoning"] = effort == "none"
                 ? new JsonObject { ["enabled"] = false }
-                : new JsonObject { ["effort"] = reasoningEffort };
+                : new JsonObject { ["effort"] = effort };
         return request;
     }
 

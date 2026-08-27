@@ -57,16 +57,49 @@ public class OpenAiCompatProviderTests
     {
         var conversation = new LlmConversation("s", []);
         var schema = JsonSchemaFactory.For<GateDiff>();
-        var config = new OpenAiCompatRoleConfig { Model = "m" };
 
-        var off = OpenAiCompatLlmProvider.BuildRequest(config, conversation, schema, "GateDiff", true, "none");
+        var off = OpenAiCompatLlmProvider.BuildRequest(
+            new OpenAiCompatRoleConfig { Model = "m", ReasoningEffort = "none" }, conversation, schema, "GateDiff", true);
         Assert.False(off["reasoning"]!["enabled"]!.GetValue<bool>());
 
-        var low = OpenAiCompatLlmProvider.BuildRequest(config, conversation, schema, "GateDiff", true, "low");
+        var low = OpenAiCompatLlmProvider.BuildRequest(
+            new OpenAiCompatRoleConfig { Model = "m", ReasoningEffort = "low" }, conversation, schema, "GateDiff", true);
         Assert.Equal("low", low["reasoning"]!["effort"]!.GetValue<string>());
 
-        var unset = OpenAiCompatLlmProvider.BuildRequest(config, conversation, schema, "GateDiff", true);
+        var unset = OpenAiCompatLlmProvider.BuildRequest(
+            new OpenAiCompatRoleConfig { Model = "m" }, conversation, schema, "GateDiff", true);
         Assert.False(unset.ContainsKey("reasoning"));
+    }
+
+    [Fact]
+    public async Task Role_routing_dispatches_to_the_provider_registered_for_the_role()
+    {
+        var gateProvider = new RecordingProvider();
+        var advisorProvider = new RecordingProvider();
+        var routing = new RoleRoutingLlmProvider(new Dictionary<LlmRole, ILlmProvider>
+        {
+            [LlmRole.Gate] = gateProvider,
+            [LlmRole.Advisor] = advisorProvider,
+        });
+
+        await routing.CompleteJsonAsync<GateDiff>(LlmRole.Gate, new LlmConversation("s", []));
+
+        Assert.Equal([LlmRole.Gate], gateProvider.Calls);
+        Assert.Empty(advisorProvider.Calls);
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            routing.CompleteJsonAsync<GateDiff>(LlmRole.Summarizer, new LlmConversation("s", [])));
+    }
+
+    private sealed class RecordingProvider : ILlmProvider
+    {
+        public List<LlmRole> Calls { get; } = [];
+
+        public Task<T> CompleteJsonAsync<T>(LlmRole role, LlmConversation conversation, CancellationToken ct = default)
+            where T : class
+        {
+            Calls.Add(role);
+            return Task.FromResult(JsonDefaults.Deserialize<T>("{}"));
+        }
     }
 
     [Fact]

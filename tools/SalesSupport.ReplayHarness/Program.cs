@@ -17,6 +17,9 @@ var compatLoose = false;
 string? compatModel = Environment.GetEnvironmentVariable("OPENAI_COMPAT_MODEL");
 string? compatUrl = Environment.GetEnvironmentVariable("OPENAI_COMPAT_BASE_URL");
 string? compatReasoning = null;
+string? compatGate = null;
+string? compatAdvisor = null;
+string? compatSummarizer = null;
 var useFixtures = false;
 var runAll = false;
 var quick = false;
@@ -37,6 +40,11 @@ for (var i = 0; i < args.Length; i++)
         case "--compat-url": compat = true; compatUrl = args[++i]; break;
         case "--compat-loose": compat = true; compatLoose = true; break;
         case "--compat-reasoning": compat = true; compatReasoning = args[++i]; break;
+        // Role mixing (D31): spec is "model[@reasoning]", or "claude"/"ollama" to route
+        // that role to the other provider. Unspecified roles fall back to --compat-model.
+        case "--compat-gate": compat = true; compatGate = args[++i]; break;
+        case "--compat-advisor": compat = true; compatAdvisor = args[++i]; break;
+        case "--compat-summarizer": compat = true; compatSummarizer = args[++i]; break;
         case "--fixtures": useFixtures = true; break;
         case "--all": runAll = true; useFixtures = true; break;
         case "--quick": quick = true; break;
@@ -55,10 +63,14 @@ if (live && string.IsNullOrEmpty(Environment.GetEnvironmentVariable("ANTHROPIC_A
     Console.Error.WriteLine("--live requires ANTHROPIC_API_KEY to be set.");
     return 1;
 }
-if (compat && (string.IsNullOrEmpty(compatUrl) || string.IsNullOrEmpty(compatModel)))
+if (compat && string.IsNullOrEmpty(compatUrl))
 {
-    Console.Error.WriteLine("--compat requires a base URL and model: --compat-url/--compat-model " +
-                            "or env OPENAI_COMPAT_BASE_URL/OPENAI_COMPAT_MODEL (key: OPENAI_COMPAT_API_KEY).");
+    Console.Error.WriteLine("--compat requires a base URL: --compat-url or env OPENAI_COMPAT_BASE_URL (key: OPENAI_COMPAT_API_KEY).");
+    return 1;
+}
+if (compat && string.IsNullOrEmpty(compatModel) && (compatGate is null || compatAdvisor is null || compatSummarizer is null))
+{
+    Console.Error.WriteLine("Roles without a --compat-gate/--compat-advisor/--compat-summarizer spec need --compat-model (or env OPENAI_COMPAT_MODEL).");
     return 1;
 }
 
@@ -146,23 +158,70 @@ async Task<CallStats> RunCallAsync(string path, bool verbose)
         ILlmProvider llm;
         if (compat)
         {
-            // The D31 bench gateway: any OpenAI-compatible endpoint, usage-accounted
-            // like --live so runs are directly comparable on cost.
-            llm = new SalesSupport.Providers.OpenAiCompat.OpenAiCompatLlmProvider(
-                SalesSupport.Providers.OpenAiCompat.OpenAiCompatProviderOptions.ForModel(
-                    new Uri(compatUrl!),
-                    Environment.GetEnvironmentVariable("OPENAI_COMPAT_API_KEY"),
-                    compatModel!,
-                    usage =>
-                    {
-                        stats.TokensIn += usage.InputTokens;
-                        stats.TokensCached += usage.CacheReadTokens;
-                        stats.TokensOut += usage.OutputTokens;
-                        log.AppendLine($"   [usage] {usage.Role} {usage.Model}: in={usage.InputTokens} cached={usage.CacheReadTokens} out={usage.OutputTokens}");
-                    },
-                    strictSchema: !compatLoose,
-                    reasoningEffort: compatReasoning));
-            stats.Mode = $"compat:{compatModel}";
+            // The D31 bench gateway: any OpenAI-compatible endpoint, usage-accounted like
+            // --live so runs are directly comparable on cost. Role specs mix models freely;
+            // "claude"/"ollama" route a role to the other provider entirely.
+            Action<LlmUsage> onUsage = usage =>
+            {
+                stats.TokensIn += usage.InputTokens;
+                stats.TokensCached += usage.CacheReadTokens;
+                stats.TokensOut += usage.OutputTokens;
+                log.AppendLine($"   [usage] {usage.Role} {usage.Model}: in={usage.InputTokens} cached={usage.CacheReadTokens} out={usage.OutputTokens}");
+            };
+
+            var roles = new Dictionary<LlmRole, (string Kind, string Model, string? Reasoning)>
+            {
+                [LlmRole.Gate] = ParseSpec(compatGate, compatModel, compatReasoning),
+                [LlmRole.Advisor] = ParseSpec(compatAdvisor, compatModel, compatReasoning),
+                [LlmRole.Summarizer] = ParseSpec(compatSummarizer, compatModel, compatReasoning),
+                [LlmRole.Drafter] = ParseSpec(compatAdvisor, compatModel, compatReasoning),
+            };
+            if (roles.Values.Any(r => r.Kind == "claude") &&
+                string.IsNullOrEmpty(Environment.GetEnvironmentVariable("ANTHROPIC_API_KEY")))
+                throw new InvalidOperationException("A role is routed to claude — ANTHROPIC_API_KEY must be set.");
+
+            var compatProvider = new SalesSupport.Providers.OpenAiCompat.OpenAiCompatLlmProvider(
+                new SalesSupport.Providers.OpenAiCompat.OpenAiCompatProviderOptions
+                {
+                    BaseUrl = new Uri(compatUrl!),
+                    ApiKey = Environment.GetEnvironmentVariable("OPENAI_COMPAT_API_KEY"),
+                    StrictSchema = !compatLoose,
+                    UsageReported = onUsage,
+                    Gate = new() { Model = roles[LlmRole.Gate].Model, Temperature = 0.1, MaxTokens = 4096, ReasoningEffort = roles[LlmRole.Gate].Reasoning },
+                    Advisor = new() { Model = roles[LlmRole.Advisor].Model, Temperature = 0.3, MaxTokens = 8192, ReasoningEffort = roles[LlmRole.Advisor].Reasoning },
+                    Summarizer = new() { Model = roles[LlmRole.Summarizer].Model, Temperature = 0.3, MaxTokens = 8192, ReasoningEffort = roles[LlmRole.Summarizer].Reasoning },
+                    Drafter = new() { Model = roles[LlmRole.Drafter].Model, Temperature = 0.4, MaxTokens = 8192, ReasoningEffort = roles[LlmRole.Drafter].Reasoning },
+                });
+
+            if (roles.Values.All(r => r.Kind == "compat"))
+            {
+                llm = compatProvider;
+            }
+            else
+            {
+                ILlmProvider? claudeShared = null, ollamaShared = null;
+                ILlmProvider RouteFor(string kind) => kind switch
+                {
+                    "claude" => claudeShared ??= new ClaudeLlmProvider(new ClaudeProviderOptions { UsageReported = onUsage }),
+                    "ollama" => ollamaShared ??= new SalesSupport.Providers.Ollama.OllamaLlmProvider(),
+                    _ => compatProvider,
+                };
+                llm = new RoleRoutingLlmProvider(roles.ToDictionary(kv => kv.Key, kv => RouteFor(kv.Value.Kind)));
+            }
+
+            if (compatGate is null && compatAdvisor is null && compatSummarizer is null)
+            {
+                stats.Mode = $"compat:{compatModel}";
+            }
+            else
+            {
+                static string Describe((string Kind, string Model, string? Reasoning) r) =>
+                    r.Kind == "compat" ? r.Model + (r.Reasoning is null ? "" : $"@{r.Reasoning}") : r.Kind;
+                var mix = $"gate={Describe(roles[LlmRole.Gate])} advisor={Describe(roles[LlmRole.Advisor])} summarizer={Describe(roles[LlmRole.Summarizer])}";
+                stats.Mode = "mix";
+                log.AppendLine($"   [mix] {mix}");
+                if (verbose) Console.WriteLine($"Mix: {mix}");
+            }
         }
         else if (ollama)
         {
@@ -366,6 +425,16 @@ static void PrintDelta(PanelDelta? delta)
     foreach (var p in delta.AddedProducts) Console.WriteLine($"     + förslag {p.Id}: {p.DisplayName} — {p.Why}");
     foreach (var id in delta.RemovedQuestionIds) Console.WriteLine($"     - fråga  {id}");
     foreach (var id in delta.RemovedProductIds) Console.WriteLine($"     - förslag {id}");
+}
+
+// Role spec: "model[@reasoning]" for the compat endpoint, or "claude"/"ollama" to route
+// the role to that provider. Null falls back to the shared --compat-model + --compat-reasoning.
+static (string Kind, string Model, string? Reasoning) ParseSpec(string? spec, string? defaultModel, string? defaultReasoning)
+{
+    if (spec is null) return ("compat", defaultModel ?? "", defaultReasoning);
+    if (spec is "claude" or "ollama") return (spec, "", null);
+    var at = spec.LastIndexOf('@');
+    return at > 0 ? ("compat", spec[..at], spec[(at + 1)..]) : ("compat", spec, defaultReasoning);
 }
 
 static string FindRepoRoot()
