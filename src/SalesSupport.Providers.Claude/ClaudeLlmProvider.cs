@@ -47,8 +47,10 @@ public sealed class ClaudeLlmProvider(ClaudeProviderOptions? options = null) : I
 
         if (_options.UsageReported is { } report)
         {
+            // Cache writes are processed input too (billed 1.25x) — without them the
+            // first tick of every call under-reports by the whole prefix.
             report(new LlmUsage(role, config.Model,
-                response.Usage.InputTokens,
+                response.Usage.InputTokens + (response.Usage.CacheCreationInputTokens ?? 0),
                 response.Usage.CacheReadInputTokens ?? 0,
                 response.Usage.OutputTokens));
         }

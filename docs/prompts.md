@@ -14,7 +14,13 @@
 
 ## Gate (small/fast model — Haiku 4.5 in the Claude provider)
 
-**Input assembly** (~1–2k tokens; system cached, rest volatile):
+**Input assembly** (~1–2k tokens; system cached, rest volatile). *2026-08-28 (D31):
+the system block additionally carries schematic diff EXAMPLES (greeting → empty
+diff; first signal; update-by-id without re-emits; rejection + commitment) and the
+CATALOG map (for recognizing product mentions — name_as_said stays as spoken).
+Both are stable per installation and deliberately sit in system so the cacheable
+prefix clears Haiku's 2048-token floor; before this the gate re-billed its full
+prompt every tick (measured cached=0).*
 
 ```
 [system — static, cached]

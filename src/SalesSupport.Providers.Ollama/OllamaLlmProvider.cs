@@ -44,9 +44,10 @@ public sealed class OllamaProviderOptions
 
     // Context windows sized for an 8 GB GPU: the model (~5 GB) plus KV cache must stay
     // on-GPU or Ollama spills to CPU and every call crawls. 16k ctx on qwen3:8b costs
-    // ~2-3 GB KV — too much; our prompts fit comfortably in these windows. Raise only
-    // for very large catalog maps, and check `ollama ps` says 100% GPU afterwards.
-    public OllamaRoleConfig Gate { get; init; } = new() { Model = "qwen3:8b", NumCtx = 4096, Temperature = 0.1, Think = false };
+    // ~2-3 GB KV — too much. Gate is 6k since the D31 cache restructure grew its system
+    // prompt (examples + catalog) past what 4k holds with generation headroom. Raise
+    // further only for very large catalog maps, and check `ollama ps` says 100% GPU.
+    public OllamaRoleConfig Gate { get; init; } = new() { Model = "qwen3:8b", NumCtx = 6144, Temperature = 0.1, Think = false };
     public OllamaRoleConfig Advisor { get; init; } = new() { Model = "qwen3:8b", NumCtx = 8192, Temperature = 0.3, Think = false };
     public OllamaRoleConfig Summarizer { get; init; } = new() { Model = "qwen3:8b", NumCtx = 8192, Temperature = 0.3, Think = false };
     public OllamaRoleConfig Drafter { get; init; } = new() { Model = "qwen3:8b", NumCtx = 8192, Temperature = 0.4, Think = false };
@@ -57,7 +58,7 @@ public sealed class OllamaProviderOptions
     /// <summary>One model for every role — think=false for thinking models (qwen3), null for the rest.</summary>
     public static OllamaProviderOptions ForModel(string model, bool? think, Action<string>? diagnostics = null) => new()
     {
-        Gate = new OllamaRoleConfig { Model = model, NumCtx = 4096, Temperature = 0.1, Think = think },
+        Gate = new OllamaRoleConfig { Model = model, NumCtx = 6144, Temperature = 0.1, Think = think },
         Advisor = new OllamaRoleConfig { Model = model, NumCtx = 8192, Temperature = 0.3, Think = think },
         Summarizer = new OllamaRoleConfig { Model = model, NumCtx = 8192, Temperature = 0.3, Think = think },
         Drafter = new OllamaRoleConfig { Model = model, NumCtx = 8192, Temperature = 0.4, Think = think },

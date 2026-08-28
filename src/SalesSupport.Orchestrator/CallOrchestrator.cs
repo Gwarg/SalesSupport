@@ -37,7 +37,7 @@ public sealed class CallOrchestrator(ILlmProvider llm, IKnowledgeSource knowledg
     /// </summary>
     public async Task<MergeOutcome> SeedFromBriefAsync(string briefText, CancellationToken ct = default)
     {
-        var conversation = PromptBuilder.Seeder(briefText, Picture, options);
+        var conversation = PromptBuilder.Seeder(briefText, Picture, knowledge.GetCatalogMap(), options);
         var diff = await llm.CompleteJsonAsync<GateDiff>(LlmRole.Gate, conversation, ct);
         return PictureMerger.Apply(Picture, diff, turn: 0);
     }
@@ -48,7 +48,7 @@ public sealed class CallOrchestrator(ILlmProvider llm, IKnowledgeSource knowledg
         var window = _transcript.TakeLast(options.GateWindow).ToList();
         _transcript.Add(utterance);
 
-        var gateConversation = PromptBuilder.Gate(Picture, window, utterance, Panel.ActiveQuestions, options);
+        var gateConversation = PromptBuilder.Gate(Picture, window, utterance, Panel.ActiveQuestions, knowledge.GetCatalogMap(), options);
         var gateStarted = Environment.TickCount64;
         var diff = await llm.CompleteJsonAsync<GateDiff>(LlmRole.Gate, gateConversation, ct);
         var gateMs = Environment.TickCount64 - gateStarted;

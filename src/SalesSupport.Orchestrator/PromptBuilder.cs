@@ -123,9 +123,63 @@ public static class PromptBuilder
         - language_flag: the observed language if it differs from {call_language},
           else null.
 
+        EXAMPLES — schematic diff shapes. Angle-bracket placeholders stand for real
+        content in {call_language}; never copy placeholder text into output.
+
+        A) NEW: [rep] "<greeting, introduces themselves>" — pleasantries only:
+        {"signals":[{"type":"smalltalk"}],"facts_upsert":[],"facts_remove":[],
+         "threads_upsert":[],"product_interest_upsert":[],"action_items_upsert":[],
+         "questions_addressed":[],"summary_append":null,
+         "advice":{"needed":false,"reason":"<greeting only>","topics":[]},
+         "language_flag":null}
+
+        B) NEW: [customer] "<our product X keeps failing in daily use>" — first real
+        signal of the call:
+        {"signals":[{"type":"objection_raised"}],
+         "facts_upsert":[{"id":null,"category":"pain","text":"<one line: what fails
+         and where>","source":"call","confidence":"high"}],"facts_remove":[],
+         "threads_upsert":[{"id":null,"topic":"<short phrase>","kind":"objection",
+         "status":"open","salience":"high","note":"<one line current state>"}],
+         "product_interest_upsert":[{"id":null,"product_ref":null,
+         "name_as_said":"<X exactly as spoken>","stance":"owns",
+         "reason":"<one line>","source":"call"}],
+         "action_items_upsert":[],"questions_addressed":[],
+         "summary_append":"<one sentence>",
+         "advice":{"needed":true,"reason":"<new objection on owned product>",
+         "topics":["<topic>"]},"language_flag":null}
+
+        C) PICTURE already holds the pain as f1 and the thread as t1;
+        ACTIVE_QUESTIONS holds q2 "<how many units?>".
+        NEW: [rep] "<asks roughly q2>" → questions_addressed:["q2"], all lists
+        empty, advice.needed false — the rep is working the shown guidance.
+        Next NEW: [customer] "<a count and a deadline>" → ONLY the new facts
+        (one situation, one timeline), plus t1 upserted by its exact id with a
+        refreshed note — not a new thread, and f1 is never re-emitted:
+        {"facts_upsert":[{"id":null,"category":"situation","text":"<count>",
+         "source":"call","confidence":"high"},{"id":null,"category":"timeline",
+         "text":"<deadline>","source":"call","confidence":"high"}],
+         "threads_upsert":[{"id":"t1","topic":"<same topic>","kind":"objection",
+         "status":"open","salience":"high","note":"<updated one line>"}],
+         "advice":{"needed":true,"reason":"<scope and deadline are new>",
+         "topics":["t1"]}}  — remaining lists empty.
+
+        D) NEW: [customer] "<we evaluated product Y and it is too expensive>" →
+        product_interest_upsert with name_as_said "<Y>", stance "rejected", plus an
+        objection thread; advice.needed true.
+        Then NEW: [rep] "<I will send a quote for Z tomorrow>" →
+        action_items_upsert:[{"id":null,"text":"<send quote for Z tomorrow>",
+        "owner":"rep","source":"call"}] — a promise is an action item, and its
+        deadline is part of the item, not also a fact; advice.needed false
+        (a closing commitment does not change what the rep says next).
+
         FINAL REMINDER: every free-text value — fact text, topic, note,
         summary_append — must be written in {call_language}, no other language.
         New items have id null; existing ids are copied exactly.
+
+        CATALOG — what the selling company offers, for recognizing product mentions
+        in noisy speech. name_as_said always stays exactly as spoken on the call —
+        never normalized to a catalog name:
+        {catalog_map}
         """;
 
     private const string AdvisorSystemTemplate = """
@@ -204,11 +258,17 @@ public static class PromptBuilder
         IReadOnlyList<Utterance> window,
         Utterance newUtterance,
         IEnumerable<QuestionItem> activeQuestions,
+        string catalogMap,
         OrchestratorOptions options)
     {
+        // Everything in system is stable for the whole call — examples and catalog
+        // deliberately live here so the prefix clears Haiku's 2048-token cache floor
+        // (D31: measured cached=0 with the short prompt; ~80% of gate input re-billed
+        // at full price every tick).
         var system = GateSystemTemplate
             .Replace("{call_language}", options.CallLanguage)
-            .Replace("{strictness_bias}", StrictnessBias(options.GateStrictness));
+            .Replace("{strictness_bias}", StrictnessBias(options.GateStrictness))
+            .Replace("{catalog_map}", string.IsNullOrWhiteSpace(catalogMap) ? "(no catalog loaded)" : catalogMap);
 
         var sb = new StringBuilder();
         sb.AppendLine($"CONTEXT: company={options.CompanyName} call_language={options.CallLanguage}");
@@ -258,11 +318,12 @@ public static class PromptBuilder
     }
 
     /// <summary>Seeder = the gate prompt with the brief as the material to extract from (docs/prompts.md).</summary>
-    public static LlmConversation Seeder(string briefText, CustomerPicture picture, OrchestratorOptions options)
+    public static LlmConversation Seeder(string briefText, CustomerPicture picture, string catalogMap, OrchestratorOptions options)
     {
         var system = GateSystemTemplate
             .Replace("{call_language}", options.CallLanguage)
             .Replace("{strictness_bias}", "leave advice.needed false")
+            .Replace("{catalog_map}", string.IsNullOrWhiteSpace(catalogMap) ? "(no catalog loaded)" : catalogMap)
             + """
 
 
