@@ -74,7 +74,7 @@ public sealed class CallOrchestrator(ILlmProvider llm, IKnowledgeSource knowledg
             var result = await llm.CompleteJsonAsync<AdvisorResult>(LlmRole.Advisor, advisorConversation, ct);
             advisorMs = Environment.TickCount64 - advisorStarted;
 
-            delta = Panel.Reconcile(FilterProducts(result));
+            delta = Panel.Reconcile(FilterProducts(result, Picture));
             PictureMerger.ApplyThreadUpdates(Picture, result.ThreadUpdates, turn);
         }
 
@@ -88,7 +88,7 @@ public sealed class CallOrchestrator(ILlmProvider llm, IKnowledgeSource knowledg
         var conversation = PromptBuilder.Advisor(Picture, cards, Panel, knowledge.GetCatalogMap(), options, repQuery: query);
         var result = await llm.CompleteJsonAsync<AdvisorResult>(LlmRole.Advisor, conversation, ct);
 
-        var delta = Panel.Reconcile(FilterProducts(result));
+        var delta = Panel.Reconcile(FilterProducts(result, Picture));
         return new AskResult(result.Answer ?? "", delta);
     }
 
@@ -130,21 +130,46 @@ public sealed class CallOrchestrator(ILlmProvider llm, IKnowledgeSource knowledg
         return company.Source == Source.Call ? company : company with { Source = Source.Call };
     }
 
-    /// <summary>Never suggest a product the customer owns or has rejected — enforced in code, not hoped for in prompt.</summary>
-    private AdvisorResult FilterProducts(AdvisorResult result)
+    /// <summary>
+    /// Never suggest a product the customer owns or has rejected — enforced in code, not
+    /// hoped for in prompt. Matching is token-based over display name AND product ref:
+    /// models restate blocked names with qualifiers ("X60 (frysklassad handskannar)" for
+    /// a rejected "X60"), and an id-resolved card is no exemption — bench round 2 caught
+    /// both evasions. Accessories that merely mention the blocked product ("Arktiskt
+    /// batteripaket till X40" for owned "X40-skannrar") stay suggestible, because
+    /// neither name's token set contains the other.
+    /// </summary>
+    internal static AdvisorResult FilterProducts(AdvisorResult result, CustomerPicture picture)
     {
-        var blocked = Picture.ProductInterest
+        var blocked = picture.ProductInterest
             .Where(p => p.Stance is Stance.Owns or Stance.Rejected)
-            .Select(p => PictureMerger.NormalizeText(p.NameAsSaid))
-            .ToHashSet();
+            .Select(p => NameTokens(p.NameAsSaid))
+            .Where(tokens => tokens.Count > 0)
+            .ToList();
         if (blocked.Count == 0) return result;
 
         var kept = result.Products
-            .Where(p => p.Id is not null || !blocked.Contains(PictureMerger.NormalizeText(p.DisplayName)))
+            .Where(p => !blocked.Any(b => NameCovers(b, p.DisplayName) || NameCovers(b, p.ProductRef)))
             .ToList();
         return kept.Count == result.Products.Count
             ? result
             : new AdvisorResult { Questions = result.Questions, Products = kept, ThreadUpdates = result.ThreadUpdates, Answer = result.Answer };
+    }
+
+    private static bool NameCovers(HashSet<string> blocked, string? candidate)
+    {
+        if (string.IsNullOrWhiteSpace(candidate)) return false;
+        var tokens = NameTokens(candidate);
+        return tokens.Count > 0 && (blocked.IsSubsetOf(tokens) || tokens.IsSubsetOf(blocked));
+    }
+
+    /// <summary>Alphanumeric tokens — "X60-skannrar" and "X60 (frysklassad)" both yield an "x60" token.</summary>
+    private static HashSet<string> NameTokens(string text)
+    {
+        var buffer = new char[text.Length];
+        for (var i = 0; i < text.Length; i++)
+            buffer[i] = char.IsLetterOrDigit(text[i]) ? char.ToLowerInvariant(text[i]) : ' ';
+        return [.. new string(buffer).Split(' ', StringSplitOptions.RemoveEmptyEntries)];
     }
 
     private async Task<IReadOnlyList<RetrievedCard>> RetrieveForTopicsAsync(IEnumerable<string> topics, CancellationToken ct)

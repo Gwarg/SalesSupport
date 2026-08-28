@@ -88,6 +88,57 @@ public class OrchestratorGuardTests
     }
 
     [Fact]
+    public void Rejected_product_restated_with_qualifiers_is_still_blocked()
+    {
+        // Bench round 2 (runs/20260827-143933): "X60 (frysklassad handskannar)" with an id
+        // sailed past the guard for a rejected "X60". Neither variance nor an id exempts.
+        var picture = PictureWith("X60", Stance.Rejected);
+        var result = new AdvisorResult
+        {
+            Products =
+            [
+                new PanelProduct("1002", "X60", "X60 (frysklassad handskannar)", "why", null, null),
+                new PanelProduct(null, "X60 handskanner", "Frysklassad skanner", "why", null, null),
+                new PanelProduct(null, "serviceavtal frys", "Serviceavtal frys", "why", null, null),
+            ],
+        };
+
+        var filtered = CallOrchestrator.FilterProducts(result, picture);
+
+        Assert.Single(filtered.Products);
+        Assert.Equal("Serviceavtal frys", filtered.Products[0].DisplayName);
+    }
+
+    [Fact]
+    public void Accessory_mentioning_an_owned_product_survives_the_block()
+    {
+        var picture = PictureWith("X40-skannrar", Stance.Owns);
+        var result = new AdvisorResult
+        {
+            Products =
+            [
+                new PanelProduct(null, "arktiskt batteripaket", "Arktiskt batteripaket till X40", "why", null, null),
+                new PanelProduct(null, "X40", "X40 handskanner", "why", null, null),
+            ],
+        };
+
+        var filtered = CallOrchestrator.FilterProducts(result, picture);
+
+        Assert.Single(filtered.Products);
+        Assert.Equal("Arktiskt batteripaket till X40", filtered.Products[0].DisplayName);
+    }
+
+    private static CustomerPicture PictureWith(string nameAsSaid, Stance stance)
+    {
+        var picture = new CustomerPicture();
+        PictureMerger.Apply(picture, new GateDiff
+        {
+            ProductInterestUpsert = [new ProductInterestUpsert(null, null, nameAsSaid, stance, "reason", Source.Call)],
+        }, turn: 1);
+        return picture;
+    }
+
+    [Fact]
     public void Ballooning_thread_notes_are_clipped()
     {
         var picture = new CustomerPicture();
