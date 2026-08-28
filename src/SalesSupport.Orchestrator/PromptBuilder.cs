@@ -153,6 +153,11 @@ public static class PromptBuilder
           picture — name the need or pain it answers. Respect stances: never suggest
           rejected products; for owned products suggest only upgrades or complements
           and say so. Prices only from cards, always marked indicative.
+        - While the customer disputes that the call is relevant to them at all
+          ("wrong list", not our kind of business) — or no concrete need has been
+          confirmed yet — put up NO product cards: probe with questions only. A
+          product card while fit is in doubt reads as not listening. The first card
+          appears after the customer confirms a need it answers.
         - If nothing fits well, suggest fewer items or none. Never invent products,
           model names, specifications, or prices.
 
