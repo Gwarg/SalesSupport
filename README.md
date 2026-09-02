@@ -206,3 +206,29 @@ on Ollama. Press Avsluta after "uppspelning klar" for the summary.
 side window with the running conversation: every backend-confirmed utterance
 (color-coded rep/customer), typed asks (⌨), and the in-flight partial at the bottom.
 Follows the tail unless you scroll up; clears on Nytt samtal.
+
+## Incoming calls — Telavox (D32)
+
+One telephony contract, a thin adapter per provider. Telavox is the reference: its
+Personal Webhooks POST/GET a user-configured URL on "ringing" with `{system.caller}`
+substituted in. The backend resolves the number against the installation's customer
+index, and the rep's panel gets an `IncomingCall` notice — banner plus a pre-filled
+Kund field on the pre-call card, one click to start as the rep answers.
+
+Setup per rep: the pre-call card shows the exact URL to paste into Telavox
+(`…/api/telephony/telavox/ring?rep=<windows user>&caller={system.caller}`); the host
+must be reachable from Telavox's cloud (server-hosted backend or a tunnel). Without a
+`rep` parameter the notice broadcasts to every connected panel. Set
+`Backend:TelephonyWebhookSecret` and append `&token=<secret>` to the URL outside
+development.
+
+Customer index: `Backend:CustomerIndexPath` (default `data/customers.jsonl` under the
+backend) — JSONL rows `{"phone","company","crm_id","notes"}`, the snapshot a CRM
+adapter (D28/D30) will write later; reloaded on file change. Numbers normalize to
+E.164 with `Backend:DefaultCountryCode` (+46), so `08-555 01 01`, `+46 8 555 01 01`
+and `0046…` all match. Try it with the demo index and a fake ring:
+
+```
+copy samples\crm\customers.jsonl src\SalesSupport.Backend\data\customers.jsonl
+curl "http://localhost:5155/api/telephony/telavox/ring?rep=%USERNAME%&caller=%2B46855501 01"
+```

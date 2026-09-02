@@ -41,6 +41,15 @@ public sealed class BackendOptions
     public GateStrictness GateStrictness { get; init; } = GateStrictness.Balanced;
     public string SalesGuidance { get; init; } = "";
 
+    /// <summary>Phone → customer index (JSONL rows: phone, company, crm_id, notes) for incoming-call screen-pop (D32). Missing file = no resolution.</summary>
+    public string CustomerIndexPath { get; init; } = "data/customers.jsonl";
+
+    /// <summary>Applied to trunk-zero national numbers when normalizing callers.</summary>
+    public string DefaultCountryCode { get; init; } = "+46";
+
+    /// <summary>When set, telephony webhooks must carry token=&lt;secret&gt;; unset leaves the endpoint open (development only).</summary>
+    public string? TelephonyWebhookSecret { get; init; }
+
     /// <summary>Interaction retention (D17). Purged on startup and on every save.</summary>
     public int RetentionDays { get; init; } = 90;
     public string DatabasePath { get; init; } = "data/salessupport.db";

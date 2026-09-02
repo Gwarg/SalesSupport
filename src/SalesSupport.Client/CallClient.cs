@@ -10,6 +10,7 @@ public sealed class CallClient : IAsyncDisposable
 {
     private HubConnection? _connection;
 
+    public event Action<IncomingCallNotice>? IncomingCall;
     public event Action<TranscriptEntry>? TranscriptAppended;
     public event Action<CustomerPicture>? PictureUpdated;
     public event Action<PanelDelta>? PanelDeltaReceived;
@@ -31,6 +32,7 @@ public sealed class CallClient : IAsyncDisposable
             .AddJsonProtocol(o => o.PayloadSerializerOptions = JsonDefaults.Options)
             .Build();
 
+        _connection.On<IncomingCallNotice>("IncomingCall", n => IncomingCall?.Invoke(n));
         _connection.On<TranscriptEntry>("TranscriptAppended", e => TranscriptAppended?.Invoke(e));
         _connection.On<CustomerPicture>("PictureUpdated", p => PictureUpdated?.Invoke(p));
         _connection.On<PanelDelta>("PanelDelta", d => PanelDeltaReceived?.Invoke(d));
@@ -46,6 +48,10 @@ public sealed class CallClient : IAsyncDisposable
 
         await _connection.StartAsync(ct);
     }
+
+    /// <summary>Joins this connection's rep group so telephony signals (D32) reach this panel.</summary>
+    public Task RegisterAsync(string repKey) =>
+        _connection!.SendAsync("Register", repKey);
 
     public Task<CallStarted> StartCallAsync(StartCallRequest request, CancellationToken ct = default) =>
         _connection!.InvokeAsync<CallStarted>("StartCall", request, ct);

@@ -50,6 +50,8 @@ public sealed class MainViewModel : ViewModelBase
         _client.AnswerReady += a => UI(() => { AnswerText = a.Answer; ApplyPanelDelta(a.PanelDelta); });
         _client.SummaryReady += s => UI(() => ShowSummary(s.Summary));
         _client.TickFailed += m => UI(() => ErrorBanner = $"Tick misslyckades: {m}");
+        _client.IncomingCall += n => UI(() => OnIncomingCall(n));
+        _ = ConnectIdleAsync();
         _client.ConnectionClosed += reason => UI(() =>
         {
             if (Stage == "Live") ErrorBanner = $"Anslutningen tappades{(reason is null ? "" : $": {reason}")}";
@@ -83,11 +85,21 @@ public sealed class MainViewModel : ViewModelBase
     private string? _selectedSample;
     public string? SelectedSample { get => _selectedSample; set => Set(ref _selectedSample, value); }
 
+    /// <summary>Rep identity for telephony routing (D32) — the Windows user name, shown in the webhook hint.</summary>
+    public string RepKey { get; } = Environment.UserName.Trim().ToLowerInvariant();
+    public string WebhookHint => TelephonyWire.TelavoxWebhookUrl(BackendUrl, RepKey);
+    private string _incomingBanner = "";
+    public string IncomingBanner { get => _incomingBanner; set => Set(ref _incomingBanner, value); }
+
     public string[] Languages { get; } = ["sv", "en"];
     private string _selectedLanguage = "sv";
     public string SelectedLanguage { get => _selectedLanguage; set => Set(ref _selectedLanguage, value); }
     private string _backendUrl = "http://localhost:5155";
-    public string BackendUrl { get => _backendUrl; set => Set(ref _backendUrl, value); }
+    public string BackendUrl
+    {
+        get => _backendUrl;
+        set { if (Set(ref _backendUrl, value)) OnPropertyChanged(nameof(WebhookHint)); }
+    }
     private string _customerCompany = "";
     public string CustomerCompany { get => _customerCompany; set => Set(ref _customerCompany, value); }
     private string _goal = "";
@@ -150,6 +162,7 @@ public sealed class MainViewModel : ViewModelBase
 
             StatusText = "Ansluter…";
             await _client.ConnectAsync(BackendUrl);
+            await _client.RegisterAsync(RepKey);
 
             var samplePath = replayMode ? Path.Combine(_samplesDir, SelectedSample!) : null;
             var language = SelectedLanguage;
@@ -216,6 +229,7 @@ public sealed class MainViewModel : ViewModelBase
 
             _callStarted = DateTime.UtcNow;
             ErrorBanner = "";
+            IncomingBanner = "";
             AnswerText = "";
             Stage = "Live";
             _clockTimer.Start();
@@ -264,6 +278,31 @@ public sealed class MainViewModel : ViewModelBase
         {
             AnswerText = $"Fel: {ex.Message}";
         }
+    }
+
+    /// <summary>Connect while idle so a ringing phone can pre-fill the pre-call card (D32); failure is not an error — StartCall reconnects.</summary>
+    private async Task ConnectIdleAsync()
+    {
+        try
+        {
+            await _client.ConnectAsync(BackendUrl);
+            await _client.RegisterAsync(RepKey);
+        }
+        catch (Exception ex)
+        {
+            StatusText = $"Backend ej ansluten ännu ({ex.Message}) — ansluter vid samtalsstart.";
+        }
+    }
+
+    private void OnIncomingCall(IncomingCallNotice notice)
+    {
+        var who = notice.Customer?.Company ?? notice.Number ?? "dolt nummer";
+        var banner = $"📞 Inkommande samtal: {who}";
+        if (notice.Customer is not null && notice.Number is not null) banner += $" ({notice.Number})";
+        if (!string.IsNullOrWhiteSpace(notice.Customer?.Notes)) banner += $" — {notice.Customer.Notes}";
+        IncomingBanner = banner;
+        if (Stage == "PreCall" && notice.Customer is { } customer)
+            CustomerCompany = customer.Company;
     }
 
     private void LogAsk(string query) => TranscriptLog.Add(new TranscriptRowVm(
@@ -356,6 +395,7 @@ public sealed class MainViewModel : ViewModelBase
         _audio?.Dispose();
         _audio = null;
         TranscriptLog.Clear();
+        IncomingBanner = "";
         Questions.Clear();
         Products.Clear();
         Threads.Clear();

@@ -46,6 +46,18 @@
                 </Style>
             </StackPanel.Style>
             <TextBlock Text="Nytt samtal" FontSize="18" FontWeight="Medium" Margin="0,4,0,12"/>
+            <Border Padding="10,8" CornerRadius="6" Margin="0,0,0,6" Background="{StaticResource AccentBg}">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IncomingBanner}" Value="">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <TextBlock Text="{Binding IncomingBanner}" Foreground="{StaticResource Accent}" FontWeight="Medium" TextWrapping="Wrap"/>
+            </Border>
             <TextBlock Text="Backend" Style="{StaticResource ZoneLabel}"/>
             <TextBox Text="{Binding BackendUrl, UpdateSourceTrigger=PropertyChanged}"/>
             <TextBlock Text="Källa" Style="{StaticResource ZoneLabel}"/>
@@ -88,6 +100,9 @@
             <Button Content="Starta samtal" Command="{Binding StartCommand}" Margin="0,14,0,0" Padding="0,8"
                     Background="{StaticResource Accent}" Foreground="White" BorderThickness="0" FontWeight="Medium"/>
             <TextBlock Text="{Binding StatusText}" Foreground="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,8,0,0"/>
+            <TextBlock Text="Inkommande samtal — klistra in som Telavox Personal Webhook (ringing)" Style="{StaticResource ZoneLabel}"/>
+            <TextBox Text="{Binding WebhookHint, Mode=OneWay}" IsReadOnly="True" FontSize="10" Foreground="{StaticResource Muted}"
+                     TextWrapping="Wrap" BorderThickness="0" Background="Transparent"/>
         </StackPanel>
 
         <!-- ============ LIVE ============ -->
@@ -153,6 +168,17 @@
                         <Style TargetType="TextBlock">
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding ErrorBanner}" Value="">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+                <TextBlock Text="{Binding IncomingBanner}" Foreground="{StaticResource Accent}" FontWeight="Medium" TextWrapping="Wrap">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IncomingBanner}" Value="">
                                     <Setter Property="Visibility" Value="Collapsed"/>
                                 </DataTrigger>
                             </Style.Triggers>

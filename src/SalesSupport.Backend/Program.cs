@@ -1,5 +1,7 @@
 using SalesSupport.Backend;
+using SalesSupport.Backend.Telephony;
 using SalesSupport.Core.Contracts;
+using SalesSupport.Core.Model;
 using SalesSupport.Core.Serialization;
 using SalesSupport.Knowledge;
 using SalesSupport.Providers.Claude;
@@ -53,6 +55,8 @@ builder.Services.AddSingleton<ILlmProvider>(sp => options.LlmProvider switch
 
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<SttTokenService>();
+builder.Services.AddSingleton(sp => new CustomerIndex(options.CustomerIndexPath, options.DefaultCountryCode));
+builder.Services.AddSingleton<CallSignalService>();
 builder.Services.AddSingleton(sp => new StorageService(options.DatabasePath, options.RetentionDays));
 builder.Services.AddSingleton(sp => new CallSessionService(
     sp.GetRequiredService<ILlmProvider>(),
@@ -76,6 +80,20 @@ var app = builder.Build();
 
 app.MapHub<CallHub>("/hub/call");
 
+// D32 telephony edge: Telavox Personal Webhooks hit this on "ringing" (GET or POST form).
+app.MapMethods(TelephonyWire.TelavoxRingPath, ["GET", "POST"], async (HttpRequest request, CallSignalService signals) =>
+{
+    var form = request.HasFormContentType ? await request.ReadFormAsync() : null;
+    string? Get(string key) =>
+        request.Query.TryGetValue(key, out var fromQuery) ? fromQuery.ToString()
+        : form is not null && form.TryGetValue(key, out var fromForm) ? fromForm.ToString()
+        : null;
+
+    if (!signals.IsAuthorized(Get("token"))) return Results.Unauthorized();
+    await signals.HandleAsync(TelavoxAdapter.Parse(Get), request.HttpContext.RequestAborted);
+    return Results.NoContent();
+});
+
 app.MapGet("/healthz", (IKnowledgeSource knowledge) => Results.Ok(new
 {
     status = "ok",
@@ -93,6 +111,10 @@ app.MapGet("/api/stt-token", async (SttTokenService tokens, CancellationToken ct
 
 app.Logger.LogInformation("SalesSupport backend up — pack {Pack} ({Company}), llm {Llm}",
     Path.GetFileName(packPath), pack.CompanyId, options.LlmProvider);
+var customerIndex = app.Services.GetRequiredService<CustomerIndex>();
+app.Logger.LogInformation("telephony: {Count} numbers in customer index {Path}; Telavox ring endpoint {Endpoint} ({Auth})",
+    customerIndex.Count, customerIndex.Path, TelephonyWire.TelavoxRingPath,
+    string.IsNullOrEmpty(options.TelephonyWebhookSecret) ? "open — set Backend:TelephonyWebhookSecret" : "token required");
 
 app.Run();
 

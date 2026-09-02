@@ -92,7 +92,7 @@ Each decision is numbered for reference in future discussions. Rationale is reco
   - **Telavox** (the pilot customer's provider) is the reference adapter and is nearly free: Personal Webhooks POST a "ringing" event with `{system.caller}` to any URL, configured per-user and self-service — no partnership or SDK. Their Custom Contact Lookup (Telavox queries our endpoint to display contact info in their app) is the later reverse direction.
   - **Consequences:** the webhook needs a reachable URL per installation (natural when the backend is server-hosted; a relay if it stays on the rep's machine), and the D28/D30 customer index contract gains **phone numbers** so number→customer resolution has data to hit.
   - **Fallbacks** where no API exists: TAPI where the PBX ships a TSP; the capture layer's audio-activity heuristic as a numberless "call started?" prompt. Teams is recorded as a poor surface — no real-time incoming-call webhook, post-call records only unless a bot joins calls — and is not pursued for the pilot.
-  - **Roadmap:** pre-pilot item — the Telavox adapter is small and the customer's reps can configure their webhooks on day one.
+  - **Roadmap:** pre-pilot item — the Telavox adapter is small and the customer's reps can configure their webhooks on day one. *Landed 2026-08-28:* `IncomingCallSignal` → `CallSignalService` (normalize, resolve via JSONL customer index, push `IncomingCall` to the rep's hub group or broadcast) with `TelavoxAdapter` as the provider edge; panel registers its rep key on connect, shows the webhook URL to paste, and pre-fills the pre-call card on ring. Webhook secret optional; `dial` and answered/ended events remain reserved.
 
 ## 3. Runtime architecture
 

@@ -6,10 +6,17 @@ namespace SalesSupport.Backend;
 /// <summary>
 /// Thin SignalR adapter over CallSessionService — fans tick envelopes out as the events
 /// the panel consumes (DESIGN.md §3): TranscriptAppended, PictureUpdated, PanelDelta,
-/// TickCompleted, AnswerReady, SummaryReady.
+/// TickCompleted, AnswerReady, SummaryReady. Telephony signals (D32) reach a panel
+/// through its rep group, joined via Register.
 /// </summary>
 public sealed class CallHub(CallSessionService sessions, SttTokenService sttTokens) : Hub
 {
+    /// <summary>Panels register their rep key so incoming-call notices target the right rep.</summary>
+    public Task Register(string repKey) =>
+        Groups.AddToGroupAsync(Context.ConnectionId, GroupFor(repKey), Context.ConnectionAborted);
+
+    public static string GroupFor(string repKey) => "rep:" + repKey.Trim().ToLowerInvariant();
+
     public async Task<CallStarted> StartCall(StartCallRequest request)
     {
         SttSession? stt = null;
