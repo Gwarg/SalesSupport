@@ -100,6 +100,8 @@ Each decision is numbered for reference in future discussions. Rationale is reco
   - **Tooling:** a generic `DocExtract` tool (PDF text → canonical JSONL + report), reusable for the next document-source customer; nothing Yokogawa-specific in code beyond configuration. `doc_chunks` remains deferred per docs/knowledge-pack.md — brochure text is the *source* for descriptions and typed attributes, not runtime retrieval content.
   - **Language:** source descriptions stay English (as published); the advisor writes its Swedish reasoning against English cards — the same cross-language grounding the bench already validated on the demo pack.
 
+- **D34 (2026-09-05) — The written half of the call is a chat, kept with the record.** Typed asks (D15) are a conversation with the assistant, and the first Test Power demo showed why one overwriting answer bubble is not enough: the rep wants to scroll back. Zone 4 becomes a scrollable chat thread directly above the input — each typed question appears at once, its answer fills in when ready — while zones 1–3 stay glanceable (this amends the "no chat thread" wording of D10 for zone 4 only). The exchanges are also shown in the transcript log (replay review) and listed post-call, and are stored with the interaction as `asks` (D17 already covered typed queries; now the answers too).
+
 ## 3. Runtime architecture
 
 ### Audio path (per call)

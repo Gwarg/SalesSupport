@@ -11,7 +11,8 @@ public sealed record InteractionRecord(
     DateTime EndedAt,
     string TranscriptJson,
     string PictureJson,
-    string SummaryJson);
+    string SummaryJson,
+    string? AsksJson = null);
 
 /// <summary>
 /// Interaction storage (D17): transcript + picture + summary, never audio. Every row
@@ -40,8 +41,18 @@ public sealed class StorageService
               ended_at TEXT NOT NULL,
               transcript TEXT NOT NULL,
               picture TEXT NOT NULL,
-              summary TEXT NOT NULL);
+              summary TEXT NOT NULL,
+              asks TEXT);
             """);
+        // Databases created before the written-exchange column (D34) get it added in place.
+        using (var columns = connection.CreateCommand())
+        {
+            columns.CommandText = "PRAGMA table_info(interactions)";
+            var hasAsks = false;
+            using var reader = columns.ExecuteReader();
+            while (reader.Read()) if (reader.GetString(1) == "asks") hasAsks = true;
+            if (!hasAsks) Execute(connection, "ALTER TABLE interactions ADD COLUMN asks TEXT");
+        }
         PurgeExpired();
     }
 
@@ -49,11 +60,11 @@ public sealed class StorageService
     {
         using var connection = Open();
         Execute(connection,
-            "INSERT OR REPLACE INTO interactions (id, interaction_kind, customer_ref, language, started_at, ended_at, transcript, picture, summary) " +
-            "VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)",
+            "INSERT OR REPLACE INTO interactions (id, interaction_kind, customer_ref, language, started_at, ended_at, transcript, picture, summary, asks) " +
+            "VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)",
             record.Id, record.InteractionKind, record.CustomerRef, record.Language,
             record.StartedAt.ToString("O"), record.EndedAt.ToString("O"),
-            record.TranscriptJson, record.PictureJson, record.SummaryJson);
+            record.TranscriptJson, record.PictureJson, record.SummaryJson, record.AsksJson);
         PurgeExpired();
     }
 

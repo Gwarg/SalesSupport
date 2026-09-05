@@ -36,7 +36,11 @@ public sealed class CallSessionService(
         public int Turn;
         public volatile bool Ending;
         public int Dropped;
+        /// <summary>The written half of the call (D34): typed questions and their answers, stored with the transcript.</summary>
+        public List<AskExchange> Asks { get; } = [];
     }
+
+    private sealed record AskExchange(DateTime At, string Query, string Answer);
 
     private readonly ConcurrentDictionary<string, Session> _sessions = new();
 
@@ -141,6 +145,7 @@ public sealed class CallSessionService(
         {
             var started = Environment.TickCount64;
             var result = await session.Orchestrator.AskAsync(query, ct);
+            session.Asks.Add(new AskExchange(DateTime.UtcNow, query, result.Answer));
             _log.LogInformation("call {CallId} ask ({Chars} chars) answered in {Ms} ms", session.CallId, query.Length, Environment.TickCount64 - started);
             return new AnswerEnvelope(result.Answer, result.PanelDelta);
         }
@@ -196,7 +201,8 @@ public sealed class CallSessionService(
                     DateTime.UtcNow,
                     JsonDefaults.Serialize(session.Orchestrator.Transcript),
                     JsonDefaults.Serialize(session.Orchestrator.Picture),
-                    JsonDefaults.Serialize(summary)));
+                    JsonDefaults.Serialize(summary),
+                    session.Asks.Count > 0 ? JsonDefaults.Serialize(session.Asks) : null));
             }
 
             _log.LogInformation(

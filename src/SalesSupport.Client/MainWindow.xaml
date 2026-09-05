@@ -300,23 +300,54 @@
                 </StackPanel>
             </ScrollViewer>
 
-            <!-- ask lane -->
+            <!-- ask lane: the written half of the call as a chat thread above the input (D34) -->
             <StackPanel Grid.Row="3" Margin="0,6,0,0">
                 <TextBlock Text="{Binding LiveLine}" FontSize="11" Foreground="{StaticResource Muted}"
                            TextTrimming="CharacterEllipsis" Margin="0,0,0,4"/>
-                <Border>
-                    <Border.Style>
-                        <Style TargetType="Border" BasedOn="{StaticResource Card}">
-                            <Setter Property="Background" Value="#F5F4EF"/>
+                <ScrollViewer x:Name="ChatScroller" MaxHeight="220" VerticalScrollBarVisibility="Auto" Margin="0,0,0,4">
+                    <ScrollViewer.Style>
+                        <Style TargetType="ScrollViewer">
                             <Style.Triggers>
-                                <DataTrigger Binding="{Binding AnswerText}" Value="">
+                                <DataTrigger Binding="{Binding AskLog.Count}" Value="0">
                                     <Setter Property="Visibility" Value="Collapsed"/>
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
-                    </Border.Style>
-                    <TextBlock Text="{Binding AnswerText}" TextWrapping="Wrap" FontSize="12"/>
-                </Border>
+                    </ScrollViewer.Style>
+                    <ItemsControl ItemsSource="{Binding AskLog}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="{x:Type local:AskItemVm}">
+                                <StackPanel Margin="0,0,0,6">
+                                    <Border Background="{StaticResource AccentBg}" CornerRadius="8" Padding="8,5" HorizontalAlignment="Right" MaxWidth="300">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Query}" Value="">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <TextBlock Text="{Binding Query}" TextWrapping="Wrap" FontSize="12" Foreground="{StaticResource Accent}"/>
+                                    </Border>
+                                    <Border Background="#F5F4EF" CornerRadius="8" Padding="8,5" HorizontalAlignment="Left" MaxWidth="320" Margin="0,3,0,0">
+                                        <TextBlock Text="{Binding Answer}" TextWrapping="Wrap" FontSize="12">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsPending}" Value="True">
+                                                            <Setter Property="Foreground" Value="{StaticResource Muted}"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </Border>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
                 <DockPanel>
                     <Button DockPanel.Dock="Right" Content="➤" Command="{Binding AskCommand}" Width="36" Margin="6,0,0,0"/>
                     <TextBox Text="{Binding AskText, UpdateSourceTrigger=PropertyChanged}" Padding="6,6">
@@ -359,6 +390,28 @@
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
+                    <StackPanel>
+                        <StackPanel.Style>
+                            <Style TargetType="StackPanel">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding AskLog.Count}" Value="0">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </StackPanel.Style>
+                        <TextBlock Text="Frågor under samtalet" Style="{StaticResource ZoneLabel}"/>
+                        <ItemsControl ItemsSource="{Binding AskLog}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="{x:Type local:AskItemVm}">
+                                    <StackPanel Margin="0,0,0,6">
+                                        <TextBlock Text="{Binding Query}" FontWeight="Medium" FontSize="12" TextWrapping="Wrap" Foreground="{StaticResource Accent}"/>
+                                        <TextBlock Text="{Binding Answer}" FontSize="12" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
                 </StackPanel>
             </ScrollViewer>
             <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,10,0,0">

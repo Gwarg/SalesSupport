@@ -31,6 +31,9 @@
                                         <DataTrigger Binding="{Binding IsAsk}" Value="True">
                                             <Setter Property="BorderBrush" Value="#B08A2E"/>
                                         </DataTrigger>
+                                        <DataTrigger Binding="{Binding IsAnswer}" Value="True">
+                                            <Setter Property="BorderBrush" Value="#3B6D11"/>
+                                        </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
                             </Border.Style>

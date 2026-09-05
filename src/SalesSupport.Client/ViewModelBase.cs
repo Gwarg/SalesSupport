@@ -56,5 +56,20 @@ public sealed class ProductVm : ViewModelBase
 
 public sealed record ThreadVm(string Label, string Kind, string Status);
 
-/// <summary>One row in the transcript log window: a merged utterance or a typed ask.</summary>
-public sealed record TranscriptRowVm(string Time, string Label, string Text, bool IsRep, bool IsAsk);
+/// <summary>One row in the transcript log window: a merged utterance, a typed ask, or the AI's written answer.</summary>
+public sealed record TranscriptRowVm(string Time, string Label, string Text, bool IsRep, bool IsAsk, bool IsAnswer = false);
+
+/// <summary>One exchange in the ask-lane chat (D34): the rep's typed question and the AI's answer ("…" while pending).</summary>
+public sealed class AskItemVm(string query) : ViewModelBase
+{
+    public string Query { get; } = query;
+
+    private string _answer = "…";
+    public string Answer
+    {
+        get => _answer;
+        set { if (Set(ref _answer, value)) OnPropertyChanged(nameof(IsPending)); }
+    }
+
+    public bool IsPending => Answer == "…";
+}

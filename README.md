@@ -284,7 +284,7 @@ Requires a knowledge pack (newest in `packs/` by default) and a model backend pe
 The WPF copilot panel (docs/panel.md): always-on-top, three states — pre-call card
 (devices, language, customer + goal), the live four-zone panel (questions with check-off
 and fresh accents, product suggestions, kundbild with thread chips/facts/action items,
-ask lane with answer bubble), and post-call summary with next steps + copy. Status strip
+ask lane as a scrollable chat of typed questions and answers above the input, D34), and post-call summary with next steps, the chat, + copy. Status strip
 shows live mic/speaker meters, call timer, advisor activity, and per-tick latency.
 
 ```

@@ -48,7 +48,11 @@ public sealed class MainViewModel : ViewModelBase
         _client.PictureUpdated += p => UI(() => ApplyPicture(p));
         _client.PanelDeltaReceived += d => UI(() => ApplyPanelDelta(d));
         _client.TickCompleted += s => UI(() => ApplyTick(s));
-        _client.AnswerReady += a => UI(() => { AnswerText = a.Answer; ApplyPanelDelta(a.PanelDelta); });
+        _client.AnswerReady += a => UI(() =>
+        {
+            ApplyPanelDelta(a.PanelDelta);
+            LogAnswer(a.Answer);
+        });
         _client.SummaryReady += s => UI(() => ShowSummary(s.Summary));
         _client.TickFailed += m => UI(() => ErrorBanner = $"Tick misslyckades: {m}");
         _client.IncomingCall += n => UI(() => OnIncomingCall(n));
@@ -83,6 +87,11 @@ public sealed class MainViewModel : ViewModelBase
     public string SelectedSource { get => _selectedSource; set => Set(ref _selectedSource, value); }
     public ObservableCollection<string> ReplaySamples { get; } = [];
     public ObservableCollection<TranscriptRowVm> TranscriptLog { get; } = [];
+    /// <summary>The ask-lane chat (D34): typed questions and answers in order, above the input box; also listed post-call.</summary>
+    public ObservableCollection<AskItemVm> AskLog { get; } = [];
+    private readonly Queue<AskItemVm> _pendingAsks = new();
+    /// <summary>Raised when the chat gets a new item or an answer lands — the window scrolls the thread to the end.</summary>
+    public event Action? ChatChanged;
     private string? _selectedSample;
     public string? SelectedSample { get => _selectedSample; set => Set(ref _selectedSample, value); }
 
@@ -130,8 +139,6 @@ public sealed class MainViewModel : ViewModelBase
     public bool IsThinking { get => _isThinking; set => Set(ref _isThinking, value); }
     private string _askText = "";
     public string AskText { get => _askText; set => Set(ref _askText, value); }
-    private string _answerText = "";
-    public string AnswerText { get => _answerText; set => Set(ref _answerText, value); }
     private string _errorBanner = "";
     public string ErrorBanner { get => _errorBanner; set => Set(ref _errorBanner, value); }
     private bool _isEnding;
@@ -195,7 +202,7 @@ public sealed class MainViewModel : ViewModelBase
                     },
                     onAsk: query =>
                     {
-                        UI(() => { LiveLine = $"⌨ {query}"; AnswerText = "…"; LogAsk(query); });
+                        UI(() => { LiveLine = $"⌨ {query}"; LogAsk(query); });
                         return _client.AskAsync(query);
                     },
                     onCompleted: () => UI(() =>
@@ -231,7 +238,6 @@ public sealed class MainViewModel : ViewModelBase
             _callStarted = DateTime.UtcNow;
             ErrorBanner = "";
             IncomingBanner = "";
-            AnswerText = "";
             Stage = "Live";
             _clockTimer.Start();
             StatusText = "";
@@ -269,7 +275,6 @@ public sealed class MainViewModel : ViewModelBase
         var query = AskText.Trim();
         if (query.Length == 0) return;
         AskText = "";
-        AnswerText = "…";
         LogAsk(query);
         try
         {
@@ -277,7 +282,7 @@ public sealed class MainViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            AnswerText = $"Fel: {ex.Message}";
+            LogAnswer($"Fel: {ex.Message}");
         }
     }
 
@@ -306,9 +311,27 @@ public sealed class MainViewModel : ViewModelBase
             CustomerCompany = customer.Company;
     }
 
-    private void LogAsk(string query) => TranscriptLog.Add(new TranscriptRowVm(
-        FormatCallTime((long)(DateTime.UtcNow - _callStarted).TotalMilliseconds),
-        "⌨", query, IsRep: false, IsAsk: true));
+    private void LogAsk(string query)
+    {
+        var item = new AskItemVm(query);
+        _pendingAsks.Enqueue(item);
+        AskLog.Add(item);
+        TranscriptLog.Add(new TranscriptRowVm(
+            FormatCallTime((long)(DateTime.UtcNow - _callStarted).TotalMilliseconds),
+            "⌨", query, IsRep: false, IsAsk: true));
+        ChatChanged?.Invoke();
+    }
+
+    /// <summary>Answers arrive in ask order (the backend serializes asks per call), so each one fills the oldest pending question.</summary>
+    private void LogAnswer(string answer)
+    {
+        if (_pendingAsks.Count > 0) _pendingAsks.Dequeue().Answer = answer;
+        else AskLog.Add(new AskItemVm("") { Answer = answer });
+        TranscriptLog.Add(new TranscriptRowVm(
+            FormatCallTime((long)(DateTime.UtcNow - _callStarted).TotalMilliseconds),
+            "✎", answer, IsRep: false, IsAsk: false, IsAnswer: true));
+        ChatChanged?.Invoke();
+    }
 
     private static string FormatCallTime(long ms) => $"{ms / 60000}:{ms / 1000 % 60:D2}";
 
@@ -412,6 +435,8 @@ public sealed class MainViewModel : ViewModelBase
         _audio?.Dispose();
         _audio = null;
         TranscriptLog.Clear();
+        AskLog.Clear();
+        _pendingAsks.Clear();
         IncomingBanner = "";
         Questions.Clear();
         Products.Clear();
@@ -420,7 +445,6 @@ public sealed class MainViewModel : ViewModelBase
         ActionItems.Clear();
         CompanyLine = "";
         LiveLine = "";
-        AnswerText = "";
         ErrorBanner = "";
         IsEnding = false;
         EndingNotice = "";

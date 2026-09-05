@@ -9,7 +9,10 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
-        DataContext = new MainViewModel();
+        var vm = new MainViewModel();
+        DataContext = vm;
+        // The ask-lane chat follows its newest message, like any messaging thread.
+        vm.ChatChanged += () => Dispatcher.BeginInvoke(ChatScroller.ScrollToEnd);
     }
 
     private void ToggleTranscript(object sender, RoutedEventArgs e)
