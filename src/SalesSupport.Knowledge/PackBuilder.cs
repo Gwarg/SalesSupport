@@ -47,7 +47,8 @@ public static class PackBuilder
         IReadOnlyList<PackAlias> aliases,
         IReadOnlyList<PackRelation> relations,
         string catalogMapText,
-        IReadOnlyList<string> sttVocab)
+        IReadOnlyList<string> sttVocab,
+        string? catalogMapCompact = null)
     {
         Validate(embedder, products, families, aliases, relations, catalogMapText, sttVocab);
 
@@ -104,6 +105,9 @@ public static class PackBuilder
 
             Execute(connection, "INSERT INTO catalog_map (tier, text, token_estimate) VALUES ('full', $1, $2)",
                 catalogMapText, catalogMapText.Length / 4);
+            if (!string.IsNullOrWhiteSpace(catalogMapCompact))
+                Execute(connection, "INSERT INTO catalog_map (tier, text, token_estimate) VALUES ('compact', $1, $2)",
+                    catalogMapCompact, catalogMapCompact.Length / 4);
 
             foreach (var term in sttVocab.Distinct(StringComparer.OrdinalIgnoreCase))
                 Execute(connection, "INSERT OR IGNORE INTO stt_vocab (term, weight) VALUES ($1, 1.0)", term);

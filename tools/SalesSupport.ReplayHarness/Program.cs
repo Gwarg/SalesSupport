@@ -17,6 +17,7 @@ var compatLoose = false;
 string? compatModel = Environment.GetEnvironmentVariable("OPENAI_COMPAT_MODEL");
 string? compatUrl = Environment.GetEnvironmentVariable("OPENAI_COMPAT_BASE_URL");
 string? compatReasoning = null;
+string? mapTier = null;
 string? compatGate = null;
 string? compatAdvisor = null;
 string? compatSummarizer = null;
@@ -42,6 +43,7 @@ for (var i = 0; i < args.Length; i++)
         case "--compat-reasoning": compat = true; compatReasoning = args[++i]; break;
         // Role mixing (D31): spec is "model[@reasoning]", or "claude"/"ollama" to route
         // that role to the other provider. Unspecified roles fall back to --compat-model.
+        case "--map": mapTier = args[++i]; break;
         case "--compat-gate": compat = true; compatGate = args[++i]; break;
         case "--compat-advisor": compat = true; compatAdvisor = args[++i]; break;
         case "--compat-summarizer": compat = true; compatSummarizer = args[++i]; break;
@@ -277,6 +279,13 @@ async Task<CallStats> RunCallAsync(string path, bool verbose)
             CompanyName = "Duab (demo)",
             CallLanguage = language,
             UiLanguage = language,
+            // Map tier per provider (D14): full where the prompt is cached (Claude), compact elsewhere.
+            CatalogMapTier = mapTier switch
+            {
+                "full" => CatalogMapTier.Full,
+                "compact" => CatalogMapTier.Compact,
+                _ => live && !compat ? CatalogMapTier.Full : CatalogMapTier.Compact,
+            },
         };
         var orchestrator = new CallOrchestrator(llm, knowledge, options);
         log.AppendLine($"{name} [{stats.Mode}] lang={language} {DateTime.Now:yyyy-MM-dd HH:mm:ss}");

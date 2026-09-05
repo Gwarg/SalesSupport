@@ -25,6 +25,7 @@ public sealed class SqlitePackKnowledge : IKnowledgeSource
     private readonly float[] _vectors;
     private readonly Dictionary<string, List<string>> _aliases;
     private readonly string _catalogMap;
+    private readonly string _catalogMapCompact;
 
     public string CompanyId { get; }
     public string PackVersion { get; }
@@ -34,7 +35,7 @@ public sealed class SqlitePackKnowledge : IKnowledgeSource
 
     private SqlitePackKnowledge(
         string connectionString, IEmbedder embedder, List<Doc> docs, float[] vectors,
-        Dictionary<string, List<string>> aliases, string catalogMap, string companyId, string packVersion)
+        Dictionary<string, List<string>> aliases, string catalogMap, string catalogMapCompact, string companyId, string packVersion)
     {
         _connectionString = connectionString;
         _embedder = embedder;
@@ -43,6 +44,7 @@ public sealed class SqlitePackKnowledge : IKnowledgeSource
         _vectors = vectors;
         _aliases = aliases;
         _catalogMap = catalogMap;
+        _catalogMapCompact = catalogMapCompact;
         CompanyId = companyId;
         PackVersion = packVersion;
     }
@@ -101,10 +103,13 @@ public sealed class SqlitePackKnowledge : IKnowledgeSource
 
         var catalogMap = ReadAll(connection, "SELECT text FROM catalog_map WHERE tier = 'full'", r => r.GetString(0)).FirstOrDefault()
             ?? throw new InvalidOperationException("Pack has no catalog_map('full').");
+        // Older packs carry only the full tier; compact falls back to it rather than failing.
+        var catalogMapCompact = ReadAll(connection, "SELECT text FROM catalog_map WHERE tier = 'compact'", r => r.GetString(0)).FirstOrDefault()
+            ?? catalogMap;
 
         var sttVocab = ReadAll(connection, "SELECT term FROM stt_vocab", r => r.GetString(0)).ToList();
 
-        return new SqlitePackKnowledge(connectionString, embedder, docs, vectors, aliases, catalogMap,
+        return new SqlitePackKnowledge(connectionString, embedder, docs, vectors, aliases, catalogMap, catalogMapCompact,
             meta["company_id"], meta["pack_version"])
         { SttVocabulary = sttVocab };
     }
@@ -146,7 +151,8 @@ public sealed class SqlitePackKnowledge : IKnowledgeSource
         return targets is { Count: 1 } ? targets[0] : null;
     }
 
-    public string GetCatalogMap() => _catalogMap;
+    public string GetCatalogMap(CatalogMapTier tier = CatalogMapTier.Full) =>
+        tier == CatalogMapTier.Compact ? _catalogMapCompact : _catalogMap;
 
     private List<(int DocIndex, int Rank)> FtsRanks(string query)
     {

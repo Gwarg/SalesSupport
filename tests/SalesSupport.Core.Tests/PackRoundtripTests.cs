@@ -1,3 +1,4 @@
+using SalesSupport.Core.Contracts;
 using SalesSupport.Knowledge;
 
 namespace SalesSupport.Core.Tests;
@@ -40,7 +41,8 @@ public class PackRoundtripTests : IDisposable
              new PackAlias("skannern", "spoken", "prod:du-x40"), new PackAlias("skannern", "spoken", "prod:du-x60")],
             [new PackRelation("prod:du-x60", "prod:du-x40", "successor_of", null)],
             "Katalog: skannrar (X40 utgående, X60 frysklassad).",
-            ["X40", "X60"]);
+            ["X40", "X60"],
+            catalogMapCompact: "Katalog: X40, X60.");
     }
 
     [Fact]
@@ -99,6 +101,8 @@ public class PackRoundtripTests : IDisposable
         var pack = SqlitePackKnowledge.Load(_packPath, _embedder);
 
         Assert.Contains("X40 utgående", pack.GetCatalogMap());
+        Assert.Equal("Katalog: X40, X60.", pack.GetCatalogMap(CatalogMapTier.Compact));
+        Assert.Equal(pack.GetCatalogMap(), pack.GetCatalogMap(CatalogMapTier.Full));
     }
 
     public void Dispose()

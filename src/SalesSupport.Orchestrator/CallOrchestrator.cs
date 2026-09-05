@@ -37,7 +37,7 @@ public sealed class CallOrchestrator(ILlmProvider llm, IKnowledgeSource knowledg
     /// </summary>
     public async Task<MergeOutcome> SeedFromBriefAsync(string briefText, CancellationToken ct = default)
     {
-        var conversation = PromptBuilder.Seeder(briefText, Picture, knowledge.GetCatalogMap(), options);
+        var conversation = PromptBuilder.Seeder(briefText, Picture, knowledge.GetCatalogMap(options.CatalogMapTier), options);
         var diff = await llm.CompleteJsonAsync<GateDiff>(LlmRole.Gate, conversation, ct);
         return PictureMerger.Apply(Picture, diff, turn: 0);
     }
@@ -48,7 +48,7 @@ public sealed class CallOrchestrator(ILlmProvider llm, IKnowledgeSource knowledg
         var window = _transcript.TakeLast(options.GateWindow).ToList();
         _transcript.Add(utterance);
 
-        var gateConversation = PromptBuilder.Gate(Picture, window, utterance, Panel.ActiveQuestions, knowledge.GetCatalogMap(), options);
+        var gateConversation = PromptBuilder.Gate(Picture, window, utterance, Panel.ActiveQuestions, knowledge.GetCatalogMap(options.CatalogMapTier), options);
         var gateStarted = Environment.TickCount64;
         var diff = await llm.CompleteJsonAsync<GateDiff>(LlmRole.Gate, gateConversation, ct);
         var gateMs = Environment.TickCount64 - gateStarted;
@@ -70,7 +70,7 @@ public sealed class CallOrchestrator(ILlmProvider llm, IKnowledgeSource knowledg
 
             var advisorStarted = Environment.TickCount64;
             var cards = await RetrieveForTopicsAsync(diff.Advice.Topics, ct);
-            var advisorConversation = PromptBuilder.Advisor(Picture, cards, Panel, knowledge.GetCatalogMap(), options);
+            var advisorConversation = PromptBuilder.Advisor(Picture, cards, Panel, knowledge.GetCatalogMap(options.CatalogMapTier), options);
             var result = await llm.CompleteJsonAsync<AdvisorResult>(LlmRole.Advisor, advisorConversation, ct);
             advisorMs = Environment.TickCount64 - advisorStarted;
 
@@ -85,7 +85,7 @@ public sealed class CallOrchestrator(ILlmProvider llm, IKnowledgeSource knowledg
     public async Task<AskResult> AskAsync(string query, CancellationToken ct = default)
     {
         var cards = await knowledge.SearchAsync(query, options.RetrievalK, ct: ct);
-        var conversation = PromptBuilder.Advisor(Picture, cards, Panel, knowledge.GetCatalogMap(), options, repQuery: query);
+        var conversation = PromptBuilder.Advisor(Picture, cards, Panel, knowledge.GetCatalogMap(options.CatalogMapTier), options, repQuery: query);
         var result = await llm.CompleteJsonAsync<AdvisorResult>(LlmRole.Advisor, conversation, ct);
 
         var delta = Panel.Reconcile(FilterProducts(result, Picture));

@@ -167,6 +167,6 @@ public class BackendSessionTests : IDisposable
 
         public string? ResolveAlias(string text) => null;
 
-        public string GetCatalogMap() => "stubkatalog";
+        public string GetCatalogMap(CatalogMapTier tier = CatalogMapTier.Full) => "stubkatalog";
     }
 }

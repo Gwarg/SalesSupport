@@ -72,7 +72,7 @@ public sealed class InMemoryKnowledge : IKnowledgeSource
 
     public string? ResolveAlias(string text) => Aliases.GetValueOrDefault(text.Trim());
 
-    public string GetCatalogMap() =>
+    public string GetCatalogMap(CatalogMapTier tier = CatalogMapTier.Full) =>
         "Demokatalog: handskannrar (X40 utgående, X60 frysklassad), arktiskt batteripaket till X40, " +
         "laddstationer (LP-dock), etikettskrivare (LP-200, klarar 2026 års märkningskrav för djupfryst), serviceavtal (frys).";
 }

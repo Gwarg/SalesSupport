@@ -78,7 +78,7 @@ Console.WriteLine($"  embedder: {embedder.ModelId} ({embedder.Dims} dims)");
 var assembly = PackAssembler.Assemble(rows, embedder);
 Console.WriteLine($"  assembled: {assembly.Families.Count} families, {assembly.Products.Count} cards, " +
                   $"{assembly.Aliases.Count} aliases, {assembly.Relations.Count} relations, " +
-                  $"catalog map ~{assembly.CatalogMap.Length / 4} tokens");
+                  $"catalog map ~{assembly.CatalogMap.Length / 4} tokens (compact ~{assembly.CatalogMapCompact.Length / 4})");
 
 var feedSnapshot = Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(input)))[..12].ToLowerInvariant();
 Directory.CreateDirectory(outDir);
@@ -93,7 +93,8 @@ PackBuilder.Build(
     assembly.Aliases,
     assembly.Relations,
     assembly.CatalogMap,
-    assembly.SttVocab);
+    assembly.SttVocab,
+    assembly.CatalogMapCompact);
 
 var size = new FileInfo(packPath).Length;
 Console.WriteLine($"  pack written: {packPath} ({size / 1024} KB, embedder {embedder.ModelId}/{embedder.Dims})");

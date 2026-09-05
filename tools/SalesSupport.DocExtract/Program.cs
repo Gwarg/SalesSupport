@@ -302,13 +302,32 @@ sealed class MergedProduct
         Absorb(product, docRef);
     }
 
+    private string _homeDoc = "";
+
+    /// <summary>
+    /// Which extraction describes the product: its own brochure wins (the file name carries
+    /// the model code — "Brochure WT5000.pdf" for WT5000, so the WT5000T brochure's
+    /// "Transformer Version" text cannot overwrite it); among equals, the longest description.
+    /// </summary>
     public void Absorb(ExtractedProduct other, string docRef)
     {
-        if (other.Description.Length > Product.Description.Length) Product = other;
+        var otherIsHome = IsHomeDoc(docRef, other.ModelCode);
+        var currentIsHome = IsHomeDoc(_homeDoc, Product.ModelCode);
+        if (DocRefs.Count == 0 || (otherIsHome && !currentIsHome) ||
+            (otherIsHome == currentIsHome && other.Description.Length > Product.Description.Length))
+        {
+            Product = other;
+            _homeDoc = docRef;
+        }
         Relations.AddRange(other.Relations.Select(r => (r, docRef)));
         foreach (var alias in other.Aliases) Aliases.Add(alias);
         if (!DocRefs.Contains(docRef)) DocRefs.Add(docRef);
     }
+
+    private static bool IsHomeDoc(string docRef, string modelCode) =>
+        Path.GetFileNameWithoutExtension(docRef)
+            .Split([' ', ',', '_', '-'], StringSplitOptions.RemoveEmptyEntries)
+            .Any(token => token.Equals(modelCode, StringComparison.OrdinalIgnoreCase));
 
     public RawProduct ToRaw(string vendor, List<RawRelation> relations, string category)
     {

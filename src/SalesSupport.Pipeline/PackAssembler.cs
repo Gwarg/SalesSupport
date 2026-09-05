@@ -21,6 +21,7 @@ public static class PackAssembler
         List<PackAlias> Aliases,
         List<PackRelation> Relations,
         string CatalogMap,
+        string CatalogMapCompact,
         List<string> SttVocab);
 
     public static List<string> Validate(IReadOnlyList<RawProduct> rows)
@@ -99,8 +100,9 @@ public static class PackAssembler
             vocab.AddRange(row.AliasesRaw ?? []);
         }
 
-        var catalogMap = BuildCatalogMap(rows, families);
-        return new Assembly(products, families, aliases, relations, catalogMap, vocab);
+        var catalogMap = BuildCatalogMap(rows, families, compact: false);
+        var catalogMapCompact = BuildCatalogMap(rows, families, compact: true);
+        return new Assembly(products, families, aliases, relations, catalogMap, catalogMapCompact, vocab);
     }
 
     private static List<PackFamily> BuildFamilies(IReadOnlyList<RawProduct> rows, IEmbedder embedder)
@@ -189,7 +191,16 @@ public static class PackAssembler
         return sb.ToString().TrimEnd();
     }
 
-    private static string BuildCatalogMap(IReadOnlyList<RawProduct> rows, IReadOnlyList<PackFamily> families)
+    /// <summary>
+    /// Two tiers (docs/knowledge-pack.md): full = headline products with a clipped one-line
+    /// description; compact = names and SKUs only, for small-context or per-token-priced
+    /// providers (D14 makes the tier per-provider config). Both are "families and
+    /// instruments" (D4), not every SKU: options, modules and accessories (kind attribute
+    /// from document-source adapters, D33) collapse into one line per family so hundreds of
+    /// probes and option codes do not swamp the gate/advisor prompts. Packs without a kind
+    /// attribute list everything as headline, as before.
+    /// </summary>
+    private static string BuildCatalogMap(IReadOnlyList<RawProduct> rows, IReadOnlyList<PackFamily> families, bool compact)
     {
         var sb = new StringBuilder();
         sb.AppendLine("Produktkatalog — familjer och produkter:");
@@ -198,19 +209,24 @@ public static class PackAssembler
             var members = rows.Where(r => r.CategoryPathRaw == family.Path).ToList();
             if (members.Count == 0) continue;
             sb.AppendLine($"\n## {family.Path}");
-            // The map is "families and instruments" (D4), not every SKU: options, modules and
-            // accessories (kind attribute from document-source adapters, D33) collapse into
-            // one line per family so hundreds of probes and option codes do not swamp the
-            // gate/advisor prompts. Packs without a kind attribute list everything as before.
             var headline = members.Where(IsHeadline).ToList();
             var rest = members.Where(m => !IsHeadline(m)).ToList();
             foreach (var member in headline)
-                sb.AppendLine($"- {member.Name} ({member.Sku}){(member.Status == "discontinued" ? " — utgående" : "")}: {FirstSentence(member.DescriptionRaw)}");
+            {
+                var flag = member.Status == "discontinued" ? " — utgående" : "";
+                sb.AppendLine(compact
+                    ? $"- {member.Name} ({member.Sku}){flag}"
+                    : $"- {member.Name} ({member.Sku}){flag}: {Clip(FirstSentence(member.DescriptionRaw), 110)}");
+            }
             if (rest.Count > 0)
-                sb.AppendLine($"- {rest.Count} tillbehör/optioner/moduler, t.ex. {string.Join(", ", rest.Take(6).Select(m => m.Sku))}{(rest.Count > 6 ? ", …" : "")}");
+                sb.AppendLine(compact
+                    ? $"- {rest.Count} tillbehör/optioner/moduler"
+                    : $"- {rest.Count} tillbehör/optioner/moduler, t.ex. {string.Join(", ", rest.Take(6).Select(m => m.Sku))}{(rest.Count > 6 ? ", …" : "")}");
         }
         return sb.ToString().TrimEnd();
     }
+
+    private static string Clip(string text, int max) => text.Length <= max ? text : text[..(max - 1)].TrimEnd() + "…";
 
     private static bool IsHeadline(RawProduct row) =>
         row.AttributesRaw is null

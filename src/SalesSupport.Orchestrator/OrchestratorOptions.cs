@@ -1,3 +1,4 @@
+using SalesSupport.Core.Contracts;
 namespace SalesSupport.Orchestrator;
 
 public sealed class OrchestratorOptions
@@ -23,6 +24,9 @@ public sealed class OrchestratorOptions
 
     /// <summary>The D27 cost dial: how eagerly the gate requests advice (docs/prompts.md).</summary>
     public GateStrictness GateStrictness { get; init; } = GateStrictness.Balanced;
+
+    /// <summary>Catalog map tier handed to gate/advisor prompts (D14: per-provider context budget).</summary>
+    public CatalogMapTier CatalogMapTier { get; init; } = CatalogMapTier.Full;
 
     /// <summary>Installation-specific house rules for the advisor's company block (≤ ~300 tokens, docs/prompts.md).</summary>
     public string SalesGuidance { get; init; } = "";

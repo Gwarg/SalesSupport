@@ -39,6 +39,16 @@ public sealed class BackendOptions
     public string ModelDirectory { get; init; } = "models/multilingual-e5-small";
 
     public GateStrictness GateStrictness { get; init; } = GateStrictness.Balanced;
+
+    /// <summary>"full" | "compact" | "auto" (default): compact for Ollama (small context) and per-token-priced providers, full for Claude where the prompt is cached (D14).</summary>
+    public string CatalogMap { get; init; } = "auto";
+
+    public Core.Contracts.CatalogMapTier ResolveCatalogMapTier() => CatalogMap.ToLowerInvariant() switch
+    {
+        "full" => Core.Contracts.CatalogMapTier.Full,
+        "compact" => Core.Contracts.CatalogMapTier.Compact,
+        _ => LlmProvider == "claude" ? Core.Contracts.CatalogMapTier.Full : Core.Contracts.CatalogMapTier.Compact,
+    };
     public string SalesGuidance { get; init; } = "";
 
     /// <summary>Phone → customer index (JSONL rows: phone, company, crm_id, notes) for incoming-call screen-pop (D32). Missing file = no resolution.</summary>

@@ -154,6 +154,6 @@ Key specs must also land as typed JSON in `attributes` (`{"operating_temp_c": [-
 ## Open items
 
 1. **`doc_chunks` table** (datasheet passages for deep spec Q&A) — only if L0 shows `attributes` + cards can't answer the ask lane's spec questions. Don't build speculatively.
-2. **`catalog_map('compact')` tier** for small-context local providers — generate when the first local installation is real.
+2. **`catalog_map('compact')` tier** — *built 2026-09-05* when the first document-source catalog (Test Power, 799 products) pushed the full map to ~8k tokens: names and SKUs only, options/modules/accessories collapsed per family; the tier is per-provider config (`Backend:CatalogMap` full|compact|auto, harness `--map`).
 3. **Multi-currency / per-market pricing** — v1 assumes one currency per company; revisit when a launch company quotes in EUR and SEK.
 4. **Per-language content** (dual sv/en cards) — only if cross-lingual retrieval quality on English calls disappoints in L0.

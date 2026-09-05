@@ -52,6 +52,7 @@ public sealed class CallSessionService(
             UiLanguage = options.UiLanguage,
             GateStrictness = options.GateStrictness,
             SalesGuidance = options.SalesGuidance,
+            CatalogMapTier = options.ResolveCatalogMapTier(),
         });
 
         var session = new Session
