@@ -34,10 +34,11 @@ public sealed class MainViewModel : ViewModelBase
         SelectedMicrophone = Microphones.FirstOrDefault(d => d.DefaultCommunications) ?? Microphones.FirstOrDefault();
         SelectedSpeaker = Speakers.FirstOrDefault(d => d.DefaultCommunications) ?? Speakers.FirstOrDefault();
 
+        // Subfolders hold per-customer corpora (samples/calls/testpower/…); shown as relative paths.
         _samplesDir = Path.Combine(FindRepoRoot(), "samples", "calls");
         if (Directory.Exists(_samplesDir))
-            foreach (var sample in Directory.GetFiles(_samplesDir, "*.jsonl").OrderBy(p => p, StringComparer.Ordinal))
-                ReplaySamples.Add(Path.GetFileName(sample));
+            foreach (var sample in Directory.GetFiles(_samplesDir, "*.jsonl", SearchOption.AllDirectories).OrderBy(p => p, StringComparer.Ordinal))
+                ReplaySamples.Add(Path.GetRelativePath(_samplesDir, sample).Replace('\\', '/'));
         SelectedSample = ReplaySamples.FirstOrDefault();
 
         _client.TranscriptAppended += e => UI(() => TranscriptLog.Add(new TranscriptRowVm(

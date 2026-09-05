@@ -98,6 +98,32 @@ extracted from documents — they stay null until a structured price list is mer
 model code. `testdata/` (customer-supplied source material) is gitignored; the derived
 canonical JSONL is committed.
 
+## Demo runbook — Test Power replay in the panel
+
+A scripted Test Power call (`samples/calls/testpower/ev-inverter-lab.jsonl`, ~90 utterances,
+~6 minutes at replay pacing: an EV-inverter lab needing an 8-channel 12-bit scope, probes,
+a power analyzer with motor evaluation, IS8000 sync, two typed asks) plays through the
+real backend so the panel fills in live. Per-customer corpora live in subfolders of
+`samples/calls/`; the harness `--all` corpus stays the top-level DUAB set.
+
+1. Build the Test Power pack once (offline, seconds):
+   `dotnet run --project src/SalesSupport.Pipeline -- --input samples/catalog/testpower-yokogawa.canonical.jsonl --company testpower --embedder e5`
+2. Point the backend at it in `src/SalesSupport.Backend/appsettings.json`: `PackPath` = the
+   `packs/testpower_*.pack.sqlite` just built (auto-discovery picks the newest pack, so set
+   it explicitly for a demo), `CompanyName` = `"Test Power"`, `LlmProvider` = `"claude"` for
+   the premium experience (needs `ANTHROPIC_API_KEY`; ~$0.50–0.80 per full replay with the
+   cached gate) or `"ollama"` for a free but slow run; `CatalogMap` stays `auto`.
+3. Start backend and client. In the pre-call card: Källa = Replay, pick
+   `testpower/ev-inverter-lab.jsonl` (Kund pre-fills from the script), open **Logg** for the
+   scrolling transcript, press Starta samtal.
+4. Watch: discovery questions and product cards arrive as the customer states needs; the
+   owned WT1800 never gets re-suggested; the budget objection and the november deadline
+   land in the picture; the typed asks answer from the pack; Avsluta after "uppspelning
+   klar" produces the summary with the offer, demo-unit and trial-link commitments.
+
+Rehearse once before the real run — the first replay after a backend start also warms the
+prompt cache.
+
 ## Capture spike (L1)
 
 Prove dual-channel audio capture on real hardware — mic + speaker loopback (D1), device

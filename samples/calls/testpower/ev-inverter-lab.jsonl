@@ -1,0 +1,94 @@
+{"language":"sv","customer":"Nordic e-Drive AB"}
+{"speaker":"rep","text":"Hej Karin, det är Andreas från Test Power. Har du några minuter?"}
+{"speaker":"customer","text":"Hej Andreas! Ja, det passar bra, jag har en halvtimme innan nästa möte."}
+{"speaker":"rep","text":"Vad bra. Jag ringer för att följa upp mejlet om ert nya labb för inverterutveckling. Hur går det med uppbyggnaden?"}
+{"speaker":"customer","text":"Det rullar på. Vi flyttade in i den nya labbhallen i Västerås i augusti och nu håller vi på att sätta upp testriggarna för drivlinan."}
+{"speaker":"rep","text":"Roligt att höra. Kan du berätta lite om vad ni utvecklar just nu?"}
+{"speaker":"customer","text":"Vi bygger en ny inverter för elbilsdrivlinor, kiselkarbid, 800 volt. Målet är att ha en fungerande prototyp klar för karakterisering i november."}
+{"speaker":"rep","text":"Okej, kiselkarbid och 800 volt, då blir det snabba switchförlopp. Hur mäter ni på inverterna idag?"}
+{"speaker":"customer","text":"Ärligt talat ganska dåligt. Vi har ett äldre fyrakanaligt oscilloskop med åtta bitar, och det räcker inte."}
+{"speaker":"rep","text":"På vilket sätt räcker det inte, är det kanalerna eller upplösningen?"}
+{"speaker":"customer","text":"Båda. Vi vill titta på tre fasströmmar och tre fasspänningar samtidigt, plus gate-signaler, och då är fyra kanaler hopplöst."}
+{"speaker":"customer","text":"Och med åtta bitar ser vi inte ringningarna efter switcharna ordentligt. Vi ser att det ringer men kan inte kvantifiera det."}
+{"speaker":"rep","text":"Det är precis den typen av mätning som våra DLM5000HD-modeller är gjorda för. Åtta kanaler och tolv bitars upplösning, med 2,5 gigasamples per sekund på alla kanaler samtidigt."}
+{"speaker":"customer","text":"Tolv bitar, det låter intressant. Är det verkligen tolv bitar hela vägen, eller är det någon slags filtrering?"}
+{"speaker":"rep","text":"Det är en riktig tolvbitars AD-omvandlare, så du får sexton gånger finare upplösning än med åtta bitar. Det gör att man kan sätta ett känsligt område och ändå se hela vågformen."}
+{"speaker":"customer","text":"Okej. Hur mycket bandbredd pratar vi om?"}
+{"speaker":"rep","text":"Det finns 350 och 500 megahertz. För kiselkarbid med snabba flanker skulle jag rekommendera 500 megahertz, alltså DLM5058HD."}
+{"speaker":"customer","text":"Vi har haft problem med att våra switchflanker är under tjugo nanosekunder, så det låter rimligt."}
+{"speaker":"rep","text":"Absolut. Hur långa förlopp behöver ni fånga? Är det enstaka switchar eller hela lastcykler?"}
+{"speaker":"customer","text":"Helst hela lastcykler. Vi vill räkna switchförluster över en hel körcykel, inte bara titta på en enskild puls."}
+{"speaker":"rep","text":"Då är minnet viktigt. Standard är tolv och en halv megapunkter kontinuerligt, men med minnesoptionen M3 kommer du upp i en gigapunkt i single-läge."}
+{"speaker":"customer","text":"En gigapunkt? Hur lång tid blir det vid full samplingshastighet?"}
+{"speaker":"rep","text":"Vid 2,5 gigasamples blir det ungefär fyra tiondels sekund, och sänker du till 250 megasamples får du fyra sekunder. Så du kan välja mellan detaljnivå och längd."}
+{"speaker":"customer","text":"Fyra sekunder vid 250 megasamples räcker gott för våra cykler."}
+{"speaker":"rep","text":"Sedan finns det en option för effektanalys, G3, som räknar switchförluster direkt i instrumentet, turn-on, turn-off och ledningsförluster."}
+{"speaker":"customer","text":"Det vore guld värt. Idag exporterar vi rådata och räknar i Python, och det tar en halv dag per mätserie."}
+{"speaker":"rep","text":"Då sparar ni mycket tid. Hur många personer i labbet skulle använda instrumentet?"}
+{"speaker":"customer","text":"Vi är tre ingenjörer på inverterteamet, och sen har vi en tekniker som kör de långa testerna."}
+{"speaker":"rep","text":"Okej. Hur ser det ut med prober? Vad använder ni för att mäta fasströmmarna idag?"}
+{"speaker":"customer","text":"Vi har några gamla strömtänger som går till kanske 30 ampere, men de är för långsamma för switchfrekvensen."}
+{"speaker":"rep","text":"Till DLM finns PBC100, det är en strömprob med 100 megahertz bandbredd och 30 ampere RMS. Den brukar vara den man tar för fasströmmar på inverternivå."}
+{"speaker":"customer","text":"Hundra megahertz på ström, det är en rejäl skillnad mot vad vi har."}
+{"speaker":"rep","text":"Och för spänningen över switcharna behöver ni differentialprober som klarar 800-voltsbussen med marginal."}
+{"speaker":"customer","text":"Ja, vi mäter ju drain-source över SiC-modulerna, så det blir 800 volt plus överslängar."}
+{"ask":"Vilken maxspänning klarar 702922?"}
+{"speaker":"rep","text":"Då rekommenderar jag PBDH0400 i varianten med 2000 volt, modellnummer 702922. Den har 400 megahertz bandbredd och tål plus minus 2000 volt."}
+{"speaker":"customer","text":"Det låter som rätt nivå. Hur många sådana behöver vi för tre faser?"}
+{"speaker":"rep","text":"Tre stycken för spänningarna och tre strömprober, så sex prober, plus att ni kan använda de två sista kanalerna för gate-signaler med vanliga passiva prober."}
+{"speaker":"customer","text":"Okej, sex prober plus passiva. Behöver strömproberna egen matning?"}
+{"speaker":"rep","text":"Ja, och där finns två vägar. Antingen optionen P8 som ger åtta probströmsuttag direkt på instrumentet, eller en separat probströmförsörjning, 701934, som matar upp till fyra prober."}
+{"speaker":"customer","text":"Då är väl P8 enklast om vi ändå köper nytt?"}
+{"speaker":"rep","text":"Ja, det tycker jag också. Då slipper ni en extra låda på bänken."}
+{"speaker":"customer","text":"Jag måste vara ärlig med budgeten. Vi tittade på en fyrakanalig HD-modell i våras och labbchefen tyckte redan det var dyrt."}
+{"speaker":"rep","text":"Jag förstår. Vad var det som gjorde att ni inte gick vidare då?"}
+{"speaker":"customer","text":"Vi hade inte budgeten klar, och fyra kanaler löste ju inte problemet med att se alla faser samtidigt."}
+{"speaker":"rep","text":"Det är en viktig poäng. Ett åttakanaligt instrument ersätter i praktiken två fyrakanaliga, och ni slipper synkronisera dem."}
+{"speaker":"customer","text":"Det argumentet tror jag Peter köper. Han är vår labbchef och det är han som godkänner investeringar över hundra tusen."}
+{"speaker":"rep","text":"Bra att veta. Finns det ett datum ni behöver ha instrumentet på plats?"}
+{"speaker":"customer","text":"Karakteriseringen startar i november, så helst leverans i oktober. Och vår investeringsbudget för året stänger i slutet av september."}
+{"speaker":"rep","text":"Då har vi några veckor på oss att få fram ett bra underlag till Peter. Jag skickar en offert på DLM5058HD med M3, G3 och P8, plus proberna."}
+{"speaker":"customer","text":"Perfekt. Kan du också ta med ett alternativ utan effektanalysoptionen, så vi ser vad den kostar separat?"}
+{"speaker":"rep","text":"Absolut, jag lägger G3 som en separat rad så det blir tydligt."}
+{"speaker":"customer","text":"En sak till. Vi behöver också mäta verkningsgraden på hela invertern, in och ut, inte bara switchförlusterna."}
+{"speaker":"rep","text":"Hur gör ni verkningsgradsmätningen idag?"}
+{"speaker":"customer","text":"Vi har en WT1800 som vi lånar från motorlabbet, men den är upptagen halva tiden och vi får inte motorparametrarna kopplade till effekten."}
+{"speaker":"rep","text":"Ni äger alltså redan en WT1800. Är det mekaniska effekten från motorn ni vill få in i samma mätning?"}
+{"speaker":"customer","text":"Ja, vridmoment och varvtal från dynamometern, så vi kan se verkningsgrad från batteri till axel."}
+{"speaker":"rep","text":"Då är WT5000 med motorutvärderingsoptionen MTR1 rätt väg. Den tar in vridmoment och varvtal och räknar mekanisk effekt och verkningsgrad direkt."}
+{"speaker":"customer","text":"Är det ett helt nytt instrument, eller kan vi uppgradera vår WT1800?"}
+{"speaker":"rep","text":"Det är ett nytt instrument. WT5000 har 0,03 procents grundnoggrannhet och sju modulplatser, så ni kan ha DC-sidan och tre faser i samma enhet."}
+{"speaker":"customer","text":"Sju platser, det är rejält. Vilka strömmar klarar ingångarna?"}
+{"speaker":"rep","text":"Elementen finns i 30 ampere och 5 ampere, och för högre strömmar använder man strömsensorelementet 760903 med externa sensorer som CT1000A upp till tusen ampere."}
+{"speaker":"customer","text":"Våra fasströmmar toppar runt 400 ampere, så det blir sensorer."}
+{"speaker":"rep","text":"Då blir det tre strömsensorelement med CT1000A. Hur får ni ihop scopedatan och effektmätningen i samma analys idag?"}
+{"speaker":"customer","text":"Det gör vi inte. Vi kör mätningarna separat och försöker matcha tidsstämplar i efterhand, vilket aldrig riktigt fungerar."}
+{"speaker":"rep","text":"Det är exakt problemet IS8000 löser. Det är vår mjukvaruplattform som styr både scopet och effektanalysatorn och synkroniserar mätningarna i tid."}
+{"speaker":"customer","text":"Synkroniserar hur då, med en kabel eller över nätverket?"}
+{"speaker":"rep","text":"Över nätverket med IEEE 1588. Scopet behöver optionen CY för att vara master, och sedan hämtar IS8000 vågformer och effektdata i samma tidsbas."}
+{"ask":"Skillnaden mellan IS8001 och IS8002?"}
+{"speaker":"customer","text":"Och mjukvaran, är det licens per dator eller per år?"}
+{"speaker":"rep","text":"Det finns båda. IS8001 är en årslicens och IS8002 är en permanent licens. Många börjar med årslicensen under ett projekt."}
+{"speaker":"customer","text":"Vi skulle nog vilja prova innan vi köper. Går det?"}
+{"speaker":"rep","text":"Ja, det finns en trettio dagars provperiod som ni laddar ner själva. Jag skickar länken efter samtalet."}
+{"speaker":"customer","text":"Bra. Då vill jag att vi testar den mot den gamla WT1800 direkt, för att se om arbetsflödet håller."}
+{"speaker":"rep","text":"Det fungerar. Får jag fråga en sak till om invertern, hur styr ni den, är det CAN mot en ECU?"}
+{"speaker":"customer","text":"Ja, CAN FD till en styrenhet, och vi har haft problem med att korrelera styrkommandon med det som händer på switcharna."}
+{"speaker":"rep","text":"Då kan det vara värt att ta med optionen F2 på scopet, som avkodar CAN, CAN FD och LIN direkt i vågformsvyn."}
+{"speaker":"customer","text":"Så vi kan se CAN-meddelandet och strömkurvan i samma bild?"}
+{"speaker":"rep","text":"Precis, och triggra på ett specifikt meddelande så ni ser vad invertern gjorde just då."}
+{"speaker":"customer","text":"Det hade sparat oss veckor i våras. Ta med det som en option också."}
+{"speaker":"rep","text":"Det gör jag. Skulle det hjälpa er att få ett demoinstrument till labbet innan beslutet?"}
+{"speaker":"customer","text":"Ja, det tror jag skulle vara avgörande för Peter. Han vill se det med våra egna moduler."}
+{"speaker":"rep","text":"Då ordnar jag en demoenhet av DLM5058HD med prober i två veckor. När passar det bäst?"}
+{"speaker":"customer","text":"Vecka 40 skulle vara perfekt, då är riggen klar och Peter är på plats."}
+{"speaker":"rep","text":"Vecka 40 noterat. Jag bekräftar datum när jag har kollat med vår demopool."}
+{"speaker":"customer","text":"Toppen. Jag skickar över vår mätspecifikation så ni ser exakt vilka signaler vi vill mäta."}
+{"speaker":"rep","text":"Tack, det underlättar offerten. Är det något mer ni behöver i labbet just nu?"}
+{"speaker":"customer","text":"Inte i den här omgången. Kalibratorer och sådant har vi redan via service."}
+{"speaker":"rep","text":"Då sammanfattar jag. Offert på DLM5058HD med M3, P8 och F2, G3 som separat rad, sex prober, och WT5000 med MTR1 och tre strömsensorelement med CT1000A."}
+{"speaker":"customer","text":"Stämmer. Och länken till IS8000-provperioden."}
+{"speaker":"rep","text":"Och länken, ja. Jag skickar allt i morgon förmiddag, och så återkommer jag om demoenheten vecka 40."}
+{"speaker":"customer","text":"Låter jättebra. Tack för ett bra samtal, Andreas."}
+{"speaker":"rep","text":"Tack själv Karin, vi hörs nästa vecka. Hej då!"}
+{"speaker":"customer","text":"Hej då!"}
