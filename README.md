@@ -141,7 +141,7 @@ budget), then `pack-testpower.cmd` and restart the backend.
 ## Demo runbook — Test Power replay in the panel
 
 A scripted Test Power call (`samples/calls/testpower/ev-inverter-lab.jsonl`, ~90 utterances,
-~6 minutes at replay pacing: an EV-inverter lab needing an 8-channel 12-bit scope, probes,
+~9 minutes at speech-rate replay pacing: an EV-inverter lab needing an 8-channel 12-bit scope, probes,
 a power analyzer with motor evaluation, IS8000 sync, two typed asks) plays through the
 real backend so the panel fills in live. Per-customer corpora live in subfolders of
 `samples/calls/`; the harness `--all` corpus stays the top-level DUAB set.
@@ -149,7 +149,8 @@ real backend so the panel fills in live. Per-customer corpora live in subfolders
 1. Build the Test Power pack once (offline, seconds): `scripts\pack-testpower.cmd`.
 2. `appsettings.json` already points at it (`PackPath` = `packs\testpower_demo.pack.sqlite`,
    `CompanyName` = `"Test Power"`) and runs Gemini 3.7 Flash via OpenRouter
-   (`LlmProvider: openai-compat`, ~$0.25–0.40 per full replay); switch to `"claude"` for the
+   (`LlmProvider: openai-compat`, ~$0.55 per live replay at list price — the first
+   recording measured 1.2 M tokens; the replay itself is free); switch to `"claude"` for the
    premium experience when credits allow (~$0.50–0.80 with the cached gate) or `"ollama"`
    for a free but slow run.
 3. Record once: `scripts\record-demo.cmd`, play the call through, wait ~30 s after "uppspelning klar"

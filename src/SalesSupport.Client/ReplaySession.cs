@@ -12,8 +12,15 @@ namespace SalesSupport.Client;
 /// </summary>
 public sealed class ReplaySession : IDisposable
 {
-    private static readonly TimeSpan PartialDwell = TimeSpan.FromMilliseconds(1200);
-    private static readonly TimeSpan UtteranceGap = TimeSpan.FromMilliseconds(2800);
+    // Speech-rate pacing: the partial stays up for as long as the line takes to say
+    // (~50 ms per character ≈ 150 words/min, clamped 2–9 s), then the final lands and a
+    // short pause follows. A fixed 4 s per utterance fed the backend faster than anyone
+    // talks and left the panel 30–50 s behind the conversation in the first recorded demo.
+    private static readonly TimeSpan TurnGap = TimeSpan.FromMilliseconds(1000);
+    private static readonly TimeSpan AskDwell = TimeSpan.FromMilliseconds(2500);
+
+    private static TimeSpan SpeakingTime(string text) =>
+        TimeSpan.FromMilliseconds(Math.Clamp(text.Length * 50, 2000, 9000));
 
     private readonly CancellationTokenSource _cts = new();
 
@@ -51,14 +58,14 @@ public sealed class ReplaySession : IDisposable
                     if (line.Ask is { } query)
                     {
                         await onAsk(query).ConfigureAwait(false);
-                        await Task.Delay(UtteranceGap, ct).ConfigureAwait(false);
+                        await Task.Delay(AskDwell, ct).ConfigureAwait(false);
                         continue;
                     }
 
                     onPartial(line.Speaker!.Value, line.Text!);
-                    await Task.Delay(PartialDwell, ct).ConfigureAwait(false);
+                    await Task.Delay(SpeakingTime(line.Text!), ct).ConfigureAwait(false);
                     await onFinal(new Utterance(++index, line.Speaker!.Value, line.Text!, Environment.TickCount64 - started)).ConfigureAwait(false);
-                    await Task.Delay(UtteranceGap, ct).ConfigureAwait(false);
+                    await Task.Delay(TurnGap, ct).ConfigureAwait(false);
                 }
                 onCompleted();
             }
