@@ -1,4 +1,4 @@
-DocExtract report — Yokogawa — 2026-09-05 14:36
+DocExtract report — Yokogawa — 2026-09-05 14:53
 BTWT1500.pdf: 45 kept / 0 dropped
   note: Base model codes are printed as WT1501-10 / WT1502-10 / WT1503-10 / WT1504-10, followed by an element-configuration suffix (-WB0-HV1 ... -WB4-HV0), installation suffix (-BN/-RE/-RJ), language suffix (-HE/-HC/-HG) and power-cord suffix (-B/-D/-F/-H/-N/-Q/-R/-T/-U). Element configurations are recorded as instrument attributes, not as separate products; a full order code example from the brochure is WT1504-10-WB3-HV1-BN-HE-x/SY1.
   note: The WB element and HV element are not sold under separate model numbers in this document; they are selected via the element-configuration suffix, so no separate module entries were created.
@@ -231,7 +231,12 @@ Brochure DL950, SL2000.pdf: 227 kept / 0 dropped
   note: Bridge heads 701955–701958 and logic probes 702911/702912/700986/700987 are listed without an explicit module assignment in the table; module-level compatibility (e.g. 701270/701271 strain modules, 720230 logic module) was not asserted.
   note: Page 1 consists of two bandwidth-vs-voltage/current graphs; model numbers were read from them but numeric graph values were not used as specs except where confirmed by the accessory table. Module specifications are referred to 'Bulletin DL950E-02EN' and are not in these pages.
   note: B9879PX and B9879KX are connection leads included with logic probes; they are described as included items, not as separately orderable products, so no entries were created.
-Brochure DLM5000, DLM5000HD, DLM3000, DLM3000HD.pdf: FAILED — System.InvalidOperationException: not in cache (A786828D4D8503F333E073C2.json) and --allow-api not given — author the cache file in-session or re-run with --allow-api | at Program.<>c__DisplayClass0_0.<<<Main>$>g__ExtractRangeAsync|7>d.MoveNext() in D:\Code\DUAB\SalesSupport\tools\SalesSupport.DocExtract\Program.cs:line 131 | --- End of stack trace from previous location --- | at Program.<>c__DisplayClass0_2.<<<Main>$>g__SplitAsync|20>d.MoveNext() in D:\Code\DUAB\SalesSupport\tools\SalesSupport.DocExtract\Program.cs:line 153
+Brochure DLM5000, DLM5000HD, DLM3000, DLM3000HD.pdf: 143 kept / 0 dropped
+  note: Authored in-session from the brochure text (no API extraction): model and suffix code tables pages 26-27, accessory models page 28, model table page 22, feature pages 2, 8, 16-19.
+  note: Series names DLM5000HD, DLM3000HD, DLM5000 and DLM3000 are not orderable model codes; they are recorded as aliases on each member model.
+  note: Free software without model codes (IS8000 Simple, XWirepuller, TMCTL control library, DL-Term, LabVIEW drivers, MATLAB WDF Access ToolBox) was not listed as products.
+  note: Option code naming differs by series: /F1-/F6, /G2, /G3, /SY on the HD models versus /F01-/F06, /G02, /G03, /SYN on DLM5000/DLM3000.
+  note: Memory options /M1-/M3 and /M1S-/M3S are mutually exclusive within a series; /G2, /G3 and /GA likewise; on DLM3000HD /C1 and /SY are mutually exclusive.
 Brochure DM7560.pdf: 17 kept / 0 dropped
   note: The DM7560 model/suffix table lists supply-voltage suffixes (-1, -3, -6, -8) and power-cord suffixes (-D, -F, -R, -Q, -H, -N); these are summarized in the instrument attribute 'suffix_codes' and not created as separate products.
   note: Power cord suffix -F is printed as 'VED Standard' in the document; this is very likely a typo for 'VDE Standard' — verify before quoting.
@@ -470,9 +475,8 @@ Brochure WTViewerE.pdf: 1 kept / 0 dropped
   PRUNE B9988AE: accessory_of → 'DLM4000' (not extracted)
   PRUNE B9988AE: accessory_of → 'DLM5000' (not extracted)
 
-products: 799 (dropped codes: 0, pruned relations: 54)
-kinds: instrument=115, software=40, accessory=329, option=264, module=51
-families: Effektmätning > Effektanalysatorer=33; Effektmätning > Programvara=17; Effektmätning > Tillbehör och optioner=200; Kalibrering > Kalibratorer och referenser=16; Kalibrering > Programvara=1; Kalibrering > Tillbehör och optioner=85; Källor > Programvara=1; Källor > Source measure units=11; Källor > Tillbehör och optioner=7; Mätinstrument > Elkvalitetsanalysatorer=2; Mätinstrument > Multimetrar och testare=4; Mätinstrument > Tillbehör och optioner=39; Optisk test > Ljuskällor, effektmätare och dämpare=13; Optisk test > OTDR=34; Optisk test > Optiska spektrumanalysatorer=9; Optisk test > Programvara=4; Optisk test > Tillbehör och optioner=126; Optisk test > Våglängdsmätare och övriga optiska instrument=8; Vågformsmätning > Programvara=20; Vågformsmätning > ScopeCorder och datalogger=4; Vågformsmätning > Tillbehör och optioner=154; Övrigt > Ethernet-testare=2; Övrigt > Tillbehör och optioner=9
+products: 908 (dropped codes: 0, pruned relations: 54)
+kinds: instrument=131, software=40, accessory=332, option=354, module=51
+families: Effektmätning > Effektanalysatorer=33; Effektmätning > Programvara=17; Effektmätning > Tillbehör och optioner=200; Kalibrering > Kalibratorer och referenser=16; Kalibrering > Programvara=1; Kalibrering > Tillbehör och optioner=85; Källor > Programvara=1; Källor > Source measure units=11; Källor > Tillbehör och optioner=7; Mätinstrument > Elkvalitetsanalysatorer=2; Mätinstrument > Multimetrar och testare=4; Mätinstrument > Tillbehör och optioner=39; Optisk test > Ljuskällor, effektmätare och dämpare=13; Optisk test > OTDR=34; Optisk test > Optiska spektrumanalysatorer=9; Optisk test > Programvara=4; Optisk test > Tillbehör och optioner=126; Optisk test > Våglängdsmätare och övriga optiska instrument=8; Vågformsmätning > Oscilloskop=16; Vågformsmätning > Programvara=20; Vågformsmätning > ScopeCorder och datalogger=4; Vågformsmätning > Tillbehör och optioner=247; Övrigt > Ethernet-testare=2; Övrigt > Tillbehör och optioner=9
 tokens: in=0 cached=0 out=0 ≈ $0,00 (Opus list prices)
 validation: OK
-FAILED documents: 1 — Brochure DLM5000, DLM5000HD, DLM3000, DLM3000HD.pdf

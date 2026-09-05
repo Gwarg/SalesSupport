@@ -189,7 +189,9 @@ foreach (var pdf in pdfs)
     var name = Path.GetFileName(pdf);
     var pages = PdfText.Pages(pdf);
     var text = PdfText.Join(pages);
-    Console.WriteLine($"→ {name}: {pages.Count} pages, {text.Length:N0} chars");
+    // The cache file name is printed so an in-session (subscription) extraction can be
+    // written straight into the cache for this document.
+    Console.WriteLine($"→ {name}: {pages.Count} pages, {text.Length:N0} chars, cache {Path.GetFileName(CachePathFor(text))}{(File.Exists(CachePathFor(text)) ? "" : " (missing)")}");
     if (dryRun) continue;
     if (failures.TryGetValue(name, out var failure))
     {

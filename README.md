@@ -86,7 +86,9 @@ dotnet run --project src/SalesSupport.Pipeline -- --input samples/catalog/testpo
 **No paid calls by default.** The tool only merges what is in `testdata/.extract-cache`
 (one JSON per document content hash); missing brochures are reported, not fetched. Cache
 files can be authored in a Claude Code session on the subscription — the zero-cost
-development-time path (D27/D33). `--allow-api` enables Opus calls for uncached brochures
+development-time path (D27/D33); the DLM oscilloscope family was done this way and its
+generator is kept in `tools/SalesSupport.DocExtract/authored/` (run it with the cache
+file name the dry-run prints for that brochure). `--allow-api` enables Opus calls for uncached brochures
 and is meant for an explicit, cost-stated go-ahead; re-runs then only pay for changed
 brochures (new editions) or a bumped prompt version. Option codes are qualified by host
 (`WT5000/G7`) because the same code means different things on different instruments. The
