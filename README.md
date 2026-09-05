@@ -317,8 +317,9 @@ Follows the tail unless you scroll up; clears on Nytt samtal.
 only use DynamicResource). `Control room` (dark, the direction chosen on the design canvas)
 is the default; `Calm instrument` is the warm-light look. Pick one under **Tema** on the
 pre-call card — it switches live and persists in `%LOCALAPPDATA%\SalesSupport\client.json`.
-A customer's brand is a new theme file, never a fork of the views. The theme fonts are
-Space Grotesk and IBM Plex Mono when installed, falling back to Segoe UI and Cascadia Code.
+A customer's brand is a new theme file, never a fork of the views. Space Grotesk and IBM Plex
+Mono ship with the app as resources (`src/SalesSupport.Client/Fonts/`, SIL OFL, licenses
+beside the files); the light theme's Plex Sans is not shipped, so Segoe UI stands in there.
 
 ## Incoming calls — Telavox (D32)
 

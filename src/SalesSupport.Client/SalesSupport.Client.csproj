@@ -10,6 +10,11 @@
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="10.0.11" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Theme faces shipped with the app (D35): Space Grotesk and IBM Plex Mono, both SIL OFL; licenses sit beside them. -->
+    <Resource Include="Fonts\*.ttf" />
+  </ItemGroup>
+
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net10.0-windows</TargetFramework>

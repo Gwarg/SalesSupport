@@ -36,8 +36,9 @@
     <SolidColorBrush x:Key="Theme.Danger" Color="#A32D2D"/>
     <SolidColorBrush x:Key="Theme.Answer" Color="#3B6D11"/>
 
+    <!-- IBM Plex Sans is not shipped (yet); Segoe UI stands in. The mono face is the embedded Plex Mono. -->
     <FontFamily x:Key="Theme.FontUi">IBM Plex Sans, Segoe UI</FontFamily>
-    <FontFamily x:Key="Theme.FontMono">IBM Plex Mono, Cascadia Code, Consolas</FontFamily>
+    <FontFamily x:Key="Theme.FontMono">/SalesSupport.Client;component/Fonts/#IBM Plex Mono</FontFamily>
 
     <CornerRadius x:Key="Theme.CardRadius">6</CornerRadius>
     <CornerRadius x:Key="Theme.ChipRadius">9</CornerRadius>

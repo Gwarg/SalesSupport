@@ -41,9 +41,9 @@
     <SolidColorBrush x:Key="Theme.Danger" Color="#F07167"/>
     <SolidColorBrush x:Key="Theme.Answer" Color="#7BD389"/>
 
-    <!-- type: open-licensed faces first, the Windows faces as fallback until the files ship with the app -->
-    <FontFamily x:Key="Theme.FontUi">Space Grotesk, Segoe UI</FontFamily>
-    <FontFamily x:Key="Theme.FontMono">IBM Plex Mono, Cascadia Code, Consolas</FontFamily>
+    <!-- type: the faces ship with the app as resources (Fonts/, SIL OFL) -->
+    <FontFamily x:Key="Theme.FontUi">/SalesSupport.Client;component/Fonts/#Space Grotesk</FontFamily>
+    <FontFamily x:Key="Theme.FontMono">/SalesSupport.Client;component/Fonts/#IBM Plex Mono</FontFamily>
 
     <!-- shape -->
     <CornerRadius x:Key="Theme.CardRadius">4</CornerRadius>
