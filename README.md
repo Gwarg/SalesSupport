@@ -98,7 +98,8 @@ extracted from documents — they stay null until a structured price list is mer
 model code. `testdata/` (customer-supplied source material) is gitignored; the derived
 canonical JSONL is committed.
 
-## Operating guide — scripts
+## Operating guide — the scripts folder
+
 One command per task; each works from any directory (double-click or run from cmd/PowerShell).
 Run `scripts\env-check.cmd` first whenever something does not start.
 
