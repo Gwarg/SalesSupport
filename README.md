@@ -107,9 +107,10 @@ Run `scripts\env-check.cmd` first whenever something does not start.
 |---|---|
 | `env-check.cmd` | Shows .NET version, which API keys are set, packs built, backend config, whether backend/Ollama are running |
 | `build.cmd` / `test.cmd` | Build everything / run the unit tests (stop the backend first — it locks binaries) |
-| `backend.cmd` | Start the backend on http://localhost:5155 (config in `src\SalesSupport.Backendppsettings.json`) |
+| `backend.cmd` | Start the backend on http://localhost:5155 (config in `src\SalesSupport.Backend\appsettings.json`) |
 | `client.cmd` | Start the panel |
-| `demo.cmd` | Backend + client in two windows — then Källa = Replay, pick the call, Logg, Starta samtal |
+| `record-demo.cmd` | Backend in **record** mode + client: play the call once live, every model response is saved to `samples\recordings\testpower-demo.jsonl` |
+| `demo.cmd` | Backend + client in two windows — **replay** mode (zero cost, no keys) when that recording exists, live otherwise |
 | `replay.cmd …` | Console replay harness; no arguments prints the modes and examples |
 | `replay-testpower.cmd` | The Test Power demo call in the console on Gemini via OpenRouter (paid, cents) |
 | `pack-testpower.cmd` / `pack-duab.cmd` | Build a knowledge pack from a canonical catalog (offline, seconds) |
@@ -128,7 +129,7 @@ with `setx NAME "value"` and visible in terminals opened afterwards:
 
 **Which provider is active** is one line in `appsettings.json`: `LlmProvider` = `openai-compat`
 (current: Gemini 3.7 Flash via OpenRouter), `claude`, or `ollama`. `PackPath` points at
-`packs	estpower_demo.pack.sqlite`, the fixed name `pack-testpower.cmd` writes, so rebuilding
+`packs\testpower_demo.pack.sqlite`, the fixed name `pack-testpower.cmd` writes, so rebuilding
 the pack never needs a config change. Backend log: `src\SalesSupport.Backend\logs\`;
 harness logs: `runs\`.
 
@@ -146,12 +147,15 @@ real backend so the panel fills in live. Per-customer corpora live in subfolders
 `samples/calls/`; the harness `--all` corpus stays the top-level DUAB set.
 
 1. Build the Test Power pack once (offline, seconds): `scripts\pack-testpower.cmd`.
-2. `appsettings.json` already points at it (`PackPath` = `packs	estpower_demo.pack.sqlite`,
+2. `appsettings.json` already points at it (`PackPath` = `packs\testpower_demo.pack.sqlite`,
    `CompanyName` = `"Test Power"`) and runs Gemini 3.7 Flash via OpenRouter
    (`LlmProvider: openai-compat`, ~$0.25–0.40 per full replay); switch to `"claude"` for the
    premium experience when credits allow (~$0.50–0.80 with the cached gate) or `"ollama"`
    for a free but slow run.
-3. `scripts\demo.cmd` (or `backend.cmd` and `client.cmd` in two terminals). In the pre-call card: Källa = Replay, pick
+3. Record once: `scripts\record-demo.cmd`, play the call through, wait ~30 s after "uppspelning klar"
+   before Avsluta. From then on `scripts\demo.cmd` replays the identical responses at zero cost with
+   their recorded pacing — no keys, no network. (`backend.cmd` + `client.cmd` run it live instead.)
+   In the pre-call card: Källa = Replay, pick
    `testpower/ev-inverter-lab.jsonl` (Kund pre-fills from the script), open **Logg** for the
    scrolling transcript, press Starta samtal.
 4. Watch: discovery questions and product cards arrive as the customer states needs; the
@@ -159,8 +163,10 @@ real backend so the panel fills in live. Per-customer corpora live in subfolders
    land in the picture; the typed asks answer from the pack; Avsluta after "uppspelning
    klar" produces the summary with the offer, demo-unit and trial-link commitments.
 
-Rehearse once before the real run — the first replay after a backend start also warms the
-prompt cache.
+The recording is keyed by the exact prompt, so it replays cleanly as long as the script and
+the pack are unchanged; a prompt that was never recorded degrades to a neutral response
+(empty tick) and is logged as a replay miss rather than failing. Never run real calls in
+replay mode — it is a per-launch switch (`--Backend:Recording=replay`), not a config value.
 
 ## Capture spike (L1)
 

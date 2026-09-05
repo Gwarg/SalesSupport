@@ -33,6 +33,18 @@ public sealed class BackendOptions
     /// <summary>true sends think=false (needed for qwen3-class models); set false for models without a thinking mode.</summary>
     public bool OllamaNoThink { get; init; } = true;
 
+    /// <summary>
+    /// "off" | "record" | "replay". Record wraps the live provider and stores every response by
+    /// prompt; replay serves those responses at zero cost and needs no keys. Set per launch
+    /// (`dotnet run -- --Backend:Recording=replay`) rather than in this file — a real call in
+    /// replay mode gets neutral responses.
+    /// </summary>
+    public string Recording { get; init; } = "off";
+    public string RecordingPath { get; init; } = "../../samples/recordings/testpower-demo.jsonl";
+
+    /// <summary>Replay reproduces each response's recorded latency (capped at 15 s) so a demo keeps real pacing.</summary>
+    public bool ReplayRecordedLatency { get; init; } = true;
+
     /// <summary>Explicit pack path; when empty the newest *.pack.sqlite in PacksDirectory is loaded.</summary>
     public string? PackPath { get; init; }
     public string PacksDirectory { get; init; } = "packs";

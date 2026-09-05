@@ -2,6 +2,7 @@ using SalesSupport.Backend;
 using SalesSupport.Backend.Telephony;
 using SalesSupport.Core.Contracts;
 using SalesSupport.Core.Model;
+using SalesSupport.Core.Recording;
 using SalesSupport.Core.Serialization;
 using SalesSupport.Knowledge;
 using SalesSupport.Providers.Claude;
@@ -31,26 +32,44 @@ if (packPath is null)
 var pack = SqlitePackKnowledge.Load(packPath, EmbedderFactory.ForPack(packPath, options.ModelDirectory));
 builder.Services.AddSingleton<IKnowledgeSource>(pack);
 
-builder.Services.AddSingleton<ILlmProvider>(sp => options.LlmProvider switch
+var recordingMode = options.Recording.ToLowerInvariant() switch
 {
-    "ollama" => new OllamaLlmProvider(OllamaProviderOptions.ForModel(
-        options.OllamaModel,
-        options.OllamaNoThink ? false : null,
-        diagnostics: message => sp.GetRequiredService<ILoggerFactory>().CreateLogger("Ollama").LogInformation("{Stats}", message))),
-    "claude" => new ClaudeLlmProvider(new ClaudeProviderOptions
+    "record" => RecordingMode.Record,
+    "replay" => RecordingMode.Replay,
+    _ => RecordingMode.Off,
+};
+
+builder.Services.AddSingleton<ILlmProvider>(sp =>
+{
+    ILlmProvider Live() => options.LlmProvider switch
     {
-        UsageReported = UsageLogger(sp, "Claude"),
-    }),
-    "openai-compat" => new OpenAiCompatLlmProvider(OpenAiCompatProviderOptions.ForModel(
-        new Uri(options.OpenAiCompatBaseUrl
-            ?? throw new InvalidOperationException("Backend:LlmProvider is 'openai-compat' but Backend:OpenAiCompatBaseUrl is not set.")),
-        Environment.GetEnvironmentVariable(options.OpenAiCompatApiKeyEnv),
-        options.OpenAiCompatModel
-            ?? throw new InvalidOperationException("Backend:LlmProvider is 'openai-compat' but Backend:OpenAiCompatModel is not set."),
-        UsageLogger(sp, "OpenAiCompat"),
-        strictSchema: options.OpenAiCompatStrictSchema,
-        reasoningEffort: options.OpenAiCompatReasoning)),
-    var other => throw new InvalidOperationException($"Unknown Backend:LlmProvider '{other}' (ollama | claude | openai-compat)"),
+        "ollama" => new OllamaLlmProvider(OllamaProviderOptions.ForModel(
+            options.OllamaModel,
+            options.OllamaNoThink ? false : null,
+            diagnostics: message => sp.GetRequiredService<ILoggerFactory>().CreateLogger("Ollama").LogInformation("{Stats}", message))),
+        "claude" => new ClaudeLlmProvider(new ClaudeProviderOptions
+        {
+            UsageReported = UsageLogger(sp, "Claude"),
+        }),
+        "openai-compat" => new OpenAiCompatLlmProvider(OpenAiCompatProviderOptions.ForModel(
+            new Uri(options.OpenAiCompatBaseUrl
+                ?? throw new InvalidOperationException("Backend:LlmProvider is 'openai-compat' but Backend:OpenAiCompatBaseUrl is not set.")),
+            Environment.GetEnvironmentVariable(options.OpenAiCompatApiKeyEnv),
+            options.OpenAiCompatModel
+                ?? throw new InvalidOperationException("Backend:LlmProvider is 'openai-compat' but Backend:OpenAiCompatModel is not set."),
+            UsageLogger(sp, "OpenAiCompat"),
+            strictSchema: options.OpenAiCompatStrictSchema,
+            reasoningEffort: options.OpenAiCompatReasoning)),
+        var other => throw new InvalidOperationException($"Unknown Backend:LlmProvider '{other}' (ollama | claude | openai-compat)"),
+    };
+
+    // Replay never constructs the live provider — no keys needed, no calls possible.
+    if (recordingMode == RecordingMode.Off) return Live();
+    var log = sp.GetRequiredService<ILoggerFactory>().CreateLogger("Recording");
+    return new RecordingLlmProvider(
+        recordingMode == RecordingMode.Record ? Live() : null,
+        options.RecordingPath, recordingMode, options.ReplayRecordedLatency,
+        message => log.LogWarning("{Message}", message));
 });
 
 builder.Services.AddHttpClient();
@@ -100,6 +119,7 @@ app.MapGet("/healthz", (IKnowledgeSource knowledge) => Results.Ok(new
     pack = pack.PackVersion,
     company = pack.CompanyId,
     llm = options.LlmProvider,
+    recording = options.Recording,
 }));
 
 app.MapGet("/api/stt-token", async (SttTokenService tokens, CancellationToken ct) =>
@@ -111,6 +131,10 @@ app.MapGet("/api/stt-token", async (SttTokenService tokens, CancellationToken ct
 
 app.Logger.LogInformation("SalesSupport backend up — pack {Pack} ({Company}), llm {Llm}",
     Path.GetFileName(packPath), pack.CompanyId, options.LlmProvider);
+if (app.Services.GetRequiredService<ILlmProvider>() is RecordingLlmProvider recording)
+    app.Logger.LogWarning("{Mode} MODE — {Count} recorded responses in {Path}{Hint}",
+        recording.Mode.ToString().ToUpperInvariant(), recording.Count, recording.Path,
+        recording.Mode == RecordingMode.Replay ? " — no live inference; unrecorded prompts get neutral responses" : " — live responses are being saved");
 var customerIndex = app.Services.GetRequiredService<CustomerIndex>();
 app.Logger.LogInformation("telephony: {Count} numbers in customer index {Path}; Telavox ring endpoint {Endpoint} ({Auth})",
     customerIndex.Count, customerIndex.Path, TelephonyWire.TelavoxRingPath,
