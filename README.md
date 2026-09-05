@@ -98,6 +98,44 @@ extracted from documents — they stay null until a structured price list is mer
 model code. `testdata/` (customer-supplied source material) is gitignored; the derived
 canonical JSONL is committed.
 
+## Operating guide — scripts
+One command per task; each works from any directory (double-click or run from cmd/PowerShell).
+Run `scripts\env-check.cmd` first whenever something does not start.
+
+| Script | What it does |
+|---|---|
+| `env-check.cmd` | Shows .NET version, which API keys are set, packs built, backend config, whether backend/Ollama are running |
+| `build.cmd` / `test.cmd` | Build everything / run the unit tests (stop the backend first — it locks binaries) |
+| `backend.cmd` | Start the backend on http://localhost:5155 (config in `src\SalesSupport.Backendppsettings.json`) |
+| `client.cmd` | Start the panel |
+| `demo.cmd` | Backend + client in two windows — then Källa = Replay, pick the call, Logg, Starta samtal |
+| `replay.cmd …` | Console replay harness; no arguments prints the modes and examples |
+| `replay-testpower.cmd` | The Test Power demo call in the console on Gemini via OpenRouter (paid, cents) |
+| `pack-testpower.cmd` / `pack-duab.cmd` | Build a knowledge pack from a canonical catalog (offline, seconds) |
+| `extract-docs.cmd` | Merge cached brochure extractions into the canonical catalog — no paid calls unless `--allow-api` |
+| `ring.cmd [number]` | Fake an incoming Telavox call so the panel shows the banner |
+
+**Keys and services.** Everything paid or external comes from environment variables, set once
+with `setx NAME "value"` and visible in terminals opened afterwards:
+
+| Variable | Used by |
+|---|---|
+| `OPENAI_COMPAT_API_KEY` + `OPENAI_COMPAT_BASE_URL` (`https://openrouter.ai/api/v1`) | OpenRouter: backend `LlmProvider: openai-compat` (Gemini and other bench models), `replay --compat-model` |
+| `ANTHROPIC_API_KEY` | Claude: backend `LlmProvider: claude`, `replay --live`, `extract-docs --allow-api` |
+| `AZURE_SPEECH_KEY` + `AZURE_SPEECH_REGION` | Live transcription (Källa = Live); not needed for replay |
+| *(none)* | Ollama: backend `LlmProvider: ollama`, `replay --ollama` — free, needs the Ollama app running |
+
+**Which provider is active** is one line in `appsettings.json`: `LlmProvider` = `openai-compat`
+(current: Gemini 3.7 Flash via OpenRouter), `claude`, or `ollama`. `PackPath` points at
+`packs	estpower_demo.pack.sqlite`, the fixed name `pack-testpower.cmd` writes, so rebuilding
+the pack never needs a config change. Backend log: `src\SalesSupport.Backend\logs\`;
+harness logs: `runs\`.
+
+**Typical days.** Code change → `build.cmd`, `test.cmd`, `replay.cmd --all` (free regression).
+Demo → `demo.cmd`. New brochures → put them in `testdata\`, `extract-docs.cmd` (missing ones
+are reported; extraction is authored in-session or run with `--allow-api` on a decided
+budget), then `pack-testpower.cmd` and restart the backend.
+
 ## Demo runbook — Test Power replay in the panel
 
 A scripted Test Power call (`samples/calls/testpower/ev-inverter-lab.jsonl`, ~90 utterances,
@@ -106,14 +144,13 @@ a power analyzer with motor evaluation, IS8000 sync, two typed asks) plays throu
 real backend so the panel fills in live. Per-customer corpora live in subfolders of
 `samples/calls/`; the harness `--all` corpus stays the top-level DUAB set.
 
-1. Build the Test Power pack once (offline, seconds):
-   `dotnet run --project src/SalesSupport.Pipeline -- --input samples/catalog/testpower-yokogawa.canonical.jsonl --company testpower --embedder e5`
-2. Point the backend at it in `src/SalesSupport.Backend/appsettings.json`: `PackPath` = the
-   `packs/testpower_*.pack.sqlite` just built (auto-discovery picks the newest pack, so set
-   it explicitly for a demo), `CompanyName` = `"Test Power"`, `LlmProvider` = `"claude"` for
-   the premium experience (needs `ANTHROPIC_API_KEY`; ~$0.50–0.80 per full replay with the
-   cached gate) or `"ollama"` for a free but slow run; `CatalogMap` stays `auto`.
-3. Start backend and client. In the pre-call card: Källa = Replay, pick
+1. Build the Test Power pack once (offline, seconds): `scripts\pack-testpower.cmd`.
+2. `appsettings.json` already points at it (`PackPath` = `packs	estpower_demo.pack.sqlite`,
+   `CompanyName` = `"Test Power"`) and runs Gemini 3.7 Flash via OpenRouter
+   (`LlmProvider: openai-compat`, ~$0.25–0.40 per full replay); switch to `"claude"` for the
+   premium experience when credits allow (~$0.50–0.80 with the cached gate) or `"ollama"`
+   for a free but slow run.
+3. `scripts\demo.cmd` (or `backend.cmd` and `client.cmd` in two terminals). In the pre-call card: Källa = Replay, pick
    `testpower/ev-inverter-lab.jsonl` (Kund pre-fills from the script), open **Logg** for the
    scrolling transcript, press Starta samtal.
 4. Watch: discovery questions and product cards arrive as the customer states needs; the
