@@ -198,11 +198,24 @@ public static class PackAssembler
             var members = rows.Where(r => r.CategoryPathRaw == family.Path).ToList();
             if (members.Count == 0) continue;
             sb.AppendLine($"\n## {family.Path}");
-            foreach (var member in members)
+            // The map is "families and instruments" (D4), not every SKU: options, modules and
+            // accessories (kind attribute from document-source adapters, D33) collapse into
+            // one line per family so hundreds of probes and option codes do not swamp the
+            // gate/advisor prompts. Packs without a kind attribute list everything as before.
+            var headline = members.Where(IsHeadline).ToList();
+            var rest = members.Where(m => !IsHeadline(m)).ToList();
+            foreach (var member in headline)
                 sb.AppendLine($"- {member.Name} ({member.Sku}){(member.Status == "discontinued" ? " — utgående" : "")}: {FirstSentence(member.DescriptionRaw)}");
+            if (rest.Count > 0)
+                sb.AppendLine($"- {rest.Count} tillbehör/optioner/moduler, t.ex. {string.Join(", ", rest.Take(6).Select(m => m.Sku))}{(rest.Count > 6 ? ", …" : "")}");
         }
         return sb.ToString().TrimEnd();
     }
+
+    private static bool IsHeadline(RawProduct row) =>
+        row.AttributesRaw is null
+        || !row.AttributesRaw.TryGetValue("kind", out var kind)
+        || kind is "instrument" or "software";
 
     private static string FirstSentence(string text)
     {

@@ -64,6 +64,33 @@ rep queries mid-call. Corpus scenarios: happy-path discovery (nordfrys), multi-t
 allocation/parking (vaxholm), rejected-product stance + budget pivot (kylgrossisten),
 English call (danfrost), and a no-fit call (stålgrossisten) where the required behavior is no product push — live Opus legitimately probes for alternate fit and future timing there, which the fixture's total silence does not capture; judge that call on +p=0, not on advisor fires.
 
+## Document-source product data — DocExtract (D33)
+
+When a company's catalog arrives as manufacturer brochures instead of a feed
+(Test Power: 48 Yokogawa PDFs), the D29 adapter is an LLM extraction at development
+time. `tools/SalesSupport.DocExtract` reads each PDF's text layer (PdfPig), asks Opus
+for every orderable product under a strict schema — instruments, options, modules,
+accessories, software, with typed relations to their base model — and then the code
+takes over: every model code must appear verbatim in the source or the row is dropped,
+duplicates across brochures merge (longest description wins, relations/aliases/doc refs
+union), relations to unextracted targets are pruned, and the result is validated at the
+waist before it is written as canonical JSONL.
+
+```
+dotnet run --project tools/SalesSupport.DocExtract -- --input testdata/Yokogawa --dry-run
+dotnet run --project tools/SalesSupport.DocExtract -- --input testdata/Yokogawa --only WT5000.pdf --out runs/extract/wt5000.jsonl
+dotnet run --project tools/SalesSupport.DocExtract -- --input testdata/Yokogawa --out samples/catalog/testpower-yokogawa.canonical.jsonl
+dotnet run --project src/SalesSupport.Pipeline -- --input samples/catalog/testpower-yokogawa.canonical.jsonl --company testpower
+```
+
+Raw responses are cached per document content hash under `testdata/.extract-cache`, so
+re-runs only pay for changed brochures (new editions) or a bumped prompt version. The
+`.report.txt` beside the output lists dropped codes, pruned relations, per-family
+counts, the extractor's own notes, and token cost. Prices and availability are never
+extracted from documents — they stay null until a structured price list is merged by
+model code. `testdata/` (customer-supplied source material) is gitignored; the derived
+canonical JSONL is committed.
+
 ## Capture spike (L1)
 
 Prove dual-channel audio capture on real hardware — mic + speaker loopback (D1), device
