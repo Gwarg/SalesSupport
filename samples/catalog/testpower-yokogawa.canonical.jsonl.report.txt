@@ -1,0 +1,478 @@
+DocExtract report — Yokogawa — 2026-09-05 14:36
+BTWT1500.pdf: 45 kept / 0 dropped
+  note: Base model codes are printed as WT1501-10 / WT1502-10 / WT1503-10 / WT1504-10, followed by an element-configuration suffix (-WB0-HV1 ... -WB4-HV0), installation suffix (-BN/-RE/-RJ), language suffix (-HE/-HC/-HG) and power-cord suffix (-B/-D/-F/-H/-N/-Q/-R/-T/-U). Element configurations are recorded as instrument attributes, not as separate products; a full order code example from the brochure is WT1504-10-WB3-HV1-BN-HE-x/SY1.
+  note: The WB element and HV element are not sold under separate model numbers in this document; they are selected via the element-configuration suffix, so no separate module entries were created.
+  note: Accessory/option compatibility is stated at WT1500 series level in the document; relations were therefore mapped to all four base models (WT1501-10 to WT1504-10).
+  note: Discrepancy: 701903 Safety BNC-BNC Cable is listed as '2 m' in the accessory combination diagram (page 14) but as '1 m' in the ordering table (page 15) — verify with Yokogawa.
+  note: 761962 and 761963 have identical printed descriptions ('Circular 20 pin - BNC/power connector'); the accessory diagram places 761962 with the 720930/720931 clamp probes and 761963 in the CT1000S path. Confirm which adapter goes with which sensor.
+  note: /SY1 (multi-unit synchronization) is stated as 'available soon', addable later via an upcoming option upgrade license; status left as active but availability should be confirmed.
+  note: WT5000, WT1800R, WT500, WT300E and WT310EH appear only in a comparison table and the SL2000 ScopeCorder (with its /C40 option) is mentioned only as a compatible IEEE 1588 partner; none were extracted as products of this brochure.
+  note: Current sensor details refer to Bulletin CT1000-00E and Bulletin CT1000S-01EN; only the summary data printed here was captured.
+BUWaveform-Acc-01EN.pdf: 136 kept / 0 dropped
+  note: Only pages 1–6 of 12 were supplied. Current probes (p. 7), logic probes (p. 8), high-voltage measurement accessories (p. 9), cables/adapters and ScopeCorder accessories (p. 10) and software (p. 11) are referenced in the table of contents but their detail pages were not included, so those products are not in this extraction.
+  note: The selection chart on page 3 shows additional model numbers without specifications or descriptions (701917, 701918, 701928, 701929, 701930, 701931, 701932, 701933, 702915, 702916 — current probes). They were omitted because no descriptive data is available in the supplied pages.
+  note: Model 701943 is printed as '701943 (PB500)', 701974 as '701974 (PBL5000)', 701927 as '701927 (PBDH0150)', 702921/702922 as '(PBDH0400)' and 702928 as '(PBD0200)'; the numeric code was used as model_code and the alphanumeric name kept as an alias.
+  note: Compatibility is often printed in collapsed form (e.g. 'DLM3000/3000HD/5000/5000HD', 'DL9000/9500/9700'). The exact printed string is kept in the compatible_with attribute; relations only list unambiguous base names — human review recommended before expanding to individual HD/9500/9700 model codes.
+  note: Both 702921 and 702922 are printed with the same designation (PBDH0400) in the document; this should be verified against Yokogawa's ordering information.
+  note: The probe power option is printed only as '/Px option' with the explanation '(/P2, /P4 and /P8 option)'. The individual codes /P2, /P4 and /P8 were recorded as options, but the brochure pages provided do not name which base instruments they belong to, nor what distinguishes them — verify against the instrument bulletins before quoting.
+  note: Cable length of 701904 is inconsistent in the document: page 3 states 1.5 m, the model table on the last page states 1.6 m.
+  note: The 'Others' section header on page 4 reads '701963/64/68/72 Soft carrying case' but only 701964, 701968 and 701972 appear in the compatibility table and the model list; 701963 was therefore not recorded as a product — check whether it exists.
+  note: The add-on functions block states some functions are 'Only available in IS8011/8012'. IS8011 and IS8012 are not listed in the software ordering table of this document, so they were not recorded as products; refer to Bulletin IS8000-01EN.
+  note: Free software items (XWirepuller, TMCTL, DL-Term, LabVIEW drivers, MATLAB WDF Access ToolBox) have no real model numbers; their names were used as model_code.
+  note: Compatibility targets written in the document as families or combined names (e.g. 'DLM series', 'DLM3000/3000HD', 'DLM4000/5000/5000HD') were mapped to the base codes actually printed (DLM3000, DLM4000, DLM5000, DLM series); the HD variants are only printed in abbreviated form.
+  note: Measurement leads B9879PX and B9879KX are mentioned as included accessories of 700986/702911/702912 but are not listed as separately orderable items, so they were not recorded as products.
+  note: 701963 aside, all model codes were copied from the text; the probe selection tables on pages 1 and 2 were legible in full.
+Brochure 2553A.pdf: 12 kept / 0 dropped
+  note: The suffix codes –VA (Version A) and –UC/–UF (Deg C / Deg C and F) are functional selections, not just language/power-cord codes, but per instruction all suffix codes are summarized in the 2553A attribute "suffix_codes" rather than listed as separate products.
+  note: The previous model 2553 is referenced only for comparison/backward compatibility and is not offered for sale in this brochure, so it was not created as a product entry; the 2553A carries a successor_of relation pointing to it.
+  note: 2558A is listed only as a "Related product" with headline specs; full ordering information (suffix codes, ranges detail) is not in this document and should be verified separately.
+  note: Standard accessories listed for the 2553A also include a power cord, rubber feet, terminal plug and user's manual, none of which have printed model numbers, so they were not created as products.
+Brochure 2558A.pdf: 20 kept / 0 dropped
+  note: Model codes 701959 and 701901 appear only inside compatibility sentences for the leads/adapters (e.g. "Used in combination with the B8506ZL, 701959, 758921, 758922, or 758929"); they are not described or priced in the accessory tables, so they were not created as separate products.
+  note: B9317WD (1.5 mm hexagonal wrench) is mentioned only as an item included with the 758931 adapter set, not as a separately orderable accessory.
+  note: Power-cord suffix codes -D, -F, -R, -Q, -H, -N were captured as the 2558A attribute "suffix_codes" rather than as products, per instructions.
+  note: The 2558 is described only as "the previous 2558 model" in the comparison table; status was set to "discontinued" by inference — verify with Yokogawa whether the 2558 is still orderable.
+  note: The WT5000 Precision Power Analyzer is named only in the power calibration application case; no WT5000 specifications are given in this brochure.
+  note: Standard accessories listed for the 2558A: power cord, B8506ZK, B8506WA, B8506ZL, rubber leg cap (no model code) and user's manual.
+  note: The /C1 GP-IB option cannot be retrofitted after purchase — important for quoting.
+Brochure 2560A.pdf: 15 kept / 0 dropped
+  note: The brochure's suffix codes (-VA, -UC, -UF, -D, -F, -R, -Q, -H, -N) are version, temperature-unit and safety-standard/power selections; they are recorded in the 2560A attribute "suffix_codes" rather than as separate option products. Note that -UC/-UF select the temperature unit (Deg C vs Deg C and F), which may be commercially relevant when quoting.
+  note: The comparison table also names older models "2550/2552" (footnote: only voltage function on 2552). No separate entries were created for 2550 and 2552 because the table combines them and gives only partial data; the 2560 previous model was entered as discontinued based on the heading "Comparison with previous models".
+  note: The brochure states standard accessories include a power cord, B8506ZK, B8506WA, B8506ZL, 758921, rubber feet, a terminal plug and the user's manual; rubber feet, terminal plug and power cord have no model numbers and were not entered as products.
+  note: Model 2553A and 2558A are listed only as "Related product" with summary specs; their full specifications are not in this document.
+  note: Detailed reference junction compensation error data is referenced as being on Yokogawa's web site ("2560A Temperature generation for Thermocouple (Detail)") and is not included in this brochure.
+Brochure AQ1000.pdf: 7 kept / 0 dropped
+  note: The optical connector suffix codes -USC, -UFC and -ASC (Universal Adapter SC / FC / SC Angled-PC) are configuration suffixes of the AQ1000 and were recorded in the instrument attribute 'suffix_codes' rather than as separate products; a human may want to expose them as orderable configuration choices.
+  note: AQ7933 suffix codes -SP01 (download, 1 license) and -SC01 (package, 1 license with CD) were kept as an attribute of AQ7933 rather than separate entries.
+  note: The document mentions 'OTDR Data Transporter' and 'OTDR Remote Controller' free application software, but no model codes are printed, so they were not created as products.
+  note: 735482 connector suffixes -FCC/-SCC are recorded as an attribute; the document does not print full combined order codes.
+  note: A USB power adapter is not included with the AQ1000; the brochure asks customers to consult Yokogawa sales for approved adapters (no model code given).
+Brochure AQ1100.pdf: 21 kept / 0 dropped
+  note: Optical power meter and optical connector selections are printed as suffix codes with a leading dash (-SPM, -HPM, -PPM, -USC, -UFC, -ULC, -ASC) in the model/suffix table; they were treated as orderable options because they select function, not just language or power cord. Language (-HE/-HC/-HK/-HR) and power cord (-D/-F/-R/-Q/-H/-P) suffixes are summarized in the instrument attribute suffix_codes.
+  note: The specification section writes the power meter options as '/SPM' and '/HPM' ('Loss test mode (only with /SPM or /HPM)') while the ordering table writes them as '-SPM' and '-HPM'. The dash form from the ordering table was used; worth verifying with the current price list.
+  note: Accessories 735480, 735481, SU2005A and 739874 are listed only as base numbers plus suffixes; individual full order codes (e.g. 735480-SCC) are not printed as such and were therefore not created as separate entries.
+  note: Availability restrictions to check: -PPM is AQ1100A only, and -ASC is not available for AQ1100D.
+  note: Footnotes *1–*12 were partially truncated/garbled in the source text (e.g. the *9 footnote text ends mid-sentence); footnote-conditioned specifications should be verified against the full datasheet.
+Brochure AQ1210 Series.pdf: 23 kept / 0 dropped
+  note: The brochure text on page 4 says "Seven models" but only six model codes are listed (AQ1210A, AQ1215A, AQ1210E, AQ1215E, AQ1215F, AQ1216F). No seventh code was invented; please verify with Yokogawa.
+  note: Language suffixes (-HE, -HM, -HC, -HK, -HR) and optical connector suffixes (-USC, -UFC, -ULC, -ASC) were recorded as an instrument attribute "suffix_codes" rather than separate products. Note that -ASC (SC Angled-PC) is not compatible with the OPM port.
+  note: In the specification table on page 14 several rows list only four values for six models (distance range, pulse width, dead zones, loss accuracy, sampling resolution). They were mapped as AQ1210A / AQ1215A / AQ1210E / (AQ1215E, AQ1215F, AQ1216F), consistent with footnote *3 which groups AQ1210A/AQ1210E vs AQ1215A/AQ1215E/AQ1215F/AQ1216F. Worth a spot check against the datasheet.
+  note: Options /SPM, /HPM, /PPM, /PC and /VLS cannot be added after shipping (footnote *4). /FST can be added later via the separately sold license 735051-FST.
+  note: The "Data transporter" mobile app (iOS/Android) and the built-in web server feature are described but have no model code, so they are not listed as products.
+  note: AQ1200 and AQ1100 OTDRs are mentioned only as compatible partners for the auto/multi-fiber loss test (with /SPM or /HPM); they are not products of this brochure.
+  note: Verified third-party USB LAN adapters mentioned (UE300 TP-Link, TL-WN725N TP-Link, CF-WU810N COMFAST) are commercial products, not Yokogawa orderables, and were excluded.
+  note: Standard accessories included with the instrument (USB power adapter connecting cable, battery pack, hand belt, start-up guide) are not listed separately; only the separately sold accessory 739884 Battery Pack is included as a product.
+Brochure AQ1300.pdf: 19 kept / 0 dropped
+  note: The brochure's model/suffix table lists language suffix -HE and power-cord suffixes -D/-F/-R/-Q/-H/-P/-T; per instructions these are captured as the instrument attribute 'suffix_codes' rather than as separate products.
+  note: Accessory items 735454, 739874, 735480 and 735481 are printed as a base number plus suffix (e.g. 735454-SR). They are recorded as one entry per base number with the suffix variants listed in attributes; confirm the exact order code format with Yokogawa before quoting.
+  note: Footnote numbering in the accessories table is inconsistent: 735480 carries footnote *4 ('Cannot be used with the AQ1301') and 735481 carries a footnote *5 that is not defined in the printed footnote list. Compatibility of 735481 with the AQ1301 should be verified.
+  note: The specification table contains apparent typos in the source ('Configration', 'raitensy', 'minits', 'EN602825-1', '5.7-inch color TFT LDC display'); values were transcribed as printed where used.
+  note: Optical power meter port and RFC2544 are factory options for the AQ1300 (/SPML, /BM); RFC2544 is standard on the AQ1301 and the optical power meter is not available for the AQ1301.
+  note: The 'Setup software (Frame Builder)' and the remote-control PC software are mentioned as included on the standard CD-ROM but no separate software model code is given, so no software product entry was created.
+  note: AQ1210 and AQ1100 appear only in a short 'Related Products' panel; their specifications here are minimal and no suffix/order codes are given in this document.
+Brochure AQ2170, AQ2180, AQ4280.pdf: 23 kept / 0 dropped
+  note: The model/suffix table lists no suffix codes for these instruments (the suffix column shows '—'); only the /CAL option is listed, so no 'suffix_codes' attribute was recorded.
+  note: The specification table does not state the weight of the AQ2170H separately; the printed column groups AQ2170/AQ2170H at 63 × 116 × 35 mm, approx. 160 g and AQ2180/AQ2180H at 76 × 153 × 43 mm, approx. 280 g. Verify per model if weight is critical.
+  note: Display resolution values for AQ2170/AQ2170H contain an unreadable comparison sign in the OCR ('0.1 dB ( −60 dBm)'); the printed original most likely reads '≤ −60 dBm'. Values were copied as printed.
+  note: The 'standard software supplied' for USB/CSV transfer (AQ2180/AQ2180H) has no model code in the document and is therefore not listed as a separate software product.
+  note: Calibration certificate model 735993 is mentioned only in a footnote; it is recorded as an accessory requiring the /CAL option.
+Brochure AQ2300 Series.pdf: 26 kept / 0 dropped
+  note: The document states the AQ2300 Series maintains the performance of its predecessor, the AQ2200 series, but no explicit model-to-model replacement pairs are given, so no successor_of relations were recorded. The history timeline names AQ2201, AQ2202, AQ2211 and AQ2212 (2004/2009) as earlier systems; these are not orderable items in this brochure and were not created as products.
+  note: Other Yokogawa instruments appear only in application diagrams (AQ6361 optical spectrum analyzer, AQ6150B wavelength meter) and are not ordered through this brochure; they were excluded.
+  note: Power cord suffix codes (-D, -F, -H, -N, -Q, -R, -T, -B, -U) were not created as separate products and are summarized in the frames' suffix_codes attribute.
+  note: External interface (-ETP/-EDP) and GP-IB (-N01/-C01) suffix codes are printed without a leading slash; they were recorded as options because they select factory-installed hardware, not just language/power cord. The same codes apply to both AQ23011A and AQ23012A and are recorded once with two option_of relations.
+  note: On page 11 the external-dimension drawing is labelled "AQ238211A /AQ23212A OPM", which appears to be a typo for AQ23211A; only the verified codes AQ23211A and AQ23212A were used.
+  note: Footnote numbering on the optical power meter table is inconsistent in the source (uncertainty ±2.5% is marked *3 while the AQ9335C note is *2); values were copied as printed.
+Brochure AQ3550.pdf: 4 kept / 0 dropped
+  note: The AQ3550 suffix codes -112 (port configuration 1×12), -SA (SMF) and -SCC (SC/PC) are configuration suffixes with a single available choice each; they were summarized in the instrument attribute 'suffix_codes' rather than listed as separate orderable options.
+  note: AQ1210 and AQ7280 appear only in the 'Related products' section with one-line descriptions; no specifications are given in this brochure, so their attributes are minimal and should be verified against their own datasheets.
+  note: Patch cords, fan-out cables and 12-fiber ribbons required for measurement are described as commercial tools with no Yokogawa model numbers in this document, so they were not extracted.
+  note: The document mentions a 'Yokogawa reference master cord' used for optical return loss specification, but gives no model number.
+Brochure AQ6150B, AQ6151B.pdf: 4 kept / 0 dropped
+  note: Suffix codes -10/-20/-30 (spec/wavelength range), -SW/-MW (single/multi wavelength detection) and -FCC/-SCC (optical input connector) materially change the instrument specification but are printed as suffix codes, not as separate orderable option codes; they are recorded in the instruments' 'suffix_codes' attribute rather than as separate products.
+  note: Power cord suffixes (-D, -F, -R, -Q, -H, -N, -T, -B, -U) are summarized in the suffix_codes attribute per instruction.
+  note: The document states the AQ6150B/AQ6151B are '2 times faster than our AQ6150 or AQ6151 model', but does not explicitly state they replace those models, so no successor_of relation was recorded; a human may wish to confirm the predecessor relationship.
+  note: The AQ6370 Series Optical Spectrum Analyzer is mentioned only as a recommendation for SMSR/OSNR measurement and the AQ6140 series only as an existing SCPI-compatible system; neither is offered as an orderable product in this brochure, so they are not listed.
+  note: Included standard accessories (power cord, rubber feet, CD-ROM user's manuals, getting started guide) have no model numbers and were not listed as products.
+Brochure AQ6360.pdf: 7 kept / 0 dropped
+  note: Suffix codes for the AQ6360 (spec code −10, optical input connector −FC/−SC, display −D1 and power cord codes −D, −F, −H, −Q, −R, −N, −T, −B, −U) are recorded in the instrument attribute 'suffix_codes' rather than as separate products.
+  note: AQ2200 Multi Application Test System (light source) is named only in the application diagrams; no model/ordering details are given, so it was not extracted as a product.
+  note: AQ6370E, AQ6370D and AQ6317 are mentioned only for comparison (4U height, screen layout) and remote-command compatibility; they are not ordering items in this brochure and were not extracted.
+  note: AQ9447 and AQ9441 are listed as accessories with connector-type suffixes −FC/−SC; the suffixed forms (e.g. AQ9447−FC) were not created as separate entries.
+  note: The document does not state a successor/predecessor relationship for the AQ6360; none was recorded.
+Brochure AQ6361.pdf: 12 kept / 0 dropped
+  note: The AQ6361 is sold as a single base model with mandatory suffix selections (-10/-20 specification, -SW/-EW wavelength range, -L0/-L1 built-in light source, -N01/-C01 GP-IB, and a power supply code). These variants are not printed as standalone model codes in the document, so they are captured in the AQ6361 'suffix_codes' attribute rather than as separate products. Note that -N01 (no GP-IB) is explicitly 'not for retrofitting', and the built-in calibration light source and AQ9441 calibration output adapter apply to the L1 spec. only.
+  note: The document states the AQ6361 requires an optical input connector adapter (AQ9447) - i.e. one of the factory options /FC or /SC (or the separately ordered AQ9447) is effectively mandatory. A human should verify order-configuration rules.
+  note: AQ6370E, AQ6370 series, AQ6380, AQ6360 and the AQ6317 series are mentioned only as comparison/compatibility references (speed comparison, size comparison, remote-command compatibility, AQ6370 Viewer support models); they are not offered as orderable products in this brochure and were therefore not created as separate entries.
+  note: Power supply suffix codes (-D, -F, -R, -H, -Q, -N, -T, -B, -U) select the power cord only and were summarized in the instrument attributes per instruction, not listed as options.
+  note: Accessory 735371 (AQ6370 Viewer) is listed under 'Accessories (optical)' with no suffix codes; it is classified here as software based on its name/function.
+Brochure AQ6370E, AQ6373E, AQ6374E, AQ6375E, AQ6376E, AQ6377E.pdf: 18 kept / 0 dropped
+  note: Power cord suffixes (-D, -F, -R, -H, -Q, -N, -T, -B, -U), spec codes (-10/-20/-00/-01) and built-in light source codes (-L0/-L1) were not created as separate products; they are summarized in each instrument's suffix_codes attribute.
+  note: The optional built-in wavelength reference source is ordered via suffix -L1 (AQ6370E also has -L0 without light source); since it is a suffix and not a slash option code, it is recorded in suffix_codes rather than as a separate option product.
+  note: In the accessories table the model AQ9441 is described as "AQ9447 Connector Adapter" — this appears to be a typo in the document; the surrounding text and the model/suffix tables confirm AQ9441 is the calibration-output adapter. Worth verifying with Yokogawa.
+  note: Page 21 header prints "AQ6377" while the model tables and body text use "AQ6377E"; the model code used here is AQ6377E as printed in the ordering table.
+  note: AQ6150B/AQ6151B and AQ2200 are only briefly mentioned as related products; specifications beyond those listed are not in this document. AQ2200 modules are not individually named.
+  note: The generic accessories table (735371, AQ9447, AQ9441, 735385, 751535) is headed "Accessories (optional)" for the AQ6370 series; per-model compatibility beyond AQ6370E/AQ6374E for the connector adapters is not explicitly stated except in the connector adapter figure caption.
+Brochure AQ6380.pdf: 5 kept / 0 dropped
+  note: The AQ6380 ordering table lists suffix codes rather than slash-type option codes: spec code -10, built-in light source -L1 (wavelength reference source), optical input connector -FCC (FC/PC) / -SCC (SC/PC) and power cords -D, -F, -R, -Q, -H, -N, -T, -B, -U. These were summarized in the instrument attribute 'suffix_codes' rather than created as separate option products; note that -L1, -FCC and -SCC are functional selections (not just power cord/language) and a human may want them exposed as configurable options.
+  note: Models AQ6370D, AQ6370D-22, AQ6360, AQ6319 and AQ6317 are mentioned only as comparison or compatibility references, not as orderable items in this document, so they were not created as products.
+  note: The AQ6370 Viewer (735371) is stated to also support AQ6360 and the AQ6370 series, but only the AQ6380 relation is recorded since those models are not catalog entries from this document.
+  note: Purge gas ports require an outer diameter 1/4 inch nylon tube; no tubing part number is given in the document.
+Brochure AQ7277B.pdf: 1 kept / 0 dropped
+  note: The document describes only one orderable configuration: model AQ7277B with suffix -B02 (Wavelength 1550 nm). The base model 'AQ7277B' and the suffix '-B02' are both printed; the combined code AQ7277B-B02 is used as the model_code and 'AQ7277B' recorded as alias.
+  note: 'LGP6531-1550FC (equivalent)' is mentioned only as the 12 V DC supply for the DC power input port; it appears to be a referenced (possibly third-party) power supply rather than a Yokogawa orderable accessory, so it was not listed as a product. Worth verifying with Yokogawa.
+  note: Recommended replacement parts (ferrule of the optical connector, optical connector adapter, DC power connector, USB connector, RJ-45 connector) are listed without model numbers and are factory-replaceable only, so no accessory entries were created.
+  note: Warm-up time 30 minutes or more; specifications apply to 23°C ±2°C per document note.
+Brochure AQ7280.pdf: 42 kept / 0 dropped
+  note: OTDR units and OPM/VLS modules are listed as 'module' since they are detachable elements of the AQ7280 mainframe; each is separately orderable and carries its own model code.
+  note: The brochure mentions historical/related Yokogawa products (AQ-1702, AQ1200 Series, AQ1210 Series, AQ1000) only in a company timeline; they are not part of this catalog and were not extracted.
+  note: Connector suffixes for OTDR units (-USC, -UFC, -ULC, -ASC, -NUA) and OPM/VLS modules (-SCC, -FCC, -LMC, -SFC) as well as language and power cord suffixes were recorded in the 'suffix_codes' attribute rather than as separate products.
+  note: The optical switch box is printed both as 'AQ3550' in the text and as the orderable code 'AQ3550-112-SA-SCC' in the ordering table; the full ordering code was used as model_code.
+  note: The option license 735050 is classified as software (license); it can also be regarded as a post-purchase option upgrade for the AQ7280.
+  note: The specification table on page 16 uses column-spanning values (e.g. dead zones, wavelengths) that are hard to align exactly per model in the extracted text; per-model dead zone and wavelength assignments for AQ7282A/AQ7283A/AQ7284A/AQ7285A/AQ7283E/AQ7283F/AQ7282G should be verified against the original PDF layout.
+  note: The document mentions 'up to 14 OTDR units to choose from' on page 4 while page 6 says 13 detachable units; the ordering table lists 13 OTDR unit model codes, which are the ones extracted.
+  note: A recommended video fiber inspection probe is required for the /FST function but no probe model number is given in this document.
+Brochure AQ7290.pdf: 27 kept / 0 dropped
+  note: Language suffixes (-HE, -HM, -HC, -HK, -HR) and optical connector suffixes (-USC, -UFC, -ASC, -NUA) are recorded as a 'suffix_codes' attribute on each OTDR instead of separate products; note that the connector suffix does affect delivered hardware (universal adapter type) and may need to be handled as a configuration choice when quoting.
+  note: Discrepancy in the /HPM high power optical power meter power range: page 12 states CW +27 to −50 dBm and CHOP +24 to −50 dBm, while the specification table on page 15 states CW +27 dBm to −70 dBm and CHOP +24 dBm to −50 dBm (both for 1300–1600 nm). The specification table value was used; please verify with Yokogawa.
+  note: The brochure states the AQ7290 improves dynamic range by 1 to 3 dB at all wavelengths compared to the previous model AQ7280. AQ7280 (and AQ7275, AQ7250, AQ-7140, AQ-1702, AQ1200 Series, AQ1210 Series) appear only in the history/lineup map and are not offered in this document, so no product entries or successor_of relations were created for them.
+  note: The AQ3550 optical switch box is described in the text as 'AQ3550'; the only orderable code printed is AQ3550-112-SA-SCC (for SM), which was used as the model code.
+  note: 735052 additional option license is listed with suffixes -MNT and -FST; it is captured as one entry with the suffixes as an attribute rather than two separate codes, since only the base number 735052 is printed as the model.
+  note: Wireless LAN adapters and fiber inspection probes are mentioned as required/compatible but are commercially available third-party items with no Yokogawa model numbers in this document, so they were not listed.
+  note: Page 6 also mentions '2 OPMs' as part of the series selection; these correspond to the /SPM and /HPM power meter options.
+Brochure AQ7420, AQ7421.pdf: 12 kept / 0 dropped
+  note: Wavelength suffixes (-13NN, -1315, -15NN, -1513), master-cord selection suffixes (-FCM/-SCM) and power-cord suffixes (-D, -F, -H, -N, -Q, -T) are recorded in the instrument attribute 'suffix_codes' rather than as separate option products, as they are configuration/language/power selections of the base model.
+  note: Accessory suffix codes (e.g. AQ740081 -FCC/-SCC/..., AQ740091, AQ740092, AQ740094, AQ740095, AQ740096, AQ740097 length and connector codes) are listed in each accessory's 'suffix_codes' attribute; the brochure does not price or describe them as standalone products.
+  note: AQ7410 is mentioned only as the predecessor of the AQ7420 series and is not offered in this brochure, so it is not listed as a product; the successor_of relation points to it.
+  note: The control software is included as a standard accessory (CD) with the AQ7420/AQ7421 and has no separate model code in this document, so no software product entry was created.
+  note: The AQ740092 suffix table prints two connector groups (-MPC/-APC and -MPM/-APC/-PPC); the exact valid combinations should be verified with Yokogawa order documentation.
+  note: A customer-supplied PC is required (CPU Core i5 2 GHz or more, Windows 11, 8 GB RAM); it is not included.
+Brochure AQ7933.pdf: 1 kept / 0 dropped
+  note: The document contains only one orderable product (AQ7933). The license versions SC01 (package, 1-licence) and SP01 (download, 1-licence) are printed as suffix codes in the Model and Suffix Code table and were recorded as the instrument attribute 'suffix_codes' rather than as separate option products; a human may wish to confirm whether these should be treated as separately orderable license SKUs.
+  note: The OTDR series AQ1000, AQ1210, AQ7280 and AQ7277 are named in this brochure only as supported instruments; they are not described as orderable products here, so no entries were created for them, only software_for relations.
+  note: The feature comparison table on page 8 (Non-licensed vs Free trial / Licensed columns) uses check marks that are not readable in the extracted text, so the per-feature availability split could not be captured.
+Brochure CA450.pdf: 12 kept / 0 dropped
+  note: The suffix code -E (English instruction manual) is recorded as an instrument attribute, not as a separate product, per the extraction rules.
+  note: The 'Related Products' section on page 4 lists model names only (CA71/CA51, CA150, CA310, CA320, CA330, CA700, CL420) with no specifications, suffix codes or descriptions; they were not extracted as products of this document. A human may wish to confirm whether these should be linked.
+  note: The OCR renders the ohm symbol as 'q' throughout the specification tables (e.g. '10 Mq', '250 q', '600 q'); values were copied as printed. Verify against the original PDF.
+  note: Page 3 DC output line contains stray characters ('DC Output ▲▲') in the OCR; range/accuracy values appear intact but should be double-checked.
+  note: Carrying Case 93043 is printed with suffix code -P1; recorded as model_code '93043-P1' with alias '93043'.
+Brochure CA500.pdf: 16 kept / 0 dropped
+  note: The document's model and suffix code table lists suffix codes -F1 (no communication function) for CA500 and -F2 (HART/BRAIN function) / -F3 (HART function) for CA550; these are recorded as instrument suffix_codes attributes rather than separate products, per instructions. A footnote states HART/BRAIN function became available with a free firmware update in June 2020.
+  note: The last item on page 8 describes a 'PC-based field device management tool' (multi-vendor BRAIN / FOUNDATION Fieldbus H1 / HART / ISA100.11a with Segment Viewer, Device Viewer, History, Parameter Manager) but no model code is printed for it in the extracted text, so it was not included as a software product. A human should check the original layout for the missing product name/model (likely FieldMate).
+  note: CA150 and CA300 series, CA71 and CA320 are mentioned only for comparison/compatibility context (page 2 dimension comparison, accessory footnotes) and are not offered as orderable products in this document, so they were not extracted.
+  note: The 24 V loop power supply, TC and RTD accuracy tables are specification content of CA500/CA550, not separate orderable items.
+Brochure CA51, CA71.pdf: 19 kept / 0 dropped
+  note: The AC adapter table on page 3 is laid out across columns; the mapping used here is 94012 = 100 VAC, 94013 = 120 VAC, 94016 = 220–240 VAC. The specification table separately confirms 94013 as '120 V AC power supply'. The 100 V / 220–240 V assignments should be verified against the current price list.
+  note: Related products on page 3 are printed only as model + product type (CA700 Pressure Calibrator, CA500/CA550 Multi-function Process Calibrator, CA450 Process Multimeter, CL420 Process Clamp Meter) with no specifications. 'CA500/CA550' was split into two entries; verify both are separately orderable.
+  note: No option codes (slash options) or suffix codes are listed anywhere in this brochure for CA71/CA51.
+  note: The document text does not state ordering information for the CA51 standard accessories separately; the standard accessory list in the specification table refers to the CA71 set (including terminal adapter 99021), while page 3 states 99021 is not used on the CA51.
+  note: IM CA71-E is the user's manual (documentation, not treated as an orderable product).
+Brochure CA700.pdf: 34 kept / 0 dropped
+  note: The CA700 is ordered as a model plus suffix codes (e.g. CA700-E-01). The region suffix -E (for countries other than Japan) is not listed as a separate product but is recorded in the instrument attribute 'suffix_codes'; the range/unit/connection suffixes -01, -02, -03, -U2, -P2 (CA700) and -05, -06, -P3 (PM100) are listed as options exactly as printed. Note that the bare suffix codes -01/-02/-03 and -05/-06 are only unique in combination with their base model.
+  note: The Low Pressure Hand Pump and the Pneumatic Hand Pump are described individually on pages 3, 5 and 11 but the document gives model numbers only for the kits (91070, 91074), which include the pump, connector set 91053 and case 93054. No standalone pump model code is printed, so no separate pump entries were created.
+  note: Hand pump external dimensions are printed as unlabelled figures (96/172/50 mm and 139/218/50 mm); the width/height/depth assignment is not stated so they were omitted from attributes.
+  note: FieldMate has no printed model/order code in this brochure; 'FieldMate' was used as the model_code and should be verified against the FieldMate ordering information before quoting.
+  note: Related products on the back page (CA500, CA550, CA71, CA310, CA320, CA330, CA450, CL420) are only briefly summarized in this brochure; the attributes captured are limited to the bullet points printed here.
+Brochure CW500.pdf: 22 kept / 0 dropped
+  note: The CW500 is listed in the model/suffix table as base model 'CW500' with Bluetooth suffixes -B0 (no Bluetooth) and -B1 (with Bluetooth). Because the specification table prints CW500-B0 and CW500-B1 as separate model codes, they are recorded as two instrument entries; the AC power cord suffixes (-D, -F, -H, -N, -P, -R, -S) are captured in the 'suffix_codes' attribute.
+  note: The Bluetooth version (-B1) and Bluetooth communication in the CW500 Viewer are available only for USA, Canada and Japan.
+  note: 98031 (Power supply adapter) and 99073 (Conversion Cable Banana-DIN) are non-CE products, not available in regions requiring CE marking; 98031 is explicitly not available for the EU region.
+  note: Clamp-on probes 96060–96066 are required for measurement but are NOT included with the CW500; they cannot be used with the older CW240, CW120 and CW121.
+  note: 96060 is dedicated to leakage current only and cannot be used for power measurement.
+  note: The clamp-on probes 96030, 96033 and 96036 are mentioned only as being connectable via conversion cable 99073; they are not offered as products in this document and were therefore not created as entries.
+  note: The 96066 accuracy value '±1.0% rdg*' refers to footnote *1 '45 to 65 Hz'; some accuracy cells in the probe table are printed as '—' (not specified).
+  note: CW500 Viewer has no printed order code (it is free software included with the instrument); the name was used as model_code. Its category was placed under 'Effektmätning > Programvara' since the taxonomy has no software subfamily under 'Mätinstrument' — please verify.
+  note: The WT310E, WT310EH, WT332E and WT333E and the /G5 option appear only in the 'Relevant products' section on the last page with limited specifications.
+Brochure DL350.pdf: 68 kept / 0 dropped
+  note: The GPS unit described on page 8 (synchronizes latitude, longitude, altitude, speed and motion direction with waveform data) has no model code printed in pages 1-10, so it was not created as a product. The document notes it can only be supplied to countries where it is not prohibited by local radio laws.
+  note: "DL350 assistant software" (page 3) and the "Symbol Editor" tool (page 8) are named but no orderable model/license codes are given in these pages; they were therefore not listed as separate software products.
+  note: Conflicting SD-card capacity figures: the page 3 icon states "UP TO 20 Gpoints /Module SD" while the page 5 text states "Up to 5 Gpoints of data per module can be recorded directly to an SD card". Verify with Yokogawa before quoting.
+  note: Channel counts for modules 720211 and 720254 are only implied by the recording-table footnotes (1 module of 720211 = 1 ch column, 2 modules = 4 ch; 2 modules of 720254 = 8 ch); exact per-module channel counts are not printed, so they were not recorded as attributes.
+  note: DL950 and SL1000 appear only as compatibility references for DL350 input modules and are not offered as products in these pages; they are used only as relation targets.
+  note: Suffix/model configuration codes for the DL350 (language, power cord, etc.) are not shown in pages 1-10, so no "suffix_codes" attribute could be filled in.
+  note: Language suffix codes (-HJ, -HE, -HC, -HK, -HG, -HF, -HL, -HS, -HR) and power cord codes (-D, -F, -Q, -H, -T, -N) are recorded only as the DL350 attribute 'suffix_codes', not as separate products.
+  note: Model 758917 is referenced only in a footnote ('Additionally, 758917 and either the 758922 or 758929 are required for measurement' for the 700987 isolated logic probe) without a product name; it was therefore not created as a separate entry.
+  note: Model 758933 appears only in footnote *10 of the module table (720268 measures 1000 V in combination with 758933 and 701954) without a product name; not created as a separate entry.
+  note: Models 720240, 720241 and 720242 (CAN/CAN bus monitor modules) are mentioned only in footnote *7 regarding DL950/VCE limits and are not part of the DL350 module lineup; not created as products.
+  note: The document lists modules NOT available on the DL350: 701250, 701251, 701255, 701267, 701281, 720210, 720212, 720256, 701260, 701280. These were not created as products.
+  note: Free PC software (XWirepuller, DL350 Assistant Software, XviewerLITE) and Xviewer are printed without model numbers; the printed product name was used as model_code. Verify actual order codes before quoting.
+  note: The 701953 16-CH Scanner Box is ordered as 701953-L1 (1 m cable) or 701953-L3 (3 m cable); the plain '701953' is used in specification text.
+  note: Third-party/companion tools mentioned without Yokogawa order codes (DIAdem DataPlugin from NI, TMCTL control library, WDF File Access Library, LabVIEW instrument driver, MATLAB WDF Access Toolbox) were not created as products.
+  note: The DL950 is included only because the document states its slot count, 200 MS/s sampling and 10 GE transfer; it is a comparison model, not the subject of this brochure.
+  note: Full plug-in module specifications are stated to be in Bulletin DL950-02EN; DC accuracy figures for 701265 and 720266 are printed as '±0.08' without a unit in the source table.
+Brochure DL950, SL2000.pdf: 227 kept / 0 dropped
+  note: Pages 1–14 only; the brochure states that plug-in module details are on pages 20–21, which are outside the supplied page range, so module specifications here are limited to the short labels in the page 6 overview table.
+  note: The heritage timeline on pages 4–5 names earlier models (3655E, OR1400, AR1200, DL708/DL716, DL750/DL750P, SL1000, SL1400, DL850/DL850V, DL850E/DL850EV) as legacy products. They are not listed as orderable in this document and the text does not explicitly state a successor relationship, so they were not included as products.
+  note: Option names for /G03 (real-time math), /G05 (power math) and /MT1 (motor dq analysis) are derived from the grouped caption on page 4 ("Real-time math function, Power math function, Motor dq analysis function (/G03, /G05, /MT1 option)") combined with pages 9 and 13; exact one-to-one mapping should be verified against the ordering information section.
+  note: /P4 and /P8 are listed together as "Up to 8 Current Probe Power Supplies (/P4 or /P8 option)"; the number of supplies per option code is not stated in these pages.
+  note: The SFP+ module and 10 GE fiber optic cord for the /C60 option, and the GPS unit for the /C35 option, are referred to as commercially available items without Yokogawa model numbers, so they were not listed as accessories.
+  note: DL350 appears only in the product comparison table; its attributes are taken from that table and the column mapping (DL950/SL2000 vs DL350) was inferred from the table layout.
+  note: No language/power-cord suffix codes appear on pages 1–14, so no suffix_codes attribute could be recorded.
+  note: The WT5000 precision power analyzer is mentioned as an integration example (page 12) but is not offered in this brochure, so it was not listed as a product.
+  note: The IS8000 add-ons are printed only as "SY1 Option", "MH1 Option" and "SB1 Option" without a leading slash; model codes were recorded exactly as printed. Their formal ordering suffix should be verified against the IS8000 price list / Bulletin IS8000-01JA.
+  note: "ScopeCorder SDK" has no printed model number in this excerpt; the name was used as model_code. The actual ordering code should be confirmed before quoting.
+  note: DL950 and SL2000 appear on these pages only as the subject instruments (panel/connectivity description and SDK compatibility); no measurement specifications (channels, sampling rate, memory) are given in this excerpt, so attributes are limited to what is printed.
+  note: The interpretation of /P4 and /P8 as 4- and 8-channel probe power supply is not stated in the document — the diagram only says "Probe power supply terminals (/P4 or /P8)". Channel counts should be verified.
+  note: Page 2/3 are labelled diagrams; the numbered callouts (1–33) were mapped to the corresponding item texts as printed.
+  note: The accessory block on page 3 prints the model number 720941 twice: once for the 'Optical Transceiver Module 1000BASE-SX SFP module 850 nm' and once for the 'Optical Fiber Cord Multi mode optical fiber (LC-LC/3 m)'. Only one product (the SFP module) was recorded; the fiber cord's real order number should be verified.
+  note: Probe model 700929 is referenced in footnote *2 (max voltage in combination with 700929, 702902 or 701947) but no product name or specification is given, so it was not created as a separate entry.
+  note: The option /VE is mentioned only as a DL350 option ('DL950/VCE and DL350 /VE option'); DL350, DL850E and DL850EV are referenced as compatible instruments but not described in these pages, so no product entries were created for them.
+  note: The 720220 has no printed product name on these pages; the name used ('16 CH voltage measurement module (Scan-type)') is derived from the table note. Verify the official name.
+  note: DC accuracy for 701265 and 720266 is printed as '±0.08 (Voltage)' without a unit/percent sign in the table.
+  note: Suffix/model configuration codes for the DL950 and SL2000 main units are not shown on these pages, so no suffix_codes attribute could be recorded.
+  note: Power cord suffixes (-D, -F, -R, -Q, -H, -N, -T, -B, -U) and language suffixes (-HJ, -HE, -HC, -HK, -HG, -HF, -HL, -HS, -HR) were summarized in the instruments' suffix_codes attribute and not created as products.
+  note: The 709831/709833 license products are ordered with suffix codes (-C40, -G02, -G05, -MT1, -VCE); these are captured as an attribute rather than separate products. 709833 is stated as 'Scheduled for release soon' but status was kept 'active' since no discontinuation is indicated.
+  note: The 709833 table text repeats 'needs to be already installed on the DL950' for the -G05 and -MT1 suffixes; this looks like a copy error in the brochure (should presumably refer to the SL2000) — worth verifying with Yokogawa.
+  note: The brochure states that the 720220 Voltage Input Module (16 CH) does not support the DL950; it is therefore linked only to the SL2000.
+  note: The External Scanner Box is referred to generically as 'model 701953' in a footnote; only the orderable variants 701953-L1 and 701953-L3 were created as products.
+  note: IS8000 and IS8002 are only mentioned in passing (DL950 binary files require IS8000; the SL2000 includes one IS8002 license). No specs are given in this document; treat those entries as references only.
+  note: Accessory-to-main-unit relations follow the brochure's 'Probes, cables, and converters' table for DL950/SL2000; the table footnote advises checking each product's bulletin/manual for actual main-unit compatibility.
+  note: Bridge heads 701955–701958 and logic probes 702911/702912/700986/700987 are listed without an explicit module assignment in the table; module-level compatibility (e.g. 701270/701271 strain modules, 720230 logic module) was not asserted.
+  note: Page 1 consists of two bandwidth-vs-voltage/current graphs; model numbers were read from them but numeric graph values were not used as specs except where confirmed by the accessory table. Module specifications are referred to 'Bulletin DL950E-02EN' and are not in these pages.
+  note: B9879PX and B9879KX are connection leads included with logic probes; they are described as included items, not as separately orderable products, so no entries were created.
+Brochure DLM5000, DLM5000HD, DLM3000, DLM3000HD.pdf: FAILED — System.InvalidOperationException: not in cache (A786828D4D8503F333E073C2.json) and --allow-api not given — author the cache file in-session or re-run with --allow-api | at Program.<>c__DisplayClass0_0.<<<Main>$>g__ExtractRangeAsync|7>d.MoveNext() in D:\Code\DUAB\SalesSupport\tools\SalesSupport.DocExtract\Program.cs:line 131 | --- End of stack trace from previous location --- | at Program.<>c__DisplayClass0_2.<<<Main>$>g__SplitAsync|20>d.MoveNext() in D:\Code\DUAB\SalesSupport\tools\SalesSupport.DocExtract\Program.cs:line 153
+Brochure DM7560.pdf: 17 kept / 0 dropped
+  note: The DM7560 model/suffix table lists supply-voltage suffixes (-1, -3, -6, -8) and power-cord suffixes (-D, -F, -R, -Q, -H, -N); these are summarized in the instrument attribute 'suffix_codes' and not created as separate products.
+  note: Power cord suffix -F is printed as 'VED Standard' in the document; this is very likely a typo for 'VDE Standard' — verify before quoting.
+  note: Options /C1 and /C2 are mutually exclusive, and none of the options (/C1, /C2, /CMP) can be retrofitted to an already purchased DM7560.
+  note: GS200 is only mentioned on the last page as a 'Related product' with a one-line description; only output range ±32 V / ±200 mA is stated in this document.
+  note: The last entry in the products list is an accidental duplicate of 751539-E2 with no data; disregard it and use the earlier full entry.
+  note: Digit notation in the source PDF renders '6½ digits' as '1/26 digits' due to fraction extraction; the instrument is a 6½-digit DMM (verify wording in the printed brochure).
+Brochure GS200.pdf: 22 kept / 0 dropped
+  note: 'GS200' is used throughout the brochure as the series/family name; the orderable models are GS210 (front panel terminals) and GS211 (rear panel terminals). No standalone 'GS200' order code is printed, so it is recorded only as an alias.
+  note: Supply voltage suffixes (-1/-4/-7) and power cord suffixes (-D, -F, -R, -Q, -H, -N, -T, -B, -U) were summarized in the instrument attribute 'suffix_codes' rather than as separate products.
+  note: Page 5 states output terminals are 'only on the GS211' (rear panel) while page 2 states 'only on the GS210' (front panel); this is consistent with the model/suffix table but worth verifying with the datasheet.
+  note: GS610 and GS820 are printed only as 'Related product' with a couple of headline specs; their detailed specifications are not in this document.
+  note: Specification tables (voltage/current source ranges, accuracies, noise) were transcribed from a dense multi-column PDF table; key headline figures used in attributes match the summary text on page 3.
+Brochure GS610.pdf: 16 kept / 0 dropped
+  note: The instrument's order code is model 765501 with description 'GS610 Source Measure Unit'; 'GS610' is used throughout the brochure as the product name/alias.
+  note: Power cord suffix codes (-D, -F, -R, -Q, -H, -N, -T, -B, -U) were recorded as an attribute on the instrument, not as separate products, per instruction.
+  note: The accessory descriptions repeatedly reference a model '758921' (used in combination with 758933/758917/701901), but 758921 itself is not listed in the order tables of this brochure, so no product entry was created for it. Worth checking against the current accessory list.
+  note: B9317WD (1.5 mm hexagonal wrench) is mentioned only as an item included with the 758931 adapter, not as a separately orderable product.
+  note: Standard accessories shipped with the GS610: power cord, 758933 measurement lead, 758922 small alligator clip adapter and instruction manuals; 758933 and 758922 also appear in the optional accessories table.
+  note: Detailed accuracy tables (generation/measurement per range) were not fully transcribed into attributes; only headline accuracy figures (±0.02% voltage, 0.03% current terms) were used.
+Brochure GS820.pdf: 22 kept / 0 dropped
+  note: The document lists four GS820 base models (765601, 765602, 765611, 765612); the brochure also writes them in shorthand as 765601/02 and 765611/12 — these shorthand forms were not treated as separate codes.
+  note: Power cord suffix codes (-D, -F, -R, -Q, -H, -N, -T, -B, -U) are not orderable products; they are summarized in the 'suffix_codes' attribute of each GS820 model.
+  note: 765670 Curve Tracer Software: the taxonomy has no 'Källor > Programvara' entry, so it was placed under 'Övrigt > Programvara för SMU'. The brochure says it works with 'the GS series Source Measure Unit' but only quotes an update-rate figure for GS820; compatibility with GS610/GS200 is not stated explicitly and was therefore not asserted.
+  note: GS610 and GS200 appear only in a short 'Related product' box with model names GS610/GS200 and no full order codes; specifications there are minimal.
+  note: No option codes (slash options) are listed in this brochure; the digital I/O width (2-bit vs 16-bit) and voltage range are selected via separate base model numbers.
+  note: Accuracy tables are extensive; only representative range accuracies were captured as attributes. Verify full accuracy figures against the specification tables on pages 13–14 before quoting.
+Brochure IS8000.pdf: 18 kept / 0 dropped
+  note: The model/suffix table prints a heading 'IS8010 IEC Harmonic/Flicker Measurement Software' above the IS8011/IS8012 rows. It is unclear whether IS8010 is an orderable model or only a family heading, so no separate IS8010 entry was created — please verify with Yokogawa.
+  note: The add-on package suffix codes (-SY1, -MH1, -RP1, -FS1, -EM1, -SB1, -MB1 for IS8001EX/IS8002EX) select the same functions as the slash options /SY1.../MB1 of IS8001/IS8002; they were recorded as a 'suffix_codes' attribute rather than separate products to avoid duplicate/invented codes.
+  note: IS8002CDV suffix codes -P01/-P05/-P10/-P20 are PC-quantity licence selections and are recorded as a 'suffix_codes' attribute on IS8002CDV.
+  note: The document mentions the free 'Simple (free) edition' of the IS8000 platform (used after trial expiry or annual licence expiry); it has no model code and is therefore not listed as a product.
+  note: The 701992 Xviewer software is mentioned only as the predecessor whose design the IS8002CDV Classic Data Viewer inherits; the document does not explicitly state a replacement, so no successor_of relation was recorded and 701992 is not listed as a product of this brochure.
+  note: Options belonging to other instruments are referenced without full order codes: WT5000 'G7 option' (required for IEC harmonic display and IS8011/IS8012), WT5000 'DS option' (data streaming), DL950/SL2000 'C60 option' (10 GbE). They are printed without a leading slash and were not created as products here.
+  note: Third-party products referenced (Photron FASTCAM cameras, DTS INSIGHT RAMScope GT170/GT122) are not Yokogawa products and were captured only as compatibility attributes.
+  note: Yokogawa GM10 and VZ20X recorders and the 760903 Current Sensor Element are named only as compatibility/limitation references and were not created as products.
+Brochure LS3300.pdf: 19 kept / 0 dropped
+  note: The free 'Power Meter Calibration Software' has no printed model/part number in the brochure; the printed product name was used as model_code and should be checked before quoting.
+  note: Power cord suffix codes (-D, -F, -R, -Q, -H, -N) are recorded as the LS3300 attribute 'suffix_codes' and not as separate products, per instructions.
+  note: 2558A and 2560A appear only in the 'Related product' section with abbreviated specifications; full specifications should be taken from their own datasheets.
+  note: Instruments mentioned as calibration examples (WT310E, CW500, WT300E/WT300/WT200/WT100 series) are referenced only as target/supported devices and are not offered as products in this brochure.
+  note: Output range, accuracy and settings tables (pages 9–11) are dense multi-column tables; only headline values were extracted. Detailed per-range accuracies should be verified against the document.
+Brochure MT300.pdf: 42 kept / 0 dropped
+  note: The 13 pressure type/range codes (-G01…-G08, -A03…-A06, -D00…-D05) are printed in the brochure only as suffix codes of MT300; they are recorded here as configuration options of MT300 rather than as separate instruments. Only the combined form 'MT300-G01' appears verbatim in the document (page 4), so other combined codes such as 'MT300-G07' were not created.
+  note: Power cord suffix codes (-D, -F, -Q, -R, -H, -N, -T, -B, -U) are not separate products and are summarized in the MT300 attribute 'suffix_codes'.
+  note: Configuration constraints worth confirming with a rep: /F1 is not selectable for -G07, -G08 or differential models; /R1 is not selectable for -G08 or -D00; /DM is only selectable on gauge and absolute models; -G08 accepts only the -P4 input connection and has its input connector on the rear panel only.
+  note: Page 8 gauge-pressure table contains OCR artefacts (e.g. '0 ka to 10 kPa' for the -G01 guaranteed accuracy range and truncated readout-range entries such as '−12 kPa to'); the readout ranges for gauge models were transcribed as the printed upper limits and should be verified against the datasheet.
+  note: MC100, CA700 and PM100 appear only in the 'Related Products' section of this brochure; their specification lists are abbreviated marketing bullets, not full specifications.
+Brochure MY600.pdf: 8 kept / 0 dropped
+  note: The document contradicts itself on the two probe tips: the 'Accessories (sold separately)' line states 99012 = Probe tip (extended type) and 99013 = Probe tip (hook type), while the Accessories table states 99012 = Probe tip (hook type), 61.9 × 26 mm and 99013 = Probe tip (extended type), 115.4 mm. Both entries were captured with the table data plus a flag; verify with Yokogawa before quoting.
+  note: MY40 is mentioned only as the 'conventional model' in a measurement-time comparison (MY40 approx. 3 s vs MY600 approx. 0.5 s). No successor_of relation was recorded because the document does not explicitly state that the MY600 replaces the MY40, and the MY40 is not offered here as an orderable product.
+  note: The 'Model code and suffix' table lists only MY600 with no suffix or option codes.
+  note: Some specification table text (e.g. 93045 'Main baby and accessory-housing') appears garbled in the source PDF; recorded verbatim.
+Brochure PX8000.pdf: 53 kept / 0 dropped
+  note: Suffix codes for the PX8000 (power cord -D/-F/-H/-N/-Q/-R and language -HE/-HG/-HJ) are not listed as separate products; they are summarized in the PX8000 attribute 'suffix_codes'. The document states the German language menu (-HG) 'will be released soon'.
+  note: Only one memory expansion option can be selected per mainframe (/M1 and /M2 are mutually exclusive); the standard memory length is 10 M points/CH.
+  note: The document states voltage module 760811 and a current module (760812 or 760813) must always be ordered in equal quantity, since power values are calibrated with a paired voltage/current module.
+  note: The difference between current modules 760812 and 760813 is not stated explicitly; the external current sensor input (isolated BNC, 50 mV to 10 Vrms, DC to 20 MHz) is specified for 760812 only. Verify 760813's exact feature set with Yokogawa.
+  note: Bulletin PX8000-02EN is referenced for complete specifications; it is a document, not an orderable product, and was not included.
+  note: Standard accessories shipped with the instrument (power cord, front cover, rubber feet, cover plate assy, current/voltage terminal adapters, printer chart, getting started guide, CD) have no model numbers in this document and were not listed as products.
+  note: Accuracy figures on page 19 are quoted at 6 months; accuracy above 1 MHz is stated to be a design value. Some accuracy-vs-frequency graph legends on pages 13/16 appear garbled in the source text ('02. A × 150 V range') and were not used.
+Brochure SL1000.pdf: 55 kept / 0 dropped
+  note: The SL1000 main unit is listed in the model/suffix table under order code 720120; the brochure uses the name 'SL1000' throughout. The code 720120 was used as model_code with 'SL1000' as alias.
+  note: Suffix codes -D, -F, -R, -Q and -H are power cord/standard selections only and are recorded as the instrument attribute 'suffix_codes', not as separate products.
+  note: The accessory table on the last page lists model numbers and product names in separate parallel columns; the mapping used here follows the column order (two synchronous cable lengths under 720901-01/-02 and two rack kits under 751541-E4/-J4). This alignment should be verified against a Yokogawa price list before quoting.
+  note: Xviewer licenses 701992-SP01 (Standard Edition) and 701992-GP01 (Math Edition) appear only inside the model/option table text; 701992 appears in the standard accessories list. They are recorded as software entries but may not be separately orderable outside the /XV0 and /XV1 options.
+  note: Footnote *5 for module 720268 also names DL850, DL850V, DL850E, DL850EV and DL950 as host instruments, but no module_of relations to those instruments were created because this brochure covers the SL1000 only.
+  note: The brochure refers to 'Bulletin DL950-02EN' for full module details; module specifications here are taken from the module selection table in this document.
+  note: The document states 13 plug-in modules are supported; 13 module codes are listed and all 13 were extracted.
+Brochure WT1800E.pdf: 70 kept / 0 dropped
+  note: Pages 1–10 only mention the series designation WT1800E; individual model codes of the series (e.g. per number of input elements) are not printed on these pages and were therefore not created.
+  note: The /EX option is printed both as "(/EX Option)" on the panel description and as "/EX1 to /EX6 options" in a footnote. Only "/EX", "/EX1" and "/EX6" appear verbatim; the intermediate codes were not invented. Verify the exact orderable option code per element with the price list.
+  note: The "CT series of AC/DC current sensors", the "Shunt Resistor Box", dedicated connection cables and shunt resistors are mentioned without model numbers, so no accessory entries were created.
+  note: Front/rear panel item numbers (1–10) in the "WT1800E in detail" section are layout callouts, not product codes.
+  note: Suffix codes (language, power cord) are not shown on pages 1–10, so no suffix_codes attribute could be filled in.
+  note: These pages (11–15) are the WT1800E overview and specification section; no ordering/model-configuration table is included, so no suffix codes, input-element model numbers or accessory part numbers could be extracted.
+  note: The motor evaluation function (electrical angle/rotation/direction, torque, mechanical power) is repeatedly described as an option, but no option code is printed on these pages — the code should be verified against the ordering information page.
+  note: The 50 A input element and the 5 A input element are described in detail (ranges, accuracy, instrument loss) but no separate model codes are printed for them in this excerpt.
+  note: /G5 and /G6 appear only together in the heading "Bar Graph/Vector (/G5, /G6 Option)"; the difference between the two option codes (typically harmonic measurement scope) is not explained in this excerpt and should be checked.
+  note: Some formulas in the accuracy section (e.g. waveform display data / Upeak-Ipeak additions and line filter influence equations) are garbled by the PDF text extraction and were not transcribed into attributes.
+  note: The accessories page prints "761902/03 Safety BNC cable (BNC-BNC 1 m/2 m)" while the ordering table lists 701902 and 701903 for the same product. Only 701902/701903 were extracted; the 761902/03 numbers look like a typo and should be verified.
+  note: Input element configurations are ordered as suffix codes (e.g. -5A2-50A2) rather than separate part numbers; they are recorded in the "suffix_codes" attribute of each base model together with the menu language (-HC/-HE/-HG/-HR) and power cord (-B/-D/-F/-H/-N/-Q/-R/-T/-U) suffixes.
+  note: Mutual exclusivity noted in the document: specify only one of /G5 and /G6, and only one of /MTR and /AUX. /G6 is not available for WT1801E. /PD2 requires firmware Ver. 3.1 or later, and Shunt Resistor Box use requires both an /EX option and /PD2.
+  note: B8200JQ (connector) and B8200JR (load resistor) appear only in the typical connection diagrams with minimal description; verify orderability and full specifications before quoting.
+  note: 751522/751524 Current Sensor Units are stated not to conform to CE Marking. The 751552 clamp-on probe text references connection to a WT3000E, which appears to be carried over from another catalog; it is listed as an accessory in this WT1800E brochure.
+  note: Accessory-to-instrument relations were mapped to all six base models (WT1801E–WT1806E) because the brochure refers generically to "WT1800E"; compatibility per element count should be confirmed for rack kits (/PD2 dependency) and current sensors.
+  note: The display resolution specification is printed inconsistently ("less than 60000: 5 digits / 6000 or more: 4 digits") and was therefore not recorded as an attribute.
+Brochure WT1800R.pdf: 77 kept / 0 dropped
+  note: Pages 1–10 describe the WT1800R series generically; no individual orderable base model codes (e.g. per number of input elements) appear in this excerpt, so only 'WT1800R' is recorded as the instrument code. The model/suffix code table is presumably on pages 11–20.
+  note: '-C01' is printed as '-C01 Option' for the GP-IB port and was recorded as an orderable option rather than a language/power-cord suffix; verify against the ordering table.
+  note: The 5 A and 50 A input elements are described as installable in a single unit, but no element model numbers are printed on these pages, so no module entries were created.
+  note: CT1000A, CT1000S, A1628WL, 758921 and 761961 appear only in figure captions ('Example of connection of ...') with no specifications; their product names/types are inferred as current sensors/connection accessories from the surrounding /PD2 text and should be verified.
+  note: 'DLM5000 series' is mentioned as a compatible oscilloscope family but no specific model code is printed, so it was not created as a product.
+  note: IS8001/IS8002 are referenced with a pointer to bulletin BU IS8000-01EN; their categorization under Vågformsmätning > Programvara is a judgement call since they serve both power and waveform instruments.
+  note: These pages (11–15) are the specification section of the WT1800R brochure; no ordering table with suffix codes, accessories or model numbers appears here, so no suffix_codes attribute could be recorded.
+  note: The document repeatedly refers to a "motor evaluation function (option)" and a "Harmonic Measurement (Option)" but does not print option codes for them on these pages (except the bar graph/vector option /G5, /G6). No codes were invented.
+  note: The "50 A input element" and "5 A input element" are described as separate input element types with different ranges and accuracies, but no model/order codes are printed on these pages, so they were not created as module entries.
+  note: The exact printed name/description of the /EX option is not given in this excerpt; it is only referenced in the current-input-terminal rating tables. Verify the official option name (likely related to safety rating of current inputs) against the ordering information page.
+  note: Some specification formulas (line filter influence, accuracy of reactive power/power factor) were rendered with broken layout in the extracted text and were not converted into attributes.
+  note: The brochure pages provided cover specifications (pages 16–18), accessories (page 19) and the model & suffix code table (page 20) of the WT1800R series; the series name 'WT1800R' is used generically for compatibility statements, so accessory relations point to 'WT1800R' rather than to each of the six orderable models WT1801R–WT1806R.
+  note: Suffix codes for menu language (-HC, -HE, -HG) and power cord (-B, -D, -F, -H, -N, -Q, -R, -T, -U) are captured in the instruments' 'suffix_codes' attribute and not listed as separate products. The GP-IB suffix -C01 is listed as an option; the alternative -N01 (no GP-IB) is recorded only as an attribute.
+  note: The accessory illustration prints '761902/03 Safety BNC cable (BNC-BNC 1 m/2 m)'; only 761902 is recorded as a complete code. The 2 m variant is presumably 761903 but the full code is not printed — verify before quoting. Similarly '366924/25' is abbreviated, but 366924 and 366925 are printed in full in the accessory table.
+  note: The part numbers B8200JQ (connector) and B8200JR (load resistor) appear only in the connection-example illustration without descriptions or ordering data, so they are not included as products; verify if they should be orderable items.
+  note: Page 19 states that the 751552 clamp-on probe requires 758921/758917 'for connection to WT3000E' — this appears to be a text carry-over in a WT1800R brochure; compatibility should be confirmed.
+  note: Detailed accuracy tables for harmonic measurement (/G5, /G6) contain many conditional terms; only headline values were extracted. The document also notes one typo-like entry in the Auto update interval accuracy table ('±(0.5% of range 0.25% of range)' for 1 kHz < f ≤ 10 kHz current).
+  note: Only one of /G5 or /G6 may be specified, and only one of /MTR or /AUX may be specified, per footnotes *2 and *3 of the ordering table.
+Brochure WT3000E.pdf: 61 kept / 0 dropped
+  note: Pages 1–10 only; the specification tables and ordering information (likely on pages 11–20) were not part of this excerpt, so element/accessory model numbers may be missing.
+  note: The 2 A input element and the 30 A input element are described in the text but no separate order codes for them are printed in these pages, so they are not listed as module products. They are captured as an attribute of the WT3000E.
+  note: Page 9 prints 'Recommended model: WT3001E-2A0-30A1-x/G6/FL'. This is a configuration string (the 'x' is a placeholder), not confirmed as a standalone catalogue model, so it is recorded as an attribute of the WT3000E rather than as a separate product. Please verify against the ordering information.
+  note: Optional features '1 External media slot' and '2 Built-in printer' are shown in the front-panel illustration on page 6 without option codes; they are therefore not listed as separate option products.
+  note: Historic and comparison models mentioned on pages 3, 1 and 10 (e.g. WT300E Series, WT500, PX8000, WT1800E, WT310E/WT330E, WT3000, WT1800, WT1600, CW500 and older meters) appear only in the 100-year timeline or accuracy-comparison graphic and are not offered in this brochure, so they are not extracted as products.
+  note: The brochure states flicker compliance with 'IEC61600-3-3' (page 9); this is most likely a typo for IEC61000-3-3 in the source document — value copied as printed.
+  note: The excerpt (pages 11–15) is mainly a specification section; no ordering/model-suffix table (suffix codes for language or power cord) appears on these pages, so no suffix_codes attribute could be recorded.
+  note: The 2 A input element and the 30 A input element are described in detail but no separate model/part numbers for them are printed on these pages — they were therefore not created as module entries. Check the ordering pages of the full brochure for their codes.
+  note: 'DLM4000' appears only as a label in the semiconductor test system figure on page 11 with no specifications; it was not included as a product entry. Verify whether it belongs in the catalog.
+  note: The figure text on page 11 contains the string 'WT3000EI' which appears to be an OCR artifact of 'WT3000E' plus a current label (I1/I2); no such model code was assumed.
+  note: The name for /C5 is not printed as a formal option title — the document only states 'PC card, USB memory (Requires /C5 option)'. The descriptive name given here should be verified against the official option list.
+  note: Accuracy tables contain many conditional/reference values; only headline figures were extracted as attributes.
+  note: Pages 16-18 are specification tables that apply to the WT3000E family as a whole; the specifications have therefore been attached to all four base models (WT3001E/2E/3E/4E) rather than to a single model.
+  note: Length of the test lead set 758917 is stated inconsistently: the accessory illustration says 'Total length: 75 cm' while the order table says 'A set of 0.8 m long, red and black test leads'. Both values recorded in the attribute; please verify.
+  note: The safety BNC cable is printed only as '761902/03 Safety BNC cable (BNC-BNC 1 m/2 m)'. Only 761902 is recorded; the 2 m version code (presumably 761903) is not printed in full anywhere in the document.
+  note: Element configuration suffixes (-2A0/-30A1 etc.) and power cord suffixes (-D, -F, -H, -N, -Q, -R) are recorded as an instrument attribute 'suffix_codes', not as separate products.
+  note: Options /C12 (USB port PC) and /C2 (Serial RS-232) are mutually exclusive — only one can be selected.
+  note: GP-IB operation requires a third-party National Instruments adapter (GPIB-USB-HS, PCI-GPIB/PCI-GPIB+, PCMCIA-GPIB/PCMCIA-GPIB+ with driver NI-488.2M v1.60 or later, except v2.3); these are not Yokogawa products and are not listed as catalog items.
+  note: 751522 and 751524 do not conform to CE Marking, per the document.
+  note: The current sensor unit suffix codes (-10/-20/-30 for phase, -TS/-TM/-TL for input terminal) are recorded as attributes; only the /CV terminal cover option is listed as a separate option code.
+  note: The document refers to related current sensor detail in 'Power Meter Accessory Catalog Bulletin CT1000-00E' / 'Current Sensors & Accessories Catalog Bulletin CT1000-00E' — a catalog reference, not a product.
+Brochure WT300E.pdf: 52 kept / 0 dropped
+  note: The two free software products have no printed order/model number; their printed names ("WTViewerFreePlus" and "Power Consumption Measurement Software", also called "PCM software") were used as model_code. Verify actual order codes before quoting.
+  note: The footnote "/E2 and /MC options are required" on page 5 refers to Yokogawa's GP10/GM recorders, not to the WT300E series, so these codes were not recorded as WT300E options. Confirm with the recorder documentation.
+  note: A D/A output option is described (4 CH on WT310E/WT310EH, 12 CH on WT332E/WT333E) but no option code is printed in pages 1-8, so no option entry was created for it. The same applies to the comparator function.
+  note: The current-range/bandwidth graphic on page 4 lists markers 50 µA, 5 mA, 10 mA, 20 A, 26 A, 40 A but the mapping of the lower limits to WT332E/WT333E is not unambiguous in the extracted text; only clearly stated values (WT310E 5 mA range, WT310EH 1 A to 40 A) were recorded.
+  note: Historical models on the page 3 timeline (2509, 2534/2535, WT110/WT130, WT210/WT230, WT300 series) are shown only as predecessors and were not recorded as orderable products. The brochure calls the WT300E series the enhanced version of the 5th generation compact power meters but does not explicitly state a per-model replacement, so no successor_of relations were created.
+  note: No suffix codes (language/power cord) appear on pages 1-8; also no ordering/specification table is included in this extract, so accessory model numbers may appear on later pages (9-16) not covered here.
+  note: This is only pages 9–12 of a 16-page brochure; the model/suffix code ordering table (language, power cord and other suffix codes) is not part of this excerpt, so no "suffix_codes" attribute could be recorded.
+  note: Predecessor models WT310, WT310HC, WT332, WT333, WT210, WT230-2ch and WT230-3ch appear only in the comparison table on page 9; they were not created as separate product entries but are referenced via successor_of relations. A human should confirm the exact model-to-model succession.
+  note: The option /HRM (harmonic measurement) is printed only as an option of the older WT210/WT230 series and was therefore not listed as a product for the WT300E series.
+  note: The rear-panel list mentions optional features 'Ethernet' and 'D/A output connector'; no order code is printed for the D/A output option in this excerpt, so it was not recorded as a product.
+  note: LabVIEW drivers and Visual Basic/Visual C++/Visual Basic .NET/Visual C# sample programs are free downloads, not orderable products, so they are not listed.
+  note: Number of input elements per model (e.g. whether WT332E is 2-element and WT333E 3-element) is not stated in this excerpt and was deliberately not added as an attribute.
+  note: Some accuracy table cells on page 11 (10 kHz to 100 kHz rows) are truncated in the extracted text; the printed brochure should be consulted for the complete equations.
+  note: The communication-interface suffix codes -C1 (GP-IB) and -C2 (RS-232) are selectable order suffixes, not slash options; per the rules they are recorded in the instruments' "suffix_codes" attribute rather than as separate products. A human may want to expose them as orderable choices. Power-cord suffixes -D, -F, -R, -Q, -H, -N, -T are likewise only summarized.
+  note: USB is standard on all WT300E models; GP-IB is standard only on -C1 and RS-232 only on -C2 versions.
+  note: The current sensors are printed as a combined line "CT60/CT200/CT1000/CT1000A/CT2000A" with bullet specs listed in the same order as the models; the mapping of each bandwidth/current rating to a specific model is inferred from that order and should be verified against Catalog Bulletin CT1000-00E.
+  note: Standard accessories (power cord, rubber foot, current input protective cover, start up guide, connector for /DA4 or /DA12) have no separate model numbers in this document except the safety terminal adapter 758931 and are therefore not listed as products.
+  note: Some symbols in the specification tables (power factor λ, phase angle Φ) were lost in the PDF text extraction; formulas and display ranges involving them should be checked in the original document.
+  note: Pages 13–16 only cover specifications, model/suffix codes and accessories; instrument measurement ranges and basic power accuracy are on earlier pages not included here.
+Brochure WT500.pdf: 46 kept / 0 dropped
+  note: Basic power accuracy is stated inconsistently in the document: the cover page panel shows "0.2%" as Basic Power Accuracy while page 2 states "achieving ±0.1% basic accuracy" (and the feature panel shows Basic Power Accuracy ±0.1%). Both values are recorded as attributes; a human should verify which applies.
+  note: The page 2 feature panel is OCR-scrambled; the string 'Software WTViewer 760122' is read as the software model number for the WT500, but the adjacent entries (/C7, VGA, 232.23 V, /V1) are interleaved. The association of 760122 with WTViewer should be verified before quoting it on a call.
+  note: The external current sensor input option appears as '/EX' in the page 2 feature panel and as '/EX1, /EX2, /EX3' in the OPTIONS section on page 6. The document does not explain the difference between /EX1, /EX2 and /EX3 (presumably number of elements) — verify before ordering.
+  note: LabVIEW Drivers are mentioned as a free download from the Yokogawa website; no model code is printed, so they are not listed as a product.
+  note: No suffix codes (language/power cord) are printed on pages 1–6, so no 'suffix_codes' attribute was created.
+  note: The picture on page 5 is noted as a sample of connection with a WT1800E; that model is not offered in this brochure and is therefore not listed.
+  note: Only pages 1–6 of 12 were provided; the specifications/model-and-suffix-code table (likely on later pages) is missing, so no orderable WT500 configuration codes (e.g. WT500-xx) could be extracted.
+  note: The comparison table on page 8 mentions other WT-series analyzers (WT300E family incl. WT310E/WT310EH/WT332E/WT333E, WT1800E, WT3000E) and their options (e.g. /G6, /MTR, /DA, /B5, /C5, /C12, /FL, /DA4, /DA12) only for specification comparison; these were not extracted as products of this WT500 brochure. Some of those codes appear ambiguously in the OCR (e.g. 'WT320EH' vs 'WT310EH') and should be checked against the dedicated brochures.
+  note: Power-cord suffix codes -D (UL/CSA), -F (VDE), -R (SAA), -Q (BS), -H (GB) are recorded as the 'suffix_codes' attribute on each WT500 model rather than as separate products.
+  note: B8200JQ (connector) and B8200JR (load resistor) appear only in the current-sensor connection diagram on page 7, not in the ordering tables; verify orderability and full part numbers before quoting.
+  note: The accessory table prints 758917 as 'Test read set – A set of 0.8 m long, red and black test leads' while page 7 states 'Total length: 75 cm'. The length discrepancy is in the source document and should be verified.
+  note: The document refers to Current Sensors & Accessories / Power Meter Accessory Brochure bulletin CT1000-00E for full current sensor and accessory details; CT-series specifications here are abbreviated.
+Brochure WT5000.pdf: 46 kept / 0 dropped
+  note: Language and power-cord suffix codes (-HC, -HE, -HG, -HJ, -B, -D, -F, -H, -N, -Q, -R, -T, -U) are recorded as the WT5000 attribute "suffix_codes" and not as separate products.
+  note: 760991 is listed under "Additional option license" with suffix codes -DS and -G7; the two license variants are captured as one product with a suffix_codes attribute since no separate full model codes are printed.
+  note: The brochure lists the harmonic/flicker software only as "IS8011/IS8012" and does not explain the difference between the two; two separate entries were created with identical descriptions — verify which one applies to a given order.
+  note: 751522 and 751524 Current Sensor Units are presented together with one shared specification block; the difference between the two model numbers is not stated in the document.
+  note: Standard-accessory part numbers B8216JA (cover panel), B9317WB/B9317WC, A1650JZ/A1651JZ and B8213YA/B8213YB were not listed as separately orderable products (the document directs users to order 758931, 761951 and 761953 instead) and were therefore omitted.
+  note: Connector B8200JQ and load resistor B8200JR appear only in a wiring illustration without ordering information, so they were not listed as products.
+  note: IS8000, IS8011 and IS8012 model codes are taken from the running text; detailed IS8000 specifications are in a separate bulletin (BU IS8000-01EN). Detailed /DS and /G7 specifications are in Bulletin WT5000-02EN.
+  note: The DL950 ScopeCorder is named only as an IEEE1588-synchronized partner instrument for IS8000 and is not itself part of this catalog.
+Brochure WT5000T.pdf: 27 kept / 0 dropped
+  note: Suffix codes -03/-04 (number of elements), -1A/-5A (calibrated current range), -HE (English menu) and -F/-Q (power cord) were not created as separate products; they are recorded in the WT5000 attribute 'suffix_codes'. Note that -03/-04 and -1A/-5A are configuration choices affecting price/spec, so a rep should confirm them at quotation.
+  note: The footnote '±0.5 µA * only direct input of 760902' references a model 760902 that is not otherwise described or offered in this brochure; no product entry was created for it. Worth checking whether a 760902 element exists in the general WT5000 catalog.
+  note: B9317WD is described as 'For 761953', but 761953 itself is not listed anywhere in this document; its identity should be verified.
+  note: Standard accessory part numbers mentioned only as included items (cover panel B8216JA, safety terminal adapters B9317WB/B9317WC and A1650JZ/A1651JZ) were not created as products; the document directs customers to order 758931 or 761951 for additional units.
+  note: The DL950 ScopeCorder, WT3000E, WT1800E, WT500 and WT300E are mentioned only as compatible/supported instruments (IS8000 IEEE1588 synchronization and WTViewerE support); they are not offered in this brochure and were not created as product entries, but are referenced as relation targets.
+  note: Pages 4-5 of the source PDF contain duplicated/overlapping text blocks with slightly different wording (e.g. 'first ISO 17025 certified non-governmental organization' vs 'one of the few ISO 17025 certified organization'); accuracy tables in both versions agree.
+  note: Formulas for corrected power (IEC76-1 1976/2011, IEEE C57.12.90-2010) are garbled in the extracted text; only the fact that both standard formulas are supported was captured.
+Brochure WTViewerE.pdf: 1 kept / 0 dropped
+  note: The brochure describes only one orderable item: model 761941 WTViewerE software. All other model designations in the document (WT5000, WT3000E/WT3000, WT1800E/WT1800, WT500, WT300E/WT300 and their numeric codes 760301–760304, 760201–760203) appear only in the compatibility table and were not extracted as separate products.
+  note: 'LF 761941-01EN' on page 1 is the brochure/document number, not a product code.
+  note: Legacy compatible models (WT3000 760301/760302/760303/760304, WT1801–WT1806, WT310/WT310HC/WT332/WT333) are listed with firmware requirements but were not added as relation targets for every code; check the compatibility table if a customer has an older unit.
+  note: Catalog contents stated as of June 2019 — verify current OS support (Windows 7/8.1/10 only per document) and pricing/availability.
+  PRUNE WT310E: successor_of → 'WT310' (not extracted)
+  PRUNE WT310EH: successor_of → 'WT310HC' (not extracted)
+  PRUNE WT332E: successor_of → 'WT332' (not extracted)
+  PRUNE WT333E: successor_of → 'WT333' (not extracted)
+  PRUNE 761941: software_for → 'WT300E' (not extracted)
+  PRUNE 2553A: successor_of → '2553' (not extracted)
+  PRUNE AQ7933: software_for → 'AQ7277' (not extracted)
+  PRUNE AQ7420: successor_of → 'AQ7410' (not extracted)
+  PRUNE IS8002CDV: software_for → 'DLM5000HD' (not extracted)
+  PRUNE IS8002CDV: software_for → 'DLM5000' (not extracted)
+  PRUNE IS8002CDV: software_for → 'DLM3000HD' (not extracted)
+  PRUNE IS8002CDV: software_for → 'DLM3000' (not extracted)
+  PRUNE IS8002CDV: software_for → 'SL1000' (not extracted)
+  PRUNE 366973: accessory_of → 'DLM series' (not extracted)
+  PRUNE 701901: accessory_of → 'SL1000' (not extracted)
+  PRUNE 701904: accessory_of → 'SL1000' (not extracted)
+  PRUNE 701937: accessory_of → 'DLM3000' (not extracted)
+  PRUNE 701937: accessory_of → 'DLM5000' (not extracted)
+  PRUNE 701938: accessory_of → 'DLM2000' (not extracted)
+  PRUNE 701939: accessory_of → 'DL6000' (not extracted)
+  PRUNE 701939: accessory_of → 'DLM2000' (not extracted)
+  PRUNE 701939: accessory_of → 'DLM4000' (not extracted)
+  PRUNE 701939: accessory_of → 'DLM6000' (not extracted)
+  PRUNE 701943: accessory_of → 'DL9000' (not extracted)
+  PRUNE 701943: accessory_of → 'SB5000' (not extracted)
+  PRUNE 701946: accessory_of → 'DL6000' (not extracted)
+  PRUNE 701946: accessory_of → 'DLM2000' (not extracted)
+  PRUNE 701946: accessory_of → 'DLM4000' (not extracted)
+  PRUNE 701946: accessory_of → 'DLM6000' (not extracted)
+  PRUNE 701949: accessory_of → 'DLM3000' (not extracted)
+  PRUNE 701949: accessory_of → 'DLM5000' (not extracted)
+  PRUNE 701964: accessory_of → 'DLM3000' (not extracted)
+  PRUNE 701966: accessory_of → 'DL750P' (not extracted)
+  PRUNE 701966: accessory_of → 'SL1400' (not extracted)
+  PRUNE 701968: accessory_of → 'DLM4000' (not extracted)
+  PRUNE 701968: accessory_of → 'DLM5000' (not extracted)
+  PRUNE 701969-E: accessory_of → 'DLM4000' (not extracted)
+  PRUNE 701969-E: accessory_of → 'DLM5000' (not extracted)
+  PRUNE 701974: accessory_of → 'DL6000' (not extracted)
+  PRUNE 701974: accessory_of → 'DL9000' (not extracted)
+  PRUNE 702906: accessory_of → 'DLM2000' (not extracted)
+  PRUNE 702906: accessory_of → 'DLM4000' (not extracted)
+  PRUNE 702907: accessory_of → 'DLM3000' (not extracted)
+  PRUNE 702907: accessory_of → 'DLM5000' (not extracted)
+  PRUNE 720268: module_of → 'SL1000' (not extracted)
+  PRUNE 720901-01: accessory_of → 'SL1000' (not extracted)
+  PRUNE 720901-02: accessory_of → 'SL1000' (not extracted)
+  PRUNE 751541-E4: accessory_of → 'SL1000' (not extracted)
+  PRUNE B8069CH: accessory_of → 'DLM4000' (not extracted)
+  PRUNE B8219EP: accessory_of → 'DLM3000' (not extracted)
+  PRUNE B8229CH: accessory_of → 'DLM5000' (not extracted)
+  PRUNE B9988AE: accessory_of → 'DLM3000' (not extracted)
+  PRUNE B9988AE: accessory_of → 'DLM4000' (not extracted)
+  PRUNE B9988AE: accessory_of → 'DLM5000' (not extracted)
+
+products: 799 (dropped codes: 0, pruned relations: 54)
+kinds: instrument=115, software=40, accessory=329, option=264, module=51
+families: Effektmätning > Effektanalysatorer=33; Effektmätning > Programvara=17; Effektmätning > Tillbehör och optioner=200; Kalibrering > Kalibratorer och referenser=16; Kalibrering > Programvara=1; Kalibrering > Tillbehör och optioner=85; Källor > Programvara=1; Källor > Source measure units=11; Källor > Tillbehör och optioner=7; Mätinstrument > Elkvalitetsanalysatorer=2; Mätinstrument > Multimetrar och testare=4; Mätinstrument > Tillbehör och optioner=39; Optisk test > Ljuskällor, effektmätare och dämpare=13; Optisk test > OTDR=34; Optisk test > Optiska spektrumanalysatorer=9; Optisk test > Programvara=4; Optisk test > Tillbehör och optioner=126; Optisk test > Våglängdsmätare och övriga optiska instrument=8; Vågformsmätning > Programvara=20; Vågformsmätning > ScopeCorder och datalogger=4; Vågformsmätning > Tillbehör och optioner=154; Övrigt > Ethernet-testare=2; Övrigt > Tillbehör och optioner=9
+tokens: in=0 cached=0 out=0 ≈ $0,00 (Opus list prices)
+validation: OK
+FAILED documents: 1 — Brochure DLM5000, DLM5000HD, DLM3000, DLM3000HD.pdf

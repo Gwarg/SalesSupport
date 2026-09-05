@@ -12,11 +12,18 @@ using SalesSupport.Providers.Claude;
 
 Console.OutputEncoding = Encoding.UTF8;
 
+// Part of the cache key: bump only when the prompt changes what gets extracted. Additive
+// taxonomy rows are not worth re-paying for 48 brochures — they apply to new extractions.
 const string PromptVersion = "v1";
 string? input = null, outPath = null, only = null;
 var vendor = "Yokogawa";
 var cacheDir = Path.Combine("testdata", ".extract-cache");
 var dryRun = false;
+var parallel = 4;
+// Paid API calls are opt-in per run. The default merges what is already in the cache —
+// cache files can also be authored in a Claude Code session on the subscription (D27),
+// which is the zero-cost path for development-time extraction.
+var allowApi = false;
 
 for (var i = 0; i < args.Length; i++)
 {
@@ -28,18 +35,21 @@ for (var i = 0; i < args.Length; i++)
         case "--vendor": vendor = args[++i]; break;
         case "--cache": cacheDir = args[++i]; break;
         case "--dry-run": dryRun = true; break;
+        case "--parallel": parallel = int.Parse(args[++i]); break;
+        case "--allow-api": allowApi = true; break;
         default: Console.Error.WriteLine($"Unknown argument: {args[i]}"); return 1;
     }
 }
 
 if (input is null || (!dryRun && outPath is null))
 {
-    Console.Error.WriteLine("Usage: SalesSupport.DocExtract --input <pdf dir> --out <canonical.jsonl> [--vendor Yokogawa] [--only <name filter>] [--cache <dir>] [--dry-run]");
+    Console.Error.WriteLine("Usage: SalesSupport.DocExtract --input <pdf dir> --out <canonical.jsonl> [--vendor Yokogawa] [--only <name filter>] [--cache <dir>] [--parallel N] [--allow-api] [--dry-run]");
+    Console.Error.WriteLine("       Without --allow-api no paid calls are made: uncached brochures are reported as missing.");
     return 1;
 }
-if (!dryRun && string.IsNullOrEmpty(Environment.GetEnvironmentVariable("ANTHROPIC_API_KEY")))
+if (allowApi && !dryRun && string.IsNullOrEmpty(Environment.GetEnvironmentVariable("ANTHROPIC_API_KEY")))
 {
-    Console.Error.WriteLine("Extraction needs ANTHROPIC_API_KEY (use --dry-run to only inspect the PDFs).");
+    Console.Error.WriteLine("--allow-api needs ANTHROPIC_API_KEY.");
     return 1;
 }
 
@@ -66,6 +76,114 @@ report.AppendLine($"DocExtract report — {vendor} — {DateTime.Now:yyyy-MM-dd 
 var merged = new Dictionary<string, MergedProduct>(StringComparer.OrdinalIgnoreCase);
 var droppedCodes = 0;
 
+const int MaxChunkChars = 50_000;
+
+// Option codes (/G7, -SPM) are only unique per instrument — the same code means different
+// things on different models, and the pack would slug "/G7" and "G7" to one id. Qualify
+// them by their (alphabetically first) host: WT5000/G7, the way Yokogawa orders read.
+// Part-numbered modules, accessories and software are globally unique and stay as printed.
+static bool IsOptionCode(string code) => code.StartsWith('/') || code.StartsWith('-');
+static string FinalSku(ExtractedProduct product)
+{
+    if (product.Kind != "option" && !IsOptionCode(product.ModelCode)) return product.ModelCode;
+    var host = product.Relations
+        .Where(r => r.Kind is "option_of" or "module_of" or "accessory_of" or "software_for")
+        .Select(r => r.TargetModelCode.Trim())
+        .Where(t => t.Length > 0)
+        .OrderBy(t => t, StringComparer.Ordinal)
+        .FirstOrDefault();
+    return host is null ? product.ModelCode : host + (IsOptionCode(product.ModelCode) ? "" : "/") + product.ModelCode;
+}
+
+// Control characters in PDF text (a stray \b on a DLM ordering page) are stripped from
+// the request only — the cache hash stays on the raw text so nothing re-extracts.
+static string ForRequest(string text) => new(text.Where(c => !char.IsControl(c) || c is '\n' or '\t').ToArray());
+
+var localSkus = new Dictionary<string, Dictionary<string, string>>(); // brochure → printed code → final sku
+string CachePathFor(string text) =>
+    Path.Combine(cacheDir, Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(PromptVersion + "\n" + text)))[..24] + ".json");
+string SplitMarkerFor(string text) => CachePathFor(text) + ".split";
+
+// Extracts a page range through the cache. Oversized ranges — or ranges whose output
+// once hit the token cap (remembered by a marker so re-runs never re-pay for the
+// truncated attempt) — are split into halves; the merge below unifies by model code.
+// Phase 1 calls this in parallel to warm the cache; phase 2 calls it again, served
+// entirely from cache.
+async Task<List<ExtractedProduct>> ExtractRangeAsync(string name, IReadOnlyList<string> pages, int first, int last, List<string> notes)
+{
+    var count = last - first + 1;
+    var text = PdfText.Join(pages.Skip(first).Take(count).ToList());
+
+    // A cached whole-range result always wins — even for ranges that would be split
+    // today (the WT5000 probe was extracted whole before the size limit existed).
+    var cachePath = CachePathFor(text);
+    if (File.Exists(cachePath))
+    {
+        var cached = JsonDefaults.Deserialize<ExtractedCatalog>(File.ReadAllText(cachePath));
+        lock (notes) notes.AddRange(cached.Notes);
+        return cached.Products;
+    }
+    if (count > 1 && (text.Length > MaxChunkChars || File.Exists(SplitMarkerFor(text))))
+        return await SplitAsync();
+
+    var label = count == pages.Count ? name : $"{name} (pages {first + 1}–{last + 1} of {pages.Count})";
+    if (!allowApi)
+        throw new InvalidOperationException($"not in cache ({Path.GetFileName(cachePath)}) and --allow-api not given — author the cache file in-session or re-run with --allow-api");
+    var conversation = new LlmConversation(
+        Prompts.System(vendor),
+        [LlmMessage.User($"DOCUMENT FILE: {label}\nVENDOR: {vendor}\n\n{ForRequest(text)}")]);
+    ExtractedCatalog catalog;
+    try
+    {
+        catalog = await llm.CompleteJsonAsync<ExtractedCatalog>(LlmRole.Drafter, conversation);
+    }
+    catch (LlmOutputTruncatedException) when (count > 1)
+    {
+        File.WriteAllText(SplitMarkerFor(text), "");
+        Console.WriteLine($"   {label}: output truncated — splitting into halves");
+        return await SplitAsync();
+    }
+    File.WriteAllText(cachePath, JsonDefaults.Serialize(catalog));
+    lock (notes) notes.AddRange(catalog.Notes);
+    return catalog.Products;
+
+    async Task<List<ExtractedProduct>> SplitAsync()
+    {
+        var mid = first + count / 2;
+        var left = await ExtractRangeAsync(name, pages, first, mid - 1, notes);
+        var right = await ExtractRangeAsync(name, pages, mid, last, notes);
+        return [.. left, .. right];
+    }
+}
+
+// Phase 1: warm the cache in parallel — one Opus call per brochure takes minutes, and
+// the merge below needs every result before it can resolve cross-brochure relations.
+// A failing document is reported, not fatal: everything else still lands.
+var failures = new Dictionary<string, string>();
+if (!dryRun)
+{
+    var docs = pdfs.Select(pdf => (Name: Path.GetFileName(pdf), Pages: PdfText.Pages(pdf))).ToList();
+    Console.WriteLine($"{docs.Count} brochures, up to {parallel} in parallel; paid API calls {(allowApi ? "ENABLED (--allow-api)" : "disabled — cache only")}");
+    await Parallel.ForEachAsync(docs, new ParallelOptions { MaxDegreeOfParallelism = parallel }, async (doc, _) =>
+    {
+        var started = Environment.TickCount64;
+        try
+        {
+            var products = await ExtractRangeAsync(doc.Name, doc.Pages, 0, doc.Pages.Count - 1, []);
+            var seconds = (Environment.TickCount64 - started) / 1000;
+            Console.WriteLine($"   {doc.Name}: {products.Count} products {(seconds < 2 ? "(cached)" : $"in {seconds} s")}");
+        }
+        catch (Exception ex)
+        {
+            // Keep the provider's detail (API error bodies live in inner exceptions/ToString).
+            var detail = string.Join(" | ", ex.ToString().Split('\n').Select(l => l.Trim()).Where(l => l.Length > 0).Take(4));
+            lock (failures) failures[doc.Name] = detail;
+            Console.WriteLine($"   FAILED {doc.Name}: {detail}");
+        }
+    });
+}
+
+// Phase 2: verify, merge, prune, validate — sequential over cached results.
 foreach (var pdf in pdfs)
 {
     var name = Path.GetFileName(pdf);
@@ -73,26 +191,17 @@ foreach (var pdf in pdfs)
     var text = PdfText.Join(pages);
     Console.WriteLine($"→ {name}: {pages.Count} pages, {text.Length:N0} chars");
     if (dryRun) continue;
+    if (failures.TryGetValue(name, out var failure))
+    {
+        report.AppendLine($"{name}: FAILED — {failure}");
+        continue;
+    }
 
-    var hash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(PromptVersion + "\n" + text)))[..24];
-    var cachePath = Path.Combine(cacheDir, hash + ".json");
-    ExtractedCatalog catalog;
-    if (File.Exists(cachePath))
-    {
-        catalog = JsonDefaults.Deserialize<ExtractedCatalog>(File.ReadAllText(cachePath));
-        Console.WriteLine("     cached");
-    }
-    else
-    {
-        var conversation = new LlmConversation(
-            Prompts.System(vendor),
-            [LlmMessage.User($"DOCUMENT FILE: {name}\nVENDOR: {vendor}\n\n{text}")]);
-        catalog = await llm.CompleteJsonAsync<ExtractedCatalog>(LlmRole.Drafter, conversation);
-        File.WriteAllText(cachePath, JsonDefaults.Serialize(catalog));
-    }
+    var notes = new List<string>();
+    var products = await ExtractRangeAsync(name, pages, 0, pages.Count - 1, notes);
 
     var kept = 0;
-    foreach (var product in catalog.Products)
+    foreach (var product in products)
     {
         if (!Verifier.AppearsIn(product.ModelCode, text))
         {
@@ -101,15 +210,19 @@ foreach (var pdf in pdfs)
             continue;
         }
         kept++;
-        if (merged.TryGetValue(product.ModelCode, out var existing))
+        var sku = FinalSku(product);
+        if (!localSkus.TryGetValue(name, out var local))
+            localSkus[name] = local = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        local[product.ModelCode] = sku;
+        if (merged.TryGetValue(sku, out var existing))
             existing.Absorb(product, name);
         else
-            merged[product.ModelCode] = new MergedProduct(product, name);
+            merged[sku] = new MergedProduct(sku, product, name);
     }
-    Console.WriteLine($"     {kept} products kept ({catalog.Products.Count - kept} dropped); kinds: " +
-                      string.Join(", ", catalog.Products.GroupBy(p => p.Kind).Select(g => $"{g.Key}={g.Count()}")));
-    report.AppendLine($"{name}: {kept} kept / {catalog.Products.Count - kept} dropped");
-    foreach (var note in catalog.Notes) report.AppendLine($"  note: {note}");
+    Console.WriteLine($"     {kept} products kept ({products.Count - kept} dropped); kinds: " +
+                      string.Join(", ", products.GroupBy(p => p.Kind).Select(g => $"{g.Key}={g.Count()}")));
+    report.AppendLine($"{name}: {kept} kept / {products.Count - kept} dropped");
+    foreach (var note in notes) report.AppendLine($"  note: {note}");
 }
 
 if (dryRun) return 0;
@@ -117,21 +230,38 @@ if (dryRun) return 0;
 // Relations may only point at products that exist after merging (the pipeline rejects the rest).
 var prunedRelations = 0;
 var rows = new List<RawProduct>();
-foreach (var item in merged.Values.OrderBy(m => m.Product.CategoryPath, StringComparer.Ordinal).ThenBy(m => m.Product.ModelCode, StringComparer.Ordinal))
+foreach (var item in merged.Values.OrderBy(m => m.Product.CategoryPath, StringComparer.Ordinal).ThenBy(m => m.Sku, StringComparer.Ordinal))
 {
     var relations = new List<RawRelation>();
-    foreach (var relation in item.Relations)
+    foreach (var (relation, doc) in item.Relations)
     {
-        if (!merged.ContainsKey(relation.TargetModelCode) || relation.TargetModelCode.Equals(item.Product.ModelCode, StringComparison.OrdinalIgnoreCase))
+        // Targets are printed codes: resolve through the brochure that printed them first
+        // (options qualified per host), then globally (part numbers are unique).
+        var printed = relation.TargetModelCode.Trim();
+        var target = localSkus.TryGetValue(doc, out var local) && local.TryGetValue(printed, out var mapped) ? mapped
+            : merged.TryGetValue(printed, out var global) ? global.Sku
+            : null;
+        if (target is null || target.Equals(item.Sku, StringComparison.OrdinalIgnoreCase))
         {
             prunedRelations++;
-            report.AppendLine($"  PRUNE {item.Product.ModelCode}: {relation.Kind} → '{relation.TargetModelCode}' (not extracted)");
+            report.AppendLine($"  PRUNE {item.Sku}: {relation.Kind} → '{printed}' (not extracted)");
             continue;
         }
-        if (relations.Any(r => r.Kind == relation.Kind && r.TargetSku.Equals(relation.TargetModelCode, StringComparison.OrdinalIgnoreCase))) continue;
-        relations.Add(new RawRelation(relation.Kind, merged[relation.TargetModelCode].Product.ModelCode, relation.Note));
+        if (relations.Any(r => r.Kind == relation.Kind && r.TargetSku.Equals(target, StringComparison.OrdinalIgnoreCase))) continue;
+        relations.Add(new RawRelation(relation.Kind, target, relation.Note));
     }
-    rows.Add(item.ToRaw(vendor, relations));
+
+    // Dependents the extractor filed under Övrigt take their host's family instead.
+    var category = item.Product.CategoryPath.Trim();
+    if (category.StartsWith("Övrigt", StringComparison.OrdinalIgnoreCase) && item.Product.Kind != "instrument")
+    {
+        var hostCategory = relations
+            .Select(r => merged[r.TargetSku].Product.CategoryPath.Trim())
+            .FirstOrDefault(c => c.Contains('>') && !c.StartsWith("Övrigt", StringComparison.OrdinalIgnoreCase));
+        if (hostCategory is not null)
+            category = $"{hostCategory.Split('>')[0].Trim()} > {(item.Product.Kind == "software" ? "Programvara" : "Tillbehör och optioner")}";
+    }
+    rows.Add(item.ToRaw(vendor, relations, category));
 }
 
 var errors = PackAssembler.Validate(rows);
@@ -146,6 +276,7 @@ summary.AppendLine("families: " + string.Join("; ", rows.GroupBy(r => r.Category
 summary.AppendLine($"tokens: in={totalIn} cached={totalCached} out={totalOut} ≈ ${cost:F2} (Opus list prices)");
 summary.AppendLine(errors.Count == 0 ? "validation: OK" : $"validation: {errors.Count} errors");
 foreach (var error in errors) summary.AppendLine($"  - {error}");
+if (failures.Count > 0) summary.AppendLine($"FAILED documents: {failures.Count} — {string.Join("; ", failures.Keys)}");
 report.AppendLine();
 report.Append(summary);
 File.WriteAllText(outPath + ".report.txt", report.ToString());
@@ -153,18 +284,20 @@ File.WriteAllText(outPath + ".report.txt", report.ToString());
 Console.WriteLine();
 Console.Write(summary);
 Console.WriteLine($"Wrote {outPath} and {outPath}.report.txt");
-return errors.Count == 0 ? 0 : 1;
+return errors.Count == 0 && failures.Count == 0 ? 0 : 1;
 
 /// <summary>One product across every brochure that mentions it: longest description wins; relations, aliases and doc refs union.</summary>
 sealed class MergedProduct
 {
+    public string Sku { get; }
     public ExtractedProduct Product { get; private set; }
-    public List<ExtractedRelation> Relations { get; } = [];
+    public List<(ExtractedRelation Relation, string Doc)> Relations { get; } = [];
     public HashSet<string> Aliases { get; } = new(StringComparer.OrdinalIgnoreCase);
     public List<string> DocRefs { get; } = [];
 
-    public MergedProduct(ExtractedProduct product, string docRef)
+    public MergedProduct(string sku, ExtractedProduct product, string docRef)
     {
+        Sku = sku;
         Product = product;
         Absorb(product, docRef);
     }
@@ -172,26 +305,32 @@ sealed class MergedProduct
     public void Absorb(ExtractedProduct other, string docRef)
     {
         if (other.Description.Length > Product.Description.Length) Product = other;
-        Relations.AddRange(other.Relations);
+        Relations.AddRange(other.Relations.Select(r => (r, docRef)));
         foreach (var alias in other.Aliases) Aliases.Add(alias);
         if (!DocRefs.Contains(docRef)) DocRefs.Add(docRef);
     }
 
-    public RawProduct ToRaw(string vendor, List<RawRelation> relations)
+    public RawProduct ToRaw(string vendor, List<RawRelation> relations, string category)
     {
         var attributes = new Dictionary<string, string> { ["kind"] = Product.Kind, ["vendor"] = vendor };
         foreach (var attribute in Product.Attributes)
             if (!string.IsNullOrWhiteSpace(attribute.Key) && !attributes.ContainsKey(attribute.Key.Trim()))
                 attributes[attribute.Key.Trim()] = attribute.Value.Trim();
 
-        var category = Product.CategoryPath.Contains('>') ? Product.CategoryPath.Trim() : $"Övrigt > {Product.CategoryPath.Trim()}";
+        if (!category.Contains('>')) category = $"Övrigt > {category}";
         var aliases = Aliases
-            .Where(a => !a.Equals(Product.ModelCode, StringComparison.OrdinalIgnoreCase) && !a.Equals(Product.Name, StringComparison.OrdinalIgnoreCase))
+            .Where(a => !a.Equals(Sku, StringComparison.OrdinalIgnoreCase) && !a.Equals(Product.Name, StringComparison.OrdinalIgnoreCase))
             .ToList();
+        // A qualified option keeps its printed code as a spoken alias ("G7" for WT5000/G7).
+        if (!Sku.Equals(Product.ModelCode, StringComparison.OrdinalIgnoreCase))
+        {
+            var bare = Product.ModelCode.TrimStart('/', '-');
+            if (bare.Length > 0 && !aliases.Contains(bare, StringComparer.OrdinalIgnoreCase)) aliases.Add(bare);
+        }
 
         return new RawProduct(
-            ExternalId: $"{vendor.ToLowerInvariant()}:{Product.ModelCode}",
-            Sku: Product.ModelCode,
+            ExternalId: $"{vendor.ToLowerInvariant()}:{Sku}",
+            Sku: Sku,
             Name: Product.Name,
             CategoryPathRaw: category,
             DescriptionRaw: string.IsNullOrWhiteSpace(Product.Description) ? Product.Name : Product.Description.Trim(),
@@ -229,7 +368,12 @@ static class Prompts
         - Mätinstrument > Elkvalitetsanalysatorer
         - Mätinstrument > Tillbehör och optioner
         - Källor > Source measure units
+        - Källor > Programvara
         - Källor > Tillbehör och optioner
+        - Nätverkstest > Ethernet-testare
+        - Nätverkstest > Tillbehör och optioner
+        - Kalibrering > Programvara
+        - Mätinstrument > Programvara
         """;
 
     public static string System(string vendor) => $$"""

@@ -8,6 +8,9 @@ using SysType = System.Type;
 
 namespace SalesSupport.Providers.Claude;
 
+/// <summary>The model hit MaxTokens mid-output — callers that can split their input (DocExtract) catch this specifically.</summary>
+public sealed class LlmOutputTruncatedException(string message) : InvalidOperationException(message);
+
 /// <summary>
 /// ILlmProvider over the Claude API (D14). Output shape is enforced with structured
 /// outputs — the JSON schema is derived from T via JsonSchemaFactory, so the model
@@ -58,7 +61,7 @@ public sealed class ClaudeLlmProvider(ClaudeProviderOptions? options = null) : I
         if (response.StopReason == "refusal")
             throw new InvalidOperationException($"Claude declined the {role} request (stop_reason=refusal).");
         if (response.StopReason == "max_tokens")
-            throw new InvalidOperationException($"{role} response was truncated at {config.MaxTokens} tokens — raise MaxTokens for this role.");
+            throw new LlmOutputTruncatedException($"{role} response was truncated at {config.MaxTokens} tokens — raise MaxTokens for this role or split the input.");
 
         var text = response.Content.Select(b => b.Value).OfType<TextBlock>().FirstOrDefault()?.Text
             ?? throw new InvalidOperationException($"{role} response contained no text block.");

@@ -83,8 +83,13 @@ dotnet run --project tools/SalesSupport.DocExtract -- --input testdata/Yokogawa 
 dotnet run --project src/SalesSupport.Pipeline -- --input samples/catalog/testpower-yokogawa.canonical.jsonl --company testpower
 ```
 
-Raw responses are cached per document content hash under `testdata/.extract-cache`, so
-re-runs only pay for changed brochures (new editions) or a bumped prompt version. The
+**No paid calls by default.** The tool only merges what is in `testdata/.extract-cache`
+(one JSON per document content hash); missing brochures are reported, not fetched. Cache
+files can be authored in a Claude Code session on the subscription — the zero-cost
+development-time path (D27/D33). `--allow-api` enables Opus calls for uncached brochures
+and is meant for an explicit, cost-stated go-ahead; re-runs then only pay for changed
+brochures (new editions) or a bumped prompt version. Option codes are qualified by host
+(`WT5000/G7`) because the same code means different things on different instruments. The
 `.report.txt` beside the output lists dropped codes, pruned relations, per-family
 counts, the extractor's own notes, and token cost. Prices and availability are never
 extracted from documents — they stay null until a structured price list is merged by
