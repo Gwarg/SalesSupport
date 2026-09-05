@@ -102,6 +102,8 @@ Each decision is numbered for reference in future discussions. Rationale is reco
 
 - **D34 (2026-09-05) — The written half of the call is a chat, kept with the record.** Typed asks (D15) are a conversation with the assistant, and the first Test Power demo showed why one overwriting answer bubble is not enough: the rep wants to scroll back. Zone 4 becomes a scrollable chat thread directly above the input — each typed question appears at once, its answer fills in when ready — while zones 1–3 stay glanceable (this amends the "no chat thread" wording of D10 for zone 4 only). The exchanges are also shown in the transcript log (replay review) and listed post-call, and are stored with the interaction as `asks` (D17 already covered typed queries; now the answers too).
 
+- **D35 (2026-09-05) — Themes are first-class; "dark control room" is the first.** The panel's visual vocabulary (colors, type, radii, spacing, the fresh/asked/objection states) lives in a theme dictionary, never inline in views: WPF ResourceDictionaries per theme resolved through DynamicResource keys, switchable at runtime and per installation (a customer's brand becomes a theme file, not a fork). The first theme is the dark "control room" direction chosen on the design canvas 2026-09-05 (dark ground, mono readouts, a glow on whatever just changed, numbered zones — in the spirit of the instruments Test Power sells); the current warm-light look becomes the second theme when the port lands. Fonts: the canvas uses Space Grotesk + IBM Plex Mono (open licenses, embeddable); the port ships them as resources rather than depending on system fonts.
+
 ## 3. Runtime architecture
 
 ### Audio path (per call)
