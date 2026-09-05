@@ -363,12 +363,28 @@ public sealed class MainViewModel : ViewModelBase
         foreach (var id in stats.QuestionsAddressed)
         {
             var question = Questions.FirstOrDefault(q => q.Id == id);
-            if (question is not null) question.Asked = true;
+            if (question is null) continue;
+            question.Asked = true;
+            _ = RemoveAskedLaterAsync(question);
         }
         var queue = stats.QueueMs > 500 ? $"kö {stats.QueueMs / 1000.0:F1}s + " : "";
         LastTiming = stats.AdvisorRan
             ? $"{queue}gate {stats.GateMs / 1000.0:F1}s + advisor {stats.AdvisorMs / 1000.0:F1}s"
             : $"{queue}gate {stats.GateMs / 1000.0:F1}s";
+    }
+
+    /// <summary>
+    /// A struck-through question is a brief "heard you ask that", not a checklist entry:
+    /// it leaves after a few seconds even when no advisor reconcile follows (late in a
+    /// call the advisor can stay quiet for many turns).
+    /// </summary>
+    private async Task RemoveAskedLaterAsync(QuestionVm question)
+    {
+        await Task.Delay(TimeSpan.FromSeconds(8));
+        UI(() =>
+        {
+            if (question.Asked && Questions.Contains(question)) Questions.Remove(question);
+        });
     }
 
     private void ShowSummary(SummaryResult summary)

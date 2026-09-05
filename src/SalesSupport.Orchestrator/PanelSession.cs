@@ -53,8 +53,11 @@ public sealed class PanelSession
             }
         }
 
+        // Asked questions leave the panel here too: they were struck through on the client
+        // when the gate detected them, and this is the client's cue to drop them (their
+        // text stays in AskedHistory so they are never re-suggested).
         var removedQ = _questions
-            .Where(q => q.Status == PanelItemStatus.Active && !desiredQIds.Contains(q.Id))
+            .Where(q => (q.Status == PanelItemStatus.Active && !desiredQIds.Contains(q.Id)) || q.Status == PanelItemStatus.Asked)
             .Select(q => q.Id)
             .ToList();
         _questions.RemoveAll(q => removedQ.Contains(q.Id));
