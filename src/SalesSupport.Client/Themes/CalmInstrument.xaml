@@ -1,0 +1,49 @@
+<!--
+  Theme "Calm instrument" (D35): the warm-light direction A from the design canvas,
+  which is also the panel's look before the theme port. Same keys as ControlRoom.xaml.
+-->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=System.Runtime"
+                    xmlns:po="http://schemas.microsoft.com/winfx/2006/xaml/presentation/options"
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                    mc:Ignorable="po">
+
+    <sys:String x:Key="Theme.Name">Calm instrument</sys:String>
+    <sys:Boolean x:Key="Theme.DarkChrome">False</sys:Boolean>
+
+    <SolidColorBrush x:Key="Theme.Ground" Color="#FAF8F3"/>
+    <SolidColorBrush x:Key="Theme.Surface" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="Theme.Card" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="Theme.Border" Color="#E3E1DA"/>
+    <SolidColorBrush x:Key="Theme.BorderStrong" Color="#CFCCC2"/>
+
+    <SolidColorBrush x:Key="Theme.Text" Color="#1F1F1C"/>
+    <SolidColorBrush x:Key="Theme.TextSoft" Color="#3D3D3A"/>
+    <SolidColorBrush x:Key="Theme.TextMuted" Color="#6B6A66"/>
+    <SolidColorBrush x:Key="Theme.TextDim" Color="#9A9891"/>
+
+    <Color x:Key="Theme.AccentColor">#1D5FA6</Color>
+    <SolidColorBrush x:Key="Theme.Accent" Color="#1D5FA6"/>
+    <SolidColorBrush x:Key="Theme.AccentBg" Color="#E6F1FB"/>
+    <SolidColorBrush x:Key="Theme.AccentBorder" Color="#C5DCF3"/>
+    <SolidColorBrush x:Key="Theme.OnAccent" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="Theme.Selection" Color="#B9D3EE"/>
+
+    <SolidColorBrush x:Key="Theme.Warn" Color="#854F0B"/>
+    <SolidColorBrush x:Key="Theme.WarnBg" Color="#FAEEDA"/>
+    <SolidColorBrush x:Key="Theme.WarnBorder" Color="#EFD9AE"/>
+    <SolidColorBrush x:Key="Theme.Danger" Color="#A32D2D"/>
+    <SolidColorBrush x:Key="Theme.Answer" Color="#3B6D11"/>
+
+    <FontFamily x:Key="Theme.FontUi">IBM Plex Sans, Segoe UI</FontFamily>
+    <FontFamily x:Key="Theme.FontMono">IBM Plex Mono, Cascadia Code, Consolas</FontFamily>
+
+    <CornerRadius x:Key="Theme.CardRadius">6</CornerRadius>
+    <CornerRadius x:Key="Theme.ChipRadius">9</CornerRadius>
+    <CornerRadius x:Key="Theme.BubbleRadius">8</CornerRadius>
+    <CornerRadius x:Key="Theme.ControlRadius">4</CornerRadius>
+
+    <DropShadowEffect x:Key="Theme.FreshGlow" po:Freeze="True" Color="#1D5FA6" BlurRadius="12" ShadowDepth="0" Opacity="0.3"/>
+    <DropShadowEffect x:Key="Theme.DotGlow" po:Freeze="True" Color="#1D5FA6" BlurRadius="6" ShadowDepth="0" Opacity="0.6"/>
+</ResourceDictionary>

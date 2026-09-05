@@ -3,36 +3,13 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:SalesSupport.Client"
         Title="SalesSupport" Width="384" Height="720" MinWidth="340"
-        Topmost="True" Background="#FAF9F5">
-    <Window.Resources>
-        <SolidColorBrush x:Key="Accent" Color="#185FA5"/>
-        <SolidColorBrush x:Key="AccentBg" Color="#E6F1FB"/>
-        <SolidColorBrush x:Key="WarnBg" Color="#FAEEDA"/>
-        <SolidColorBrush x:Key="WarnFg" Color="#854F0B"/>
-        <SolidColorBrush x:Key="Muted" Color="#6B6A66"/>
-        <SolidColorBrush x:Key="Hairline" Color="#E3E1DA"/>
-        <Style x:Key="ZoneLabel" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="11"/>
-            <Setter Property="Foreground" Value="{StaticResource Muted}"/>
-            <Setter Property="Margin" Value="0,10,0,6"/>
-        </Style>
-        <Style x:Key="Card" TargetType="Border">
-            <Setter Property="Background" Value="White"/>
-            <Setter Property="BorderBrush" Value="{StaticResource Hairline}"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="CornerRadius" Value="6"/>
-            <Setter Property="Padding" Value="10,8"/>
-            <Setter Property="Margin" Value="0,0,0,6"/>
-        </Style>
-        <Style x:Key="Chip" TargetType="Border">
-            <Setter Property="CornerRadius" Value="9"/>
-            <Setter Property="Padding" Value="8,2"/>
-            <Setter Property="Margin" Value="0,0,6,4"/>
-            <Setter Property="Background" Value="#F1EFE8"/>
-        </Style>
-    </Window.Resources>
+        Topmost="True"
+        Background="{DynamicResource Theme.Ground}" Foreground="{DynamicResource Theme.Text}"
+        FontFamily="{DynamicResource Theme.FontUi}" FontSize="13"
+        TextOptions.TextFormattingMode="Display" UseLayoutRounding="True" SnapsToDevicePixels="True">
+    <!-- Every color, font and radius comes from the active theme (D35); nothing visual is inline. -->
+    <Grid Margin="14,12">
 
-    <Grid Margin="12">
         <!-- ============ PRE-CALL ============ -->
         <StackPanel>
             <StackPanel.Style>
@@ -45,8 +22,11 @@
                     </Style.Triggers>
                 </Style>
             </StackPanel.Style>
-            <TextBlock Text="Nytt samtal" FontSize="18" FontWeight="Medium" Margin="0,4,0,12"/>
-            <Border Padding="10,8" CornerRadius="6" Margin="0,0,0,6" Background="{StaticResource AccentBg}">
+            <TextBlock Text="Nytt samtal" Style="{StaticResource Title}" Margin="0,2,0,10"/>
+
+            <!-- incoming call (D32) -->
+            <Border Background="{DynamicResource Theme.AccentBg}" BorderBrush="{DynamicResource Theme.AccentBorder}" BorderThickness="1"
+                    CornerRadius="{DynamicResource Theme.CardRadius}" Padding="10,8" Margin="0,0,0,4" Effect="{DynamicResource Theme.FreshGlow}">
                 <Border.Style>
                     <Style TargetType="Border">
                         <Style.Triggers>
@@ -56,12 +36,32 @@
                         </Style.Triggers>
                     </Style>
                 </Border.Style>
-                <TextBlock Text="{Binding IncomingBanner}" Foreground="{StaticResource Accent}" FontWeight="Medium" TextWrapping="Wrap"/>
+                <DockPanel>
+                    <Path DockPanel.Dock="Left" Style="{StaticResource Icon}" Data="{StaticResource Icon.Phone}" Stroke="{DynamicResource Theme.Accent}"
+                          Width="15" Height="15" Margin="0,2,9,0" VerticalAlignment="Top"/>
+                    <StackPanel>
+                        <TextBlock Text="{Binding IncomingBanner}" Foreground="{DynamicResource Theme.Accent}" FontWeight="SemiBold" TextWrapping="Wrap"/>
+                        <TextBlock Text="{Binding IncomingDetail}" TextWrapping="Wrap" Margin="0,2,0,0">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock" BasedOn="{StaticResource Readout}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IncomingDetail}" Value="">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </StackPanel>
+                </DockPanel>
             </Border>
-            <TextBlock Text="Backend" Style="{StaticResource ZoneLabel}"/>
-            <TextBox Text="{Binding BackendUrl, UpdateSourceTrigger=PropertyChanged}"/>
-            <TextBlock Text="Källa" Style="{StaticResource ZoneLabel}"/>
-            <ComboBox ItemsSource="{Binding Sources}" SelectedItem="{Binding SelectedSource}" Width="120" HorizontalAlignment="Left"/>
+
+            <TextBlock Text="BACKEND" Style="{StaticResource ZoneLabel}"/>
+            <TextBox Text="{Binding BackendUrl, UpdateSourceTrigger=PropertyChanged}" FontFamily="{DynamicResource Theme.FontMono}"/>
+
+            <TextBlock Text="KÄLLA" Style="{StaticResource ZoneLabel}"/>
+            <ListBox Style="{StaticResource Segmented}" ItemsSource="{Binding Sources}" SelectedItem="{Binding SelectedSource}"/>
+
             <StackPanel>
                 <StackPanel.Style>
                     <Style TargetType="StackPanel">
@@ -72,9 +72,9 @@
                         </Style.Triggers>
                     </Style>
                 </StackPanel.Style>
-                <TextBlock Text="Mikrofon (du)" Style="{StaticResource ZoneLabel}"/>
+                <TextBlock Text="MIKROFON (DU)" Style="{StaticResource ZoneLabel}"/>
                 <ComboBox ItemsSource="{Binding Microphones}" SelectedItem="{Binding SelectedMicrophone}" DisplayMemberPath="Name"/>
-                <TextBlock Text="Högtalare (kunden, loopback)" Style="{StaticResource ZoneLabel}"/>
+                <TextBlock Text="HÖGTALARE (KUNDEN, LOOPBACK)" Style="{StaticResource ZoneLabel}"/>
                 <ComboBox ItemsSource="{Binding Speakers}" SelectedItem="{Binding SelectedSpeaker}" DisplayMemberPath="Name"/>
             </StackPanel>
             <StackPanel>
@@ -88,21 +88,38 @@
                         </Style.Triggers>
                     </Style>
                 </StackPanel.Style>
-                <TextBlock Text="Samtal att spela upp" Style="{StaticResource ZoneLabel}"/>
+                <TextBlock Text="SAMTAL ATT SPELA UPP" Style="{StaticResource ZoneLabel}"/>
                 <ComboBox ItemsSource="{Binding ReplaySamples}" SelectedItem="{Binding SelectedSample}"/>
             </StackPanel>
-            <TextBlock Text="Språk" Style="{StaticResource ZoneLabel}"/>
-            <ComboBox ItemsSource="{Binding Languages}" SelectedItem="{Binding SelectedLanguage}" Width="80" HorizontalAlignment="Left"/>
-            <TextBlock Text="Kund (valfritt)" Style="{StaticResource ZoneLabel}"/>
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="SPRÅK" Style="{StaticResource ZoneLabel}"/>
+                    <ComboBox ItemsSource="{Binding Languages}" SelectedItem="{Binding SelectedLanguage}"/>
+                </StackPanel>
+                <StackPanel Grid.Column="2">
+                    <TextBlock Text="TEMA" Style="{StaticResource ZoneLabel}"/>
+                    <ComboBox ItemsSource="{Binding Themes}" SelectedItem="{Binding SelectedTheme}"/>
+                </StackPanel>
+            </Grid>
+
+            <TextBlock Text="KUND" Style="{StaticResource ZoneLabel}"/>
             <TextBox Text="{Binding CustomerCompany, UpdateSourceTrigger=PropertyChanged}"/>
-            <TextBlock Text="Mål med samtalet (valfritt)" Style="{StaticResource ZoneLabel}"/>
-            <TextBox Text="{Binding Goal, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" Height="48" TextWrapping="Wrap"/>
-            <Button Content="Starta samtal" Command="{Binding StartCommand}" Margin="0,14,0,0" Padding="0,8"
-                    Background="{StaticResource Accent}" Foreground="White" BorderThickness="0" FontWeight="Medium"/>
-            <TextBlock Text="{Binding StatusText}" Foreground="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,8,0,0"/>
-            <TextBlock Text="Inkommande samtal — klistra in som Telavox Personal Webhook (ringing)" Style="{StaticResource ZoneLabel}"/>
-            <TextBox Text="{Binding WebhookHint, Mode=OneWay}" IsReadOnly="True" FontSize="10" Foreground="{StaticResource Muted}"
-                     TextWrapping="Wrap" BorderThickness="0" Background="Transparent"/>
+            <TextBlock Text="MÅL MED SAMTALET" Style="{StaticResource ZoneLabel}"/>
+            <TextBox Text="{Binding Goal, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" Height="52" TextWrapping="Wrap"
+                     VerticalContentAlignment="Top" VerticalScrollBarVisibility="Auto"/>
+
+            <Button Content="Starta samtal" Style="{StaticResource PrimaryButton}" Command="{Binding StartCommand}" Margin="0,14,0,0"/>
+            <TextBlock Text="{Binding StatusText}" Foreground="{DynamicResource Theme.TextMuted}" FontSize="12" TextWrapping="Wrap" Margin="0,8,0,0"/>
+
+            <TextBlock Text="TELAVOX-WEBHOOK (RINGING)" Style="{StaticResource ZoneLabel}"/>
+            <TextBox Text="{Binding WebhookHint, Mode=OneWay}" IsReadOnly="True" FontFamily="{DynamicResource Theme.FontMono}" FontSize="10"
+                     Foreground="{DynamicResource Theme.TextDim}" TextWrapping="Wrap" BorderThickness="0" Background="Transparent" Padding="0"/>
         </StackPanel>
 
         <!-- ============ LIVE ============ -->
@@ -124,46 +141,50 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <!-- status strip -->
-            <DockPanel Grid.Row="0" Margin="0,0,0,4">
-                <Button DockPanel.Dock="Right" Content="Avsluta" Command="{Binding EndCommand}"
-                        Padding="10,4" Background="Transparent" BorderBrush="#A32D2D" Foreground="#A32D2D">
-                    <Button.Style>
-                        <Style TargetType="Button">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsEnding}" Value="True">
-                                    <Setter Property="IsEnabled" Value="False"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Button.Style>
-                </Button>
-                <Button DockPanel.Dock="Right" Content="Logg" Click="ToggleTranscript" Padding="8,4" Margin="0,0,6,0"
-                        Background="Transparent" BorderBrush="{StaticResource Hairline}" Foreground="{StaticResource Muted}"/>
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <Ellipse Width="9" Height="9" Margin="0,0,6,0">
-                        <Ellipse.Style>
-                            <Style TargetType="Ellipse">
-                                <Setter Property="Fill" Value="#3B6D11"/>
+            <!-- status strip: live dot, clock, meters, timing readout, Logg / Avsluta -->
+            <Border Grid.Row="0" BorderBrush="{DynamicResource Theme.Border}" BorderThickness="0,0,0,1" Padding="0,0,0,8" Margin="0,0,0,4">
+                <DockPanel>
+                    <Button DockPanel.Dock="Right" Content="Avsluta" Command="{Binding EndCommand}" Padding="9,4">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource DangerButton}">
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding IsThinking}" Value="True">
-                                        <Setter Property="Fill" Value="{StaticResource Accent}"/>
+                                    <DataTrigger Binding="{Binding IsEnding}" Value="True">
+                                        <Setter Property="IsEnabled" Value="False"/>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
-                        </Ellipse.Style>
-                    </Ellipse>
-                    <TextBlock Text="{Binding Duration}" Foreground="{StaticResource Muted}" FontSize="12" Margin="0,0,10,0"/>
-                    <TextBlock Text="mic" FontSize="10" Foreground="{StaticResource Muted}" VerticalAlignment="Center"/>
-                    <ProgressBar Width="38" Height="4" Margin="4,0,8,0" Maximum="100" Value="{Binding MicLevel, Mode=OneWay}"/>
-                    <TextBlock Text="spk" FontSize="10" Foreground="{StaticResource Muted}" VerticalAlignment="Center"/>
-                    <ProgressBar Width="38" Height="4" Margin="4,0,8,0" Maximum="100" Value="{Binding SpeakerLevel, Mode=OneWay}"/>
-                    <TextBlock Text="{Binding LastTiming}" FontSize="10" Foreground="{StaticResource Muted}" VerticalAlignment="Center"/>
-                </StackPanel>
-            </DockPanel>
+                        </Button.Style>
+                    </Button>
+                    <Button DockPanel.Dock="Right" Content="Logg" Style="{StaticResource QuietButton}" Click="ToggleTranscript" Padding="9,4" Margin="0,0,6,0"/>
+                    <DockPanel VerticalAlignment="Center" Margin="0,0,8,0">
+                        <Ellipse DockPanel.Dock="Left" Width="8" Height="8" Margin="0,0,8,0" VerticalAlignment="Center">
+                            <Ellipse.Style>
+                                <Style TargetType="Ellipse">
+                                    <Setter Property="Fill" Value="{DynamicResource Theme.Answer}"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsThinking}" Value="True">
+                                            <Setter Property="Fill" Value="{DynamicResource Theme.Accent}"/>
+                                            <Setter Property="Effect" Value="{DynamicResource Theme.DotGlow}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Ellipse.Style>
+                        </Ellipse>
+                        <TextBlock DockPanel.Dock="Left" Text="{Binding Duration}" Style="{StaticResource Readout}" Foreground="{DynamicResource Theme.Text}" Margin="0,0,10,0"/>
+                        <TextBlock DockPanel.Dock="Left" Text="MIC" Style="{StaticResource Readout}" FontSize="10" Margin="0,0,4,0"/>
+                        <local:LevelMeter DockPanel.Dock="Left" Level="{Binding MicLevel}" OnBrush="{DynamicResource Theme.Accent}" OffBrush="{DynamicResource Theme.Border}"
+                                          VerticalAlignment="Center" Margin="0,0,8,0"/>
+                        <TextBlock DockPanel.Dock="Left" Text="SPK" Style="{StaticResource Readout}" FontSize="10" Margin="0,0,4,0"/>
+                        <local:LevelMeter DockPanel.Dock="Left" Level="{Binding SpeakerLevel}" OnBrush="{DynamicResource Theme.Accent}" OffBrush="{DynamicResource Theme.Border}"
+                                          VerticalAlignment="Center" Margin="0,0,8,0"/>
+                        <TextBlock Text="{Binding LastTiming}" Style="{StaticResource Readout}" FontSize="10" TextTrimming="CharacterEllipsis"/>
+                    </DockPanel>
+                </DockPanel>
+            </Border>
 
+            <!-- notices -->
             <StackPanel Grid.Row="1">
-                <TextBlock Text="{Binding ErrorBanner}" Foreground="#A32D2D" TextWrapping="Wrap">
+                <TextBlock Text="{Binding ErrorBanner}" Foreground="{DynamicResource Theme.Danger}" FontSize="12" TextWrapping="Wrap" Margin="0,2,0,2">
                     <TextBlock.Style>
                         <Style TargetType="TextBlock">
                             <Style.Triggers>
@@ -174,7 +195,7 @@
                         </Style>
                     </TextBlock.Style>
                 </TextBlock>
-                <TextBlock Text="{Binding IncomingBanner}" Foreground="{StaticResource Accent}" FontWeight="Medium" TextWrapping="Wrap">
+                <TextBlock Text="{Binding IncomingBanner}" Foreground="{DynamicResource Theme.Accent}" FontWeight="SemiBold" FontSize="12" TextWrapping="Wrap" Margin="0,2,0,2">
                     <TextBlock.Style>
                         <Style TargetType="TextBlock">
                             <Style.Triggers>
@@ -185,7 +206,7 @@
                         </Style>
                     </TextBlock.Style>
                 </TextBlock>
-                <TextBlock Text="{Binding EndingNotice}" Foreground="{StaticResource Accent}" TextWrapping="Wrap">
+                <TextBlock Text="{Binding EndingNotice}" Foreground="{DynamicResource Theme.Accent}" FontSize="12" TextWrapping="Wrap" Margin="0,2,0,2">
                     <TextBlock.Style>
                         <Style TargetType="TextBlock">
                             <Style.Triggers>
@@ -198,65 +219,93 @@
                 </TextBlock>
             </StackPanel>
 
-            <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+            <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" Margin="0,0,-8,0" Padding="0,0,8,0">
                 <StackPanel>
-                    <TextBlock Text="Att fråga" Style="{StaticResource ZoneLabel}"/>
+                    <!-- 01 questions -->
+                    <TextBlock Text="01 · ATT FRÅGA" Style="{StaticResource ZoneLabel}" Margin="0,4,0,6"/>
                     <ItemsControl ItemsSource="{Binding Questions}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate DataType="{x:Type local:QuestionVm}">
-                                <Border Style="{StaticResource Card}">
-                                    <Border.Resources>
-                                        <Style TargetType="Border" BasedOn="{StaticResource Card}"/>
-                                    </Border.Resources>
-                                    <StackPanel>
+                                <Border>
+                                    <Border.Style>
+                                        <Style TargetType="Border" BasedOn="{StaticResource Card}">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Fresh}" Value="True">
+                                                    <Setter Property="Effect" Value="{DynamicResource Theme.FreshGlow}"/>
+                                                    <Setter Property="BorderBrush" Value="{DynamicResource Theme.AccentBorder}"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Asked}" Value="True">
+                                                    <Setter Property="Background" Value="{DynamicResource Theme.Surface}"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <DockPanel>
+                                        <Path DockPanel.Dock="Left" Style="{StaticResource Icon}" Data="{StaticResource Icon.Check}" Stroke="{DynamicResource Theme.Accent}"
+                                              StrokeThickness="2.4" Margin="0,3,8,0" VerticalAlignment="Top"
+                                              Visibility="{Binding Asked, Converter={StaticResource BoolToVisibility}}"/>
                                         <TextBlock Text="{Binding Text}" TextWrapping="Wrap" FontWeight="Medium">
                                             <TextBlock.Style>
                                                 <Style TargetType="TextBlock">
+                                                    <Setter Property="Foreground" Value="{DynamicResource Theme.Text}"/>
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding Asked}" Value="True">
-                                                            <Setter Property="Opacity" Value="0.45"/>
+                                                            <Setter Property="Foreground" Value="{DynamicResource Theme.TextDim}"/>
                                                             <Setter Property="TextDecorations" Value="Strikethrough"/>
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding Fresh}" Value="True">
-                                                            <Setter Property="Foreground" Value="{StaticResource Accent}"/>
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
                                             </TextBlock.Style>
                                         </TextBlock>
-                                    </StackPanel>
+                                    </DockPanel>
                                 </Border>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
 
-                    <TextBlock Text="Föreslå" Style="{StaticResource ZoneLabel}"/>
+                    <!-- 02 products -->
+                    <TextBlock Text="02 · FÖRESLÅ" Style="{StaticResource ZoneLabel}"/>
                     <ItemsControl ItemsSource="{Binding Products}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate DataType="{x:Type local:ProductVm}">
-                                <Border Style="{StaticResource Card}">
+                                <Border>
+                                    <Border.Style>
+                                        <Style TargetType="Border" BasedOn="{StaticResource Card}">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Fresh}" Value="True">
+                                                    <Setter Property="Effect" Value="{DynamicResource Theme.FreshGlow}"/>
+                                                    <Setter Property="BorderBrush" Value="{DynamicResource Theme.AccentBorder}"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
                                     <StackPanel>
-                                        <TextBlock Text="{Binding Name}" FontWeight="Medium">
-                                            <TextBlock.Style>
-                                                <Style TargetType="TextBlock">
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding Fresh}" Value="True">
-                                                            <Setter Property="Foreground" Value="{StaticResource Accent}"/>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBlock.Style>
-                                        </TextBlock>
-                                        <TextBlock Text="{Binding Why}" TextWrapping="Wrap" FontSize="12" Foreground="{StaticResource Muted}"/>
-                                        <TextBlock Text="{Binding Price}" FontSize="11" Foreground="{StaticResource Muted}"/>
+                                        <DockPanel>
+                                            <TextBlock DockPanel.Dock="Right" Text="{Binding Price}" Style="{StaticResource Readout}" FontSize="10"
+                                                       VerticalAlignment="Top" Margin="8,2,0,0"/>
+                                            <TextBlock Text="{Binding Name}" FontFamily="{DynamicResource Theme.FontMono}" FontWeight="SemiBold" TextWrapping="Wrap">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Foreground" Value="{DynamicResource Theme.Text}"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Fresh}" Value="True">
+                                                                <Setter Property="Foreground" Value="{DynamicResource Theme.Accent}"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </DockPanel>
+                                        <TextBlock Text="{Binding Why}" Style="{StaticResource Body}" Margin="0,3,0,0"/>
                                     </StackPanel>
                                 </Border>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
 
-                    <TextBlock Text="Kundbild" Style="{StaticResource ZoneLabel}"/>
-                    <TextBlock Text="{Binding CompanyLine}" FontWeight="Medium" TextWrapping="Wrap"/>
+                    <!-- 03 customer picture -->
+                    <TextBlock Text="03 · KUNDBILD" Style="{StaticResource ZoneLabel}"/>
+                    <TextBlock Text="{Binding CompanyLine}" FontWeight="SemiBold" TextWrapping="Wrap"/>
                     <ItemsControl ItemsSource="{Binding Threads}" Margin="0,6,0,0">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate>
@@ -268,43 +317,48 @@
                                         <Style TargetType="Border" BasedOn="{StaticResource Chip}">
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding Status}" Value="Open">
-                                                    <Setter Property="Background" Value="{StaticResource AccentBg}"/>
+                                                    <Setter Property="Background" Value="{DynamicResource Theme.AccentBg}"/>
+                                                    <Setter Property="BorderBrush" Value="{DynamicResource Theme.AccentBorder}"/>
+                                                    <Setter Property="TextElement.Foreground" Value="{DynamicResource Theme.Accent}"/>
                                                 </DataTrigger>
                                                 <DataTrigger Binding="{Binding Kind}" Value="Objection">
-                                                    <Setter Property="Background" Value="{StaticResource WarnBg}"/>
+                                                    <Setter Property="Background" Value="{DynamicResource Theme.WarnBg}"/>
+                                                    <Setter Property="BorderBrush" Value="{DynamicResource Theme.WarnBorder}"/>
+                                                    <Setter Property="TextElement.Foreground" Value="{DynamicResource Theme.Warn}"/>
                                                 </DataTrigger>
                                             </Style.Triggers>
                                         </Style>
                                     </Border.Style>
-                                    <TextBlock FontSize="11" Text="{Binding Label}" MaxWidth="200" TextTrimming="CharacterEllipsis"/>
+                                    <TextBlock FontSize="11" Text="{Binding Label}" MaxWidth="220" TextTrimming="CharacterEllipsis"/>
                                 </Border>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
-                    <ItemsControl ItemsSource="{Binding Facts}" Margin="0,4,0,0">
+                    <ItemsControl ItemsSource="{Binding Facts}" Margin="0,2,0,0">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding}" FontSize="12" Foreground="#3D3D3A" TextWrapping="Wrap" Margin="0,1"/>
+                                <TextBlock Text="{Binding}" Style="{StaticResource Body}" Margin="0,1"/>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
                     <ItemsControl ItemsSource="{Binding ActionItems}" Margin="0,4,0,0">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <TextBlock FontSize="12" TextWrapping="Wrap" Margin="0,1">
-                                    <Run Text="☐ "/><Run Text="{Binding Mode=OneWay}"/>
-                                </TextBlock>
+                                <DockPanel Margin="0,2">
+                                    <Path DockPanel.Dock="Left" Style="{StaticResource Icon}" Data="{StaticResource Icon.Box}" Width="12" Height="12"
+                                          StrokeThickness="1.8" Margin="0,3,7,0" VerticalAlignment="Top"/>
+                                    <TextBlock Text="{Binding}" FontSize="12" TextWrapping="Wrap"/>
+                                </DockPanel>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
                 </StackPanel>
             </ScrollViewer>
 
-            <!-- ask lane: the written half of the call as a chat thread above the input (D34) -->
+            <!-- 04 the written half of the call: live partial, the ask thread (D34), the input -->
             <StackPanel Grid.Row="3" Margin="0,6,0,0">
-                <TextBlock Text="{Binding LiveLine}" FontSize="11" Foreground="{StaticResource Muted}"
-                           TextTrimming="CharacterEllipsis" Margin="0,0,0,4"/>
-                <ScrollViewer x:Name="ChatScroller" MaxHeight="220" VerticalScrollBarVisibility="Auto" Margin="0,0,0,4">
+                <TextBlock Text="{Binding LiveLine}" Style="{StaticResource Readout}" TextTrimming="CharacterEllipsis" Margin="0,0,0,6"/>
+                <ScrollViewer x:Name="ChatScroller" MaxHeight="220" VerticalScrollBarVisibility="Auto" Margin="0,0,0,6">
                     <ScrollViewer.Style>
                         <Style TargetType="ScrollViewer">
                             <Style.Triggers>
@@ -318,7 +372,8 @@
                         <ItemsControl.ItemTemplate>
                             <DataTemplate DataType="{x:Type local:AskItemVm}">
                                 <StackPanel Margin="0,0,0,6">
-                                    <Border Background="{StaticResource AccentBg}" CornerRadius="8" Padding="8,5" HorizontalAlignment="Right" MaxWidth="300">
+                                    <Border Background="{DynamicResource Theme.AccentBg}" CornerRadius="{DynamicResource Theme.BubbleRadius}"
+                                            Padding="8,5" HorizontalAlignment="Right" MaxWidth="300">
                                         <Border.Style>
                                             <Style TargetType="Border">
                                                 <Style.Triggers>
@@ -328,15 +383,17 @@
                                                 </Style.Triggers>
                                             </Style>
                                         </Border.Style>
-                                        <TextBlock Text="{Binding Query}" TextWrapping="Wrap" FontSize="12" Foreground="{StaticResource Accent}"/>
+                                        <TextBlock Text="{Binding Query}" TextWrapping="Wrap" FontSize="12" Foreground="{DynamicResource Theme.Accent}"/>
                                     </Border>
-                                    <Border Background="#F5F4EF" CornerRadius="8" Padding="8,5" HorizontalAlignment="Left" MaxWidth="320" Margin="0,3,0,0">
+                                    <Border Background="{DynamicResource Theme.Card}" BorderBrush="{DynamicResource Theme.Border}" BorderThickness="1"
+                                            CornerRadius="{DynamicResource Theme.BubbleRadius}" Padding="8,5" HorizontalAlignment="Left" MaxWidth="320" Margin="0,4,0,0">
                                         <TextBlock Text="{Binding Answer}" TextWrapping="Wrap" FontSize="12">
                                             <TextBlock.Style>
                                                 <Style TargetType="TextBlock">
+                                                    <Setter Property="Foreground" Value="{DynamicResource Theme.Text}"/>
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding IsPending}" Value="True">
-                                                            <Setter Property="Foreground" Value="{StaticResource Muted}"/>
+                                                            <Setter Property="Foreground" Value="{DynamicResource Theme.TextMuted}"/>
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
@@ -349,12 +406,29 @@
                     </ItemsControl>
                 </ScrollViewer>
                 <DockPanel>
-                    <Button DockPanel.Dock="Right" Content="➤" Command="{Binding AskCommand}" Width="36" Margin="6,0,0,0"/>
-                    <TextBox Text="{Binding AskText, UpdateSourceTrigger=PropertyChanged}" Padding="6,6">
-                        <TextBox.InputBindings>
-                            <KeyBinding Key="Return" Command="{Binding AskCommand}"/>
-                        </TextBox.InputBindings>
-                    </TextBox>
+                    <Button DockPanel.Dock="Right" Command="{Binding AskCommand}" Width="36" Margin="6,0,0,0" Padding="0" Background="{DynamicResource Theme.Card}">
+                        <Path Style="{StaticResource Icon}" Data="{StaticResource Icon.Arrow}" Stroke="{DynamicResource Theme.Accent}" Width="15" Height="15"/>
+                    </Button>
+                    <Grid>
+                        <TextBox Text="{Binding AskText, UpdateSourceTrigger=PropertyChanged}" Padding="8,7">
+                            <TextBox.InputBindings>
+                                <KeyBinding Key="Return" Command="{Binding AskCommand}"/>
+                            </TextBox.InputBindings>
+                        </TextBox>
+                        <TextBlock Text="Fråga assistenten…" Foreground="{DynamicResource Theme.TextDim}" FontSize="12" Margin="10,0,0,0"
+                                   VerticalAlignment="Center" IsHitTestVisible="False">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding AskText}" Value="">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Grid>
                 </DockPanel>
             </StackPanel>
         </Grid>
@@ -376,17 +450,26 @@
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <TextBlock Grid.Row="0" Text="Samtalet avslutat" FontSize="18" FontWeight="Medium" Margin="0,4,0,10"/>
-            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <DockPanel Grid.Row="0" Margin="0,2,0,10">
+                <TextBlock DockPanel.Dock="Right" Style="{StaticResource Readout}" VerticalAlignment="Bottom" Margin="8,0,0,2">
+                    <Run Text="{Binding Duration, Mode=OneWay}"/><Run Text=" · "/><Run Text="{Binding TranscriptLog.Count, Mode=OneWay}"/><Run Text=" repliker"/>
+                </TextBlock>
+                <TextBlock Text="Samtalet avslutat" Style="{StaticResource Title}"/>
+            </DockPanel>
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,0,-8,0" Padding="0,0,8,0">
                 <StackPanel>
-                    <TextBlock Text="{Binding SummaryText}" TextWrapping="Wrap"/>
-                    <TextBlock Text="Nästa steg" Style="{StaticResource ZoneLabel}"/>
+                    <Border Style="{StaticResource Card}" Padding="11,9">
+                        <TextBlock Text="{Binding SummaryText}" Style="{StaticResource Body}"/>
+                    </Border>
+                    <TextBlock Text="NÄSTA STEG" Style="{StaticResource ZoneLabel}"/>
                     <ItemsControl ItemsSource="{Binding NextSteps}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <TextBlock TextWrapping="Wrap" Margin="0,2">
-                                    <Run Text="☐ "/><Run Text="{Binding Mode=OneWay}"/>
-                                </TextBlock>
+                                <DockPanel Margin="0,2">
+                                    <Path DockPanel.Dock="Left" Style="{StaticResource Icon}" Data="{StaticResource Icon.Box}" Width="12" Height="12"
+                                          StrokeThickness="1.8" Margin="0,3,7,0" VerticalAlignment="Top"/>
+                                    <TextBlock Text="{Binding}" FontSize="12" TextWrapping="Wrap"/>
+                                </DockPanel>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
@@ -400,13 +483,13 @@
                                 </Style.Triggers>
                             </Style>
                         </StackPanel.Style>
-                        <TextBlock Text="Frågor under samtalet" Style="{StaticResource ZoneLabel}"/>
+                        <TextBlock Text="FRÅGOR UNDER SAMTALET" Style="{StaticResource ZoneLabel}"/>
                         <ItemsControl ItemsSource="{Binding AskLog}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate DataType="{x:Type local:AskItemVm}">
-                                    <StackPanel Margin="0,0,0,6">
-                                        <TextBlock Text="{Binding Query}" FontWeight="Medium" FontSize="12" TextWrapping="Wrap" Foreground="{StaticResource Accent}"/>
-                                        <TextBlock Text="{Binding Answer}" FontSize="12" TextWrapping="Wrap"/>
+                                    <StackPanel Margin="0,0,0,7">
+                                        <TextBlock Text="{Binding Query}" FontWeight="Medium" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource Theme.Accent}"/>
+                                        <TextBlock Text="{Binding Answer}" Style="{StaticResource Body}" Margin="0,1,0,0"/>
                                     </StackPanel>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
@@ -414,12 +497,13 @@
                     </StackPanel>
                 </StackPanel>
             </ScrollViewer>
-            <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,10,0,0">
-                <Button Content="Transkript" Click="ToggleTranscript" Padding="14,6" Margin="0,0,8,0"/>
-                <Button Content="Kopiera" Command="{Binding CopyCommand}" Padding="14,6" Margin="0,0,8,0"/>
-                <Button Content="Nytt samtal" Command="{Binding NewCallCommand}" Padding="14,6"
-                        Background="{StaticResource Accent}" Foreground="White" BorderThickness="0"/>
-            </StackPanel>
+            <DockPanel Grid.Row="2" Margin="0,10,0,0">
+                <Button DockPanel.Dock="Right" Content="Nytt samtal" Style="{StaticResource PrimaryButton}" Command="{Binding NewCallCommand}"/>
+                <StackPanel Orientation="Horizontal">
+                    <Button Content="Transkript" Style="{StaticResource QuietButton}" Click="ToggleTranscript" Padding="12,7" Margin="0,0,8,0"/>
+                    <Button Content="Kopiera" Command="{Binding CopyCommand}" Padding="12,7"/>
+                </StackPanel>
+            </DockPanel>
         </Grid>
     </Grid>
 </Window>

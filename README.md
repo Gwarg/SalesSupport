@@ -312,6 +312,14 @@ side window with the running conversation: every backend-confirmed utterance
 (color-coded rep/customer), typed asks (⌨), and the in-flight partial at the bottom.
 Follows the tail unless you scroll up; clears on Nytt samtal.
 
+**Themes (D35)** — the panel's whole look is a theme dictionary under
+`src/SalesSupport.Client/Themes/` (one file per theme, identical `Theme.*` keys; the views
+only use DynamicResource). `Control room` (dark, the direction chosen on the design canvas)
+is the default; `Calm instrument` is the warm-light look. Pick one under **Tema** on the
+pre-call card — it switches live and persists in `%LOCALAPPDATA%\SalesSupport\client.json`.
+A customer's brand is a new theme file, never a fork of the views. The theme fonts are
+Space Grotesk and IBM Plex Mono when installed, falling back to Segoe UI and Cascadia Code.
+
 ## Incoming calls — Telavox (D32)
 
 One telephony contract, a thin adapter per provider. Telavox is the reference: its

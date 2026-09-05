@@ -13,6 +13,7 @@ public partial class TranscriptWindow : Window
     public TranscriptWindow()
     {
         InitializeComponent();
+        NativeChrome.Track(this);
         Loaded += (_, _) =>
         {
             Scroller.ScrollToEnd();

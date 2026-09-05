@@ -1,0 +1,57 @@
+<!--
+  Theme "Control room" (D35): the dark direction chosen on the design canvas 2026-09-05.
+  Every theme defines exactly this set of keys; views reach them only through DynamicResource,
+  so a theme is a file, never a fork of the views.
+-->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=System.Runtime"
+                    xmlns:po="http://schemas.microsoft.com/winfx/2006/xaml/presentation/options"
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                    mc:Ignorable="po">
+
+    <sys:String x:Key="Theme.Name">Control room</sys:String>
+    <sys:Boolean x:Key="Theme.DarkChrome">True</sys:Boolean>
+
+    <!-- surfaces -->
+    <SolidColorBrush x:Key="Theme.Ground" Color="#121417"/>
+    <SolidColorBrush x:Key="Theme.Surface" Color="#181B1F"/>
+    <SolidColorBrush x:Key="Theme.Card" Color="#20242A"/>
+    <SolidColorBrush x:Key="Theme.Border" Color="#2B3038"/>
+    <SolidColorBrush x:Key="Theme.BorderStrong" Color="#3A414B"/>
+
+    <!-- text -->
+    <SolidColorBrush x:Key="Theme.Text" Color="#E8EAEE"/>
+    <SolidColorBrush x:Key="Theme.TextSoft" Color="#B7BDC7"/>
+    <SolidColorBrush x:Key="Theme.TextMuted" Color="#8B93A1"/>
+    <SolidColorBrush x:Key="Theme.TextDim" Color="#6B7280"/>
+
+    <!-- accent: whatever just changed, and the rep's own voice -->
+    <Color x:Key="Theme.AccentColor">#4FD1C5</Color>
+    <SolidColorBrush x:Key="Theme.Accent" Color="#4FD1C5"/>
+    <SolidColorBrush x:Key="Theme.AccentBg" Color="#14302E"/>
+    <SolidColorBrush x:Key="Theme.AccentBorder" Color="#1F4A46"/>
+    <SolidColorBrush x:Key="Theme.OnAccent" Color="#121417"/>
+    <SolidColorBrush x:Key="Theme.Selection" Color="#2A6B65"/>
+
+    <!-- semantic -->
+    <SolidColorBrush x:Key="Theme.Warn" Color="#F5B14B"/>
+    <SolidColorBrush x:Key="Theme.WarnBg" Color="#3A2A12"/>
+    <SolidColorBrush x:Key="Theme.WarnBorder" Color="#5A401A"/>
+    <SolidColorBrush x:Key="Theme.Danger" Color="#F07167"/>
+    <SolidColorBrush x:Key="Theme.Answer" Color="#7BD389"/>
+
+    <!-- type: open-licensed faces first, the Windows faces as fallback until the files ship with the app -->
+    <FontFamily x:Key="Theme.FontUi">Space Grotesk, Segoe UI</FontFamily>
+    <FontFamily x:Key="Theme.FontMono">IBM Plex Mono, Cascadia Code, Consolas</FontFamily>
+
+    <!-- shape -->
+    <CornerRadius x:Key="Theme.CardRadius">4</CornerRadius>
+    <CornerRadius x:Key="Theme.ChipRadius">3</CornerRadius>
+    <CornerRadius x:Key="Theme.BubbleRadius">6</CornerRadius>
+    <CornerRadius x:Key="Theme.ControlRadius">4</CornerRadius>
+
+    <!-- motion/light: a fresh item glows, the live dot breathes -->
+    <DropShadowEffect x:Key="Theme.FreshGlow" po:Freeze="True" Color="#4FD1C5" BlurRadius="16" ShadowDepth="0" Opacity="0.55"/>
+    <DropShadowEffect x:Key="Theme.DotGlow" po:Freeze="True" Color="#4FD1C5" BlurRadius="8" ShadowDepth="0" Opacity="0.9"/>
+</ResourceDictionary>

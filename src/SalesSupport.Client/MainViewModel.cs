@@ -43,7 +43,7 @@ public sealed class MainViewModel : ViewModelBase
 
         _client.TranscriptAppended += e => UI(() => TranscriptLog.Add(new TranscriptRowVm(
             FormatCallTime(e.TimestampMs),
-            e.Speaker == Speaker.Rep ? "Du:" : "Kund:",
+            e.Speaker == Speaker.Rep ? "Du" : "Kund",
             e.Text, e.Speaker == Speaker.Rep, IsAsk: false)));
         _client.PictureUpdated += p => UI(() => ApplyPicture(p));
         _client.PanelDeltaReceived += d => UI(() => ApplyPanelDelta(d));
@@ -100,6 +100,22 @@ public sealed class MainViewModel : ViewModelBase
     public string WebhookHint => TelephonyWire.TelavoxWebhookUrl(BackendUrl, RepKey);
     private string _incomingBanner = "";
     public string IncomingBanner { get => _incomingBanner; set => Set(ref _incomingBanner, value); }
+    private string _incomingDetail = "";
+    /// <summary>Second line of the incoming-call banner: the number and the CRM note, when known.</summary>
+    public string IncomingDetail { get => _incomingDetail; set => Set(ref _incomingDetail, value); }
+
+    /// <summary>Themes are first-class (D35): the picker lists every theme dictionary; the choice persists per user.</summary>
+    public string[] Themes { get; } = ThemeManager.DisplayNames.ToArray();
+    public string SelectedTheme
+    {
+        get => ThemeManager.Current.DisplayName;
+        set
+        {
+            if (value == ThemeManager.Current.DisplayName) return;
+            ThemeManager.ApplyByDisplayName(value);
+            OnPropertyChanged();
+        }
+    }
 
     public string[] Languages { get; } = ["sv", "en"];
     private string _selectedLanguage = "sv";
@@ -303,10 +319,11 @@ public sealed class MainViewModel : ViewModelBase
     private void OnIncomingCall(IncomingCallNotice notice)
     {
         var who = notice.Customer?.Company ?? notice.Number ?? "dolt nummer";
-        var banner = $"📞 Inkommande samtal: {who}";
-        if (notice.Customer is not null && notice.Number is not null) banner += $" ({notice.Number})";
-        if (!string.IsNullOrWhiteSpace(notice.Customer?.Notes)) banner += $" — {notice.Customer.Notes}";
-        IncomingBanner = banner;
+        IncomingBanner = $"Inkommande samtal: {who}";
+        var detail = new List<string>();
+        if (notice.Customer is not null && notice.Number is not null) detail.Add(notice.Number);
+        if (!string.IsNullOrWhiteSpace(notice.Customer?.Notes)) detail.Add(notice.Customer.Notes);
+        IncomingDetail = string.Join(" · ", detail);
         if (Stage == "PreCall" && notice.Customer is { } customer)
             CustomerCompany = customer.Company;
     }
@@ -390,10 +407,11 @@ public sealed class MainViewModel : ViewModelBase
             question.Asked = true;
             _ = RemoveAskedLaterAsync(question);
         }
-        var queue = stats.QueueMs > 500 ? $"kö {stats.QueueMs / 1000.0:F1}s + " : "";
+        // Readout form for the status strip: Q = queue wait, G = gate, A = advisor (seconds).
+        var queue = stats.QueueMs > 500 ? $"Q {stats.QueueMs / 1000.0:F1}s · " : "";
         LastTiming = stats.AdvisorRan
-            ? $"{queue}gate {stats.GateMs / 1000.0:F1}s + advisor {stats.AdvisorMs / 1000.0:F1}s"
-            : $"{queue}gate {stats.GateMs / 1000.0:F1}s";
+            ? $"{queue}G {stats.GateMs / 1000.0:F1}s · A {stats.AdvisorMs / 1000.0:F1}s"
+            : $"{queue}G {stats.GateMs / 1000.0:F1}s";
     }
 
     /// <summary>

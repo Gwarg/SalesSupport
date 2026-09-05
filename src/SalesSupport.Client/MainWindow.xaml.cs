@@ -13,6 +13,8 @@ public partial class MainWindow : Window
         DataContext = vm;
         // The ask-lane chat follows its newest message, like any messaging thread.
         vm.ChatChanged += () => Dispatcher.BeginInvoke(ChatScroller.ScrollToEnd);
+        // Title bar follows the theme (D35).
+        NativeChrome.Track(this);
     }
 
     private void ToggleTranscript(object sender, RoutedEventArgs e)
